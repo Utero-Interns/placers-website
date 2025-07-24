@@ -18,10 +18,10 @@ export default function NavBar() {
 
           <ul className="flex space-x-12">
             <li>
-              <a href="/" className="text-gray-700 font-medium text-2xl hover:text-[--color-primary]">Beranda</a>
+              <a href="/" className="text-gray-700 font-medium text-2xl hover:text-[var(--color-primary)]">Beranda</a>
             </li>
             <li className="relative group">
-              <button className="text-gray-700 font-medium text-2xl hover:text-[--color-primary]">Populer</button>
+              <button className="text-gray-700 font-medium text-2xl hover:text-[var(--color-primary)]">Populer</button>
               <ul className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10">
                 <li>
                   <a href="/news" className="block px-4 py-2 text-gray-700 hover:bg-red-100">News</a>
@@ -32,7 +32,7 @@ export default function NavBar() {
               </ul>
             </li>
             <li>
-              <a href="/" className="text-gray-700 font-medium text-2xl hover:text-[--color-primary]">Upgrade ke Seller</a>
+              <a href="/" className="text-gray-700 font-medium text-2xl hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
             </li>
           </ul>
         </div>
@@ -42,7 +42,7 @@ export default function NavBar() {
         <div className="flex items-center space-x-9">
           {/* Language Dropdown */}
           <div className="relative group">
-            <button className="flex items-center gap-1 text-gray-700 hover:text-[--color-primary]">
+            <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)]">
               <Globe className="w-10 h-10" />
             </button>
             <ul className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10">
@@ -61,14 +61,14 @@ export default function NavBar() {
 
 
           {/* Cart Icon */}
-          <a href="/cart" className="text-gray-700 hover:text-[--color-primary]">
+          <a href="/cart" className="text-gray-700 hover:text-[var(--color-primary)]">
             <ShoppingCart className="w-10 h-10" />
           </a>
 
           {/* Daftar Button */}
           <a
             href="/register"
-            className="bg-red-600 text-2xl text-white px-4 py-2 rounded-2xl font-medium hover:bg-red-700 transition w-40 h-16 flex items-center justify-center"
+            className="bg-[var(--color-primary)] text-2xl text-white px-4 py-2 rounded-2xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition w-40 h-16 flex items-center justify-center"
           >
             Daftar
           </a>
