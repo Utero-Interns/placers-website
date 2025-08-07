@@ -4,6 +4,7 @@ import LandingAboutUs from "@/components/landingpage/LandingAboutUs";
 import LandingValues from "@/components/landingpage/LandingValues";
 import LandingGallery from "@/components/landingpage/LandingGallery";
 import LandingInvestor from "@/components/landingpage/LandingInvestor";
+import LandingFAQ from "@/components/landingpage/LandingFAQ";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
         <LandingValues />
         <LandingGallery />
         <LandingInvestor />
+        <LandingFAQ />
       </main>
     </div>
   );
