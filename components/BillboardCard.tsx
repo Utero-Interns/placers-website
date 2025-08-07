@@ -31,7 +31,7 @@ const BillboardCard = ({
     : "bg-[var(--color-gray2)]/20";
 
   return (
-    <div className="w-[418px] h-[570px] rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)]">
+    <div className="w-[418px] h-[570px] rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
       <div className="relative">
         <img
           src={image}
@@ -43,7 +43,7 @@ const BillboardCard = ({
         </h1>
       </div>
 
-      <div className="px-4 py-5 space-y-2">
+      <div className="px-4 py-5 flex flex-col flex-1">
         {/* Status tag */}
         <div className="flex justify-end">
           <div
@@ -60,11 +60,11 @@ const BillboardCard = ({
         {/* Title */}
         <div className="flex space-x-2">
           <Location variant="Bold" color="var(--color-primary)" size={24} />
-          <span className="text-black text-xl font-medium">{title}</span>
+          <span className="text-black text-xl font-medium truncate">{title}</span>
         </div>
 
         {/* Tags */}
-        <div className="space-y-2">
+        <div className="space-y-2 mt-6">
           <h1 className="text-[var(--color-secondary)]/80 font-semibold text-lg">
             Kriteria
           </h1>
@@ -76,7 +76,7 @@ const BillboardCard = ({
         </div>
 
         {/* Detail button */}
-        <div className="mt-5">
+        <div className="mt-auto mb-6 pt-5">
           <a
             href={detailHref}
             className="bg-[var(--color-primary)] text-[20px] py-1.5 px-40 rounded-[10px] font-medium"
