@@ -3,13 +3,13 @@ import BillboardCard from "../BillboardCard";
 
 export default function LandingGallery() {
     return (
-        <section id="gallery" className="flex items-center justify-center bg-white w-full mt-5">
+        <section id="gallery" className="flex items-center justify-center bg-white w-full mt-24">
             <div className="flex flex-col items-center space-y-1">
                 <h1 className="text-white text-lg font-bold bg-[var(--color-primary)] py-2 px-12 w-fit rounded-full">
                     OUR GALLERY
                 </h1>
 
-                <h1 className="text-black text-6xl font-bold text-center">
+                <h1 className="text-black text-6xl font-bold text-center leading-normal">
                     Showcase Placers
                 </h1>
 
@@ -18,7 +18,7 @@ export default function LandingGallery() {
                 </p>
 
                 {/* gallery cards container */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-9">
 
                     <BillboardCard
                         image="/billboard1.png"
