@@ -1,13 +1,16 @@
 import ValuesCard from "./ValuesCard";
 import { MapPinned, SearchCheck, HandCoins } from "lucide-react";
+import SectionTag from "./SectionTag";
 
 export default function LandingValues() {
     return(
         <section id="values" className="flex flex-col items-center justify-center bg-[var(--color-primary)] w-full pt-5 mt-24">
             <div className="flex justify-start w-11/12">
-                <h1 className="text-[var(--color-primary)] text-[18px] font-bold bg-white rounded-full py-2 px-12">
-                    OUR VALUES
-                </h1>
+                <SectionTag 
+                    text="OUR VALUES"
+                    bgColor="white"
+                    textColor="var(--color-primary)"
+                />
             </div>
             
 

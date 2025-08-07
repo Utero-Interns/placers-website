@@ -1,13 +1,16 @@
 import { Grid2X2, PanelLeftOpen, Rotate3D } from "lucide-react";
 import BillboardCard from "../BillboardCard";
+import SectionTag from "./SectionTag";
 
 export default function LandingGallery() {
     return (
         <section id="gallery" className="flex items-center justify-center bg-white w-full mt-24">
             <div className="flex flex-col items-center space-y-1">
-                <h1 className="text-white text-lg font-bold bg-[var(--color-primary)] py-2 px-12 w-fit rounded-full">
-                    OUR GALLERY
-                </h1>
+                <SectionTag 
+                    text="OUR GALLERY"
+                    bgColor="var(--color-primary)"
+                    textColor="white"
+                />
 
                 <h1 className="text-black text-6xl font-bold text-center leading-normal">
                     Showcase Placers

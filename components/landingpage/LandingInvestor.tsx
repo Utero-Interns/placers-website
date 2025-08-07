@@ -1,10 +1,14 @@
+import SectionTag from "./SectionTag";
+
 export default function LandingInvestor() {
     return (
         <section id="investor" className="flex flex-col items-center bg-white w-full mt-24">
             <div className="flex justify-start w-11/12">
-                <h1 className="text-white text-lg font-bold bg-[var(--color-primary)] py-2 px-12 rounded-full">
-                    FOR INVESTOR
-                </h1>
+                <SectionTag
+                    text="FOR INVESTOR"
+                    bgColor="var(--color-primary)"
+                    textColor="white" 
+                />
             </div>
 
             <div className="flex items-center justify-between mt-[60px] w-11/12">
