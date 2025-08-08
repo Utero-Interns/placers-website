@@ -20,6 +20,7 @@
   --color-gray1: #5A5A5A;
   --color-gray2: #A5A5A5;
   --color-browngold: #B58800;
+  --color-black2: #32393A;
 }
 
 @media (prefers-color-scheme: dark) {

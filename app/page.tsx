@@ -1,10 +1,11 @@
 import NavBar from "@/components/NavBar";
-import LandingHero from "@/components/landingpage/LandingHero";
+import FootBar from "@/components/footer/FootBar";
 import LandingAboutUs from "@/components/landingpage/LandingAboutUs";
-import LandingValues from "@/components/landingpage/LandingValues";
-import LandingGallery from "@/components/landingpage/LandingGallery";
-import LandingInvestor from "@/components/landingpage/LandingInvestor";
 import LandingFAQ from "@/components/landingpage/LandingFAQ";
+import LandingGallery from "@/components/landingpage/LandingGallery";
+import LandingHero from "@/components/landingpage/LandingHero";
+import LandingInvestor from "@/components/landingpage/LandingInvestor";
+import LandingValues from "@/components/landingpage/LandingValues";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
         <LandingInvestor />
         <LandingFAQ />
       </main>
+      <FootBar />
     </div>
   );
 }
