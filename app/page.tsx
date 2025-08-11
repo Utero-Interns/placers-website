@@ -13,13 +13,13 @@ export default function Home() {
       <NavBar />
       <main>
         <LandingHero />
-        {/* <LandingAboutUs /> */}
-        {/* <LandingValues /> */}
-        {/* <LandingGallery /> */}
-        {/* <LandingInvestor /> */}
-        {/* <LandingFAQ /> */}
+        <LandingAboutUs />
+        <LandingValues />
+        <LandingGallery />
+        <LandingInvestor />
+        <LandingFAQ />
       </main>
-      {/* <FootBar /> */}
+      <FootBar />
     </div>
   );
 }
