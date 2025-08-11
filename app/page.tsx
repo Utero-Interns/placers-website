@@ -14,7 +14,7 @@ export default function Home() {
       <main>
         <LandingHero />
         <LandingAboutUs />
-        {/* <LandingValues /> */}
+        <LandingValues />
         {/* <LandingGallery /> */}
         {/* <LandingInvestor /> */}
         {/* <LandingFAQ /> */}

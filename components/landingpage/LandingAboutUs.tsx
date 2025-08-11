@@ -6,7 +6,6 @@ export default function LandingAboutUs() {
             id="about-us" 
             className="flex items-center justify-center bg-white w-full px-4 mt-8 md:mt-12 lg:mt-16"
         >
-            {/* Main container with responsive padding and spacing */}
             <div 
                 className="flex flex-col items-center border-4 rounded-2xl border-dashed border-[var(--color-primary)] w-11/12 space-y-4 
                            py-8 px-4 
@@ -20,8 +19,6 @@ export default function LandingAboutUs() {
                     bgColor="var(--color-primary)"
                     textColor="white"
                 />
-
-                {/* Responsive heading */}
                 <h1 
                     className="text-black font-bold text-center 
                                text-2xl 
@@ -30,8 +27,6 @@ export default function LandingAboutUs() {
                 >
                     Billboardmu, Kapanpun, Dimanapun
                 </h1>
-                
-                {/* Responsive paragraph */}
                 <p 
                     className="text-black text-center 
                                text-base 
