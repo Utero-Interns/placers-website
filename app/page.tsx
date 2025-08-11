@@ -14,12 +14,12 @@ export default function Home() {
       <main>
         <LandingHero />
         <LandingAboutUs />
-        <LandingValues />
-        <LandingGallery />
-        <LandingInvestor />
-        <LandingFAQ />
+        {/* <LandingValues /> */}
+        {/* <LandingGallery /> */}
+        {/* <LandingInvestor /> */}
+        {/* <LandingFAQ /> */}
       </main>
-      <FootBar />
+      {/* <FootBar /> */}
     </div>
   );
 }
