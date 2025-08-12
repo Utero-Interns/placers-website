@@ -6,13 +6,15 @@ import FootLink from "./FootLink";
 
 export default function FootBar() {
     return (
-        <footer className="flex flex-col items-center bg-[var(--color-black2)] py-16">
-            <div className="flex items-center justify-between w-11/12 mb-11">
+
+        <footer className="flex flex-col items-center bg-[var(--color-black2)] px-6 py-10 2xl:py-16">
+
+            <div className="flex w-full flex-col gap-12 mb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8 2xl:w-11/12 2xl:items-center 2xl:mb-11">
 
                 <img 
                     src="/logo-placers-white.png" 
-                    alt="" 
-                    className="h-48 w-48 m-16"
+                    alt="Placers Logo" 
+                    className="h-24 w-24 self-center lg:h-32 lg:w-32 lg:self-start 2xl:h-48 2xl:w-48 2xl:m-16"
                 />
 
                 <div className="flex flex-col self-start space-y-[18px]">
@@ -26,7 +28,7 @@ export default function FootBar() {
                 <div className="flex flex-col self-start space-y-[18px]">
                     <FootLinkTitle text="FOLLOW US" />
 
-                    <div className="flex space-x-10">
+                    <div className="flex space-x-8 2xl:space-x-10">
                         <SocialIconLink href="https://www.facebook.com" Icon={Facebook} />
                         <SocialIconLink href="https://www.twitter.com" Icon={Twitter} />
                         <SocialIconLink href="https://www.instagram.com" Icon={Instagram} />
@@ -34,7 +36,7 @@ export default function FootBar() {
                     </div>
                 </div>
 
-                <div className="flex flex-col w-[519px] self-start space-y-[18px]">
+                <div className="flex w-full flex-col self-start space-y-[18px] lg:w-auto 2xl:w-[519px]">
                     <FootLinkTitle text="CONTACT US" />
 
                     <FootLink href="https://uteroindonesia.com/" text="PT. Utero Kreatif Indonesia" />
@@ -45,9 +47,12 @@ export default function FootBar() {
                 </div>
 
             </div>
-            <hr className="w-11/12"/>
-            <div className="flex justify-end w-11/12">
-                <p className="mt-[15px] text-[20px]">© 2025 Placers x TCW. All rights reserved</p>
+
+            <div className="flex w-11/12 flex-col items-center border-t border-gray-700 pt-6 2xl:items-end">
+                {/* Font size is now responsive, starting smaller (text-sm) and scaling up to the original size (2xl:text-[20px]). */}
+                <p className="text-center text-sm lg:text-base 2xl:text-[20px] 2xl:text-right">
+                    © 2025 Placers x TCW. All rights reserved
+                </p>
             </div>
         </footer>
     );
