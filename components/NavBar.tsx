@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { Globe, ShoppingCart, Menu, X, ChevronDown } from 'lucide-react';
+import { Globe, Menu, X, ChevronDown } from 'lucide-react';
 import { useState } from "react";
 
 export default function NavBar() {
@@ -78,11 +78,6 @@ export default function NavBar() {
                     </ul>
                 </div>
 
-                {/* Cart Icon */}
-                <a href="/cart" className="text-gray-700 hover:text-[var(--color-primary)]">
-                    <ShoppingCart className="lg:w-4 xl:w-6 2xl:w-10 lg:h-4 xl:h-6 2xl:h-10" />
-                </a>
-
                 {/* Daftar Button */}
                 <a
                     href="/register"
@@ -156,12 +151,6 @@ export default function NavBar() {
                                     </ul>
                                 )}
                             </div>
-
-                            {/* Cart Link */}
-                            <a href="/cart" className="flex items-center justify-center p-2 text-gray-700 hover:text-[var(--color-primary)]">
-                                <ShoppingCart className="w-6 h-6 mr-2" />
-                                <span className="font-medium text-lg">Keranjang</span>
-                            </a>
 
                             {/* Daftar Button */}
                             <a
