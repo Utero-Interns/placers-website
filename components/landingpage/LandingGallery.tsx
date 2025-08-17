@@ -4,24 +4,27 @@ import SectionTag from "./SectionTag";
 
 export default function LandingGallery() {
     return (
-        <section id="gallery" className="flex items-center justify-center bg-white w-full mt-24">
-            <div className="flex flex-col items-center space-y-1">
+        <section 
+            id="gallery" 
+            className="flex items-center justify-center bg-white w-full px-4 sm:px-6 lg:px-8 mt-16 md:mt-24"
+        >
+            <div className="flex flex-col items-center space-y-2 md:space-y-3">
                 <SectionTag 
                     text="OUR GALLERY"
                     bgColor="var(--color-primary)"
                     textColor="white"
                 />
 
-                <h1 className="text-black text-6xl font-bold text-center leading-normal">
+                <h1 className="text-black text-4xl sm:text-5xl lg:text-6xl font-bold text-center leading-tight">
                     Showcase Placers
                 </h1>
 
-                <p className="text-black text-2xl text-center">
+                <p className="text-black text-lg sm:text-xl lg:text-2xl text-center max-w-3xl">
                     Jelajahi titik-titik billboard strategis terbaik dari Placers untuk mendukung promosi bisnis Anda.
                 </p>
 
                 {/* gallery cards container */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-9">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8 md:pt-10 w-11/12">
 
                 <BillboardCard
                     image="/billboard1.png"

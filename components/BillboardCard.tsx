@@ -32,14 +32,14 @@ const BillboardCard = ({
 }: BillboardCardProps) => {
 
   return (
-    <div className="w-[418px] h-fit rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
+    <div className="w-full h-full rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
       <div className="relative">
         <img
           src={image}
           alt="Billboard"
-          className="w-full h-[233px] object-cover"
+          className="w-full aspect-video object-cover" // Changed from fixed height to aspect-ratio
         />
-        <h1 className="absolute bottom-0 left-7 font-bold text-2xl">
+        <h1 className="absolute bottom-2 left-4 font-bold text-xl md:text-2xl">
           BILLBOARD
         </h1>
       </div>
@@ -47,9 +47,9 @@ const BillboardCard = ({
       <div className="px-4 py-5 flex flex-col flex-1 space-y-3">
         
         {/* Title */}
-        <div className="flex space-x-2">
-          <Location variant="Bold" color="var(--color-primary)" size={24} />
-          <span className="text-black text-xl font-medium truncate">{title}</span>
+        <div className="flex items-start space-x-2">
+          <Location variant="Bold" color="var(--color-primary)" size={24} className="flex-shrink-0 mt-0.5" />
+          <span className="text-black text-lg md:text-xl font-medium">{title}</span>
         </div>
 
         {/* Tags */}
@@ -60,37 +60,37 @@ const BillboardCard = ({
         </div>
 
         {/* Star */}
-        <div className="flex items-center space-x-1">
-          <div className="flex items-center space-x-0.5">
-            <Star className="fill-[var(--color-browngold)] text-[var(--color-browngold)]"/>
-            <h1 className="font-medium text-lg text-black">{rating}</h1>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            <Star className="fill-[var(--color-browngold)] text-[var(--color-browngold)] w-5 h-5"/>
+            <h1 className="font-medium text-base md:text-lg text-black">{rating}</h1>
           </div>
             
             <div
               className="w-1.5 h-1.5 rounded-full bg-black"
             ></div>
-            <h1 className="font-medium text-lg text-black">{orders} Pesanan</h1>
+            <h1 className="font-medium text-base md:text-lg text-black">{orders} Pesanan</h1>
         </div>
 
         {/* Price */}
-        <div className="flex items-center">
-          <h1 className="font-medium text-lg text-black">Mulai Dari Rp. </h1>
-          <span className="font-bold text-2xl text-black">{price}</span>
+        <div className="flex items-baseline">
+          <h1 className="font-medium text-base md:text-lg text-black mr-1">Mulai Dari Rp.</h1>
+          <span className="font-bold text-xl md:text-2xl text-black">{price}</span>
         </div>
 
         {/* Seller */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
           <img src={sellerImage} alt="Seller Picture"
-              className="h-10 w-10 rounded-full"
+              className="h-10 w-10 rounded-full object-cover"
           />
-          <h1 className="font-medium text-lg text-black">{sellerName}</h1>
+          <h1 className="font-medium text-base md:text-lg text-black truncate">{sellerName}</h1>
         </div>
 
         {/* Detail button */}
-        <div className="mt-auto pt-5">
+        <div className="mt-auto pt-4">
           <a
             href={detailHref}
-            className="bg-[var(--color-primary)] text-[20px] py-1.5 px-40 rounded-[10px] font-medium"
+            className="block w-full bg-[var(--color-primary)] text-white text-lg md:text-xl py-2 px-4 rounded-[10px] font-medium text-center transition-transform duration-200 hover:scale-105 active:scale-100"
           >
             Detail
           </a>
