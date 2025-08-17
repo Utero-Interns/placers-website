@@ -1,4 +1,5 @@
 import { Location } from "iconsax-react";
+import { Star } from "lucide-react";
 import BillboardTag from "./BillboardTag";
 
 type BillboardTagType = {
@@ -8,30 +9,30 @@ type BillboardTagType = {
 
 type BillboardCardProps = {
   image: string;
-  status: string;
+  sellerImage: string;
+  rating: string;
+  orders: string;
   title: string;
   tags: BillboardTagType[];
+  sellerName: string;
+  price: string;
   detailHref: string;
 };
 
 const BillboardCard = ({
   image,
-  status,
+  sellerImage,
+  rating,
+  orders,
   title,
   tags,
+  sellerName,
+  price,
   detailHref,
 }: BillboardCardProps) => {
 
-  const isAvailable = status === "Tersedia";
-  const statusColor = isAvailable
-    ? "var(--color-success)"
-    : "var(--color-gray2)";
-  const statusBg = isAvailable
-    ? "bg-[var(--color-success)]/20"
-    : "bg-[var(--color-gray2)]/20";
-
   return (
-    <div className="w-[418px] h-[570px] rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
+    <div className="w-[418px] h-fit rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
       <div className="relative">
         <img
           src={image}
@@ -43,20 +44,8 @@ const BillboardCard = ({
         </h1>
       </div>
 
-      <div className="px-4 py-5 flex flex-col flex-1">
-        {/* Status tag */}
-        <div className="flex justify-end">
-          <div
-            className={`flex items-center space-x-2 w-fit py-0.5 px-4 rounded-[10px] ${statusBg}`}
-          >
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: statusColor }}
-            ></div>
-            <span style={{ color: statusColor }}>{status}</span>
-          </div>
-        </div>
-
+      <div className="px-4 py-5 flex flex-col flex-1 space-y-3">
+        
         {/* Title */}
         <div className="flex space-x-2">
           <Location variant="Bold" color="var(--color-primary)" size={24} />
@@ -64,19 +53,41 @@ const BillboardCard = ({
         </div>
 
         {/* Tags */}
-        <div className="space-y-2 mt-6">
-          <h1 className="text-[var(--color-secondary)]/80 font-semibold text-lg">
-            Kriteria
-          </h1>
-          <div className="flex flex-wrap items-center gap-2">
-            {tags.map(({ text, Icon }, i) => (
-              <BillboardTag key={i} text={text} Icon={Icon} />
-            ))}
+        <div className="flex flex-wrap items-center gap-2">
+          {tags.map(({ text, Icon }, i) => (
+            <BillboardTag key={i} text={text} Icon={Icon} />
+          ))}
+        </div>
+
+        {/* Star */}
+        <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
+            <Star className="fill-[var(--color-browngold)] text-[var(--color-browngold)]"/>
+            <h1 className="font-medium text-lg text-black">{rating}</h1>
           </div>
+            
+            <div
+              className="w-1.5 h-1.5 rounded-full bg-black"
+            ></div>
+            <h1 className="font-medium text-lg text-black">{orders} Pesanan</h1>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center">
+          <h1 className="font-medium text-lg text-black">Mulai Dari Rp. </h1>
+          <span className="font-bold text-2xl text-black">{price}</span>
+        </div>
+
+        {/* Seller */}
+        <div className="flex items-center">
+          <img src={sellerImage} alt="Seller Picture"
+              className="h-10 w-10 rounded-full"
+          />
+          <h1 className="font-medium text-lg text-black">{sellerName}</h1>
         </div>
 
         {/* Detail button */}
-        <div className="mt-auto mb-6 pt-5">
+        <div className="mt-auto pt-5">
           <a
             href={detailHref}
             className="bg-[var(--color-primary)] text-[20px] py-1.5 px-40 rounded-[10px] font-medium"

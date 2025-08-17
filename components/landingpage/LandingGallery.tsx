@@ -23,101 +23,133 @@ export default function LandingGallery() {
                 {/* gallery cards container */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-9">
 
-                    <BillboardCard
-                        image="/billboard1.png"
-                        status="Tersedia"
-                        title="Perempatan Patimura Malang, Jawa Timur"
-                        tags={[
+                <BillboardCard
+                    image="/billboard1.png"
+                    title="Perempatan Patimura Malang, Jawa Timur"
+                    tags={[
                         { text: "4 x 8", Icon: Grid2X2 },
                         { text: "Landscape", Icon: Rotate3D },
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/1"
-                    />
+                    ]}
+                    detailHref="/billboard/1"
+                    sellerImage="/seller-logo1.png"
+                    rating="4.8"
+                    orders="(120)"
+                    sellerName="Media Kreatif"
+                    price="1.500.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard2.png"
-                        status="Tidak Tersedia"
-                        title="Jl. Soekarno Hatta, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard2.png"
+                    title="Jl. Soekarno Hatta, Malang"
+                    tags={[
                         { text: "5 x 10", Icon: Grid2X2 },
                         { text: "Portrait", Icon: Rotate3D },
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/2"
-                    />
+                    ]}
+                    detailHref="/billboard/2"
+                    sellerImage="/seller-logo2.png"
+                    rating="4.9"
+                    orders="(215)"
+                    sellerName="Citra Advertising"
+                    price="2.800.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard3.png"
-                        status="Tersedia"
-                        title="Jl. Ijen, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard3.png"
+                    title="Jl. Ijen, Malang"
+                    tags={[
                         { text: "6 x 4", Icon: Grid2X2 },
                         { text: "Landscape", Icon: Rotate3D },
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/3"
-                    />
+                    ]}
+                    detailHref="/billboard/3"
+                    sellerImage="/seller-logo3.png"
+                    rating="4.7"
+                    orders="(88)"
+                    sellerName="Promo Jaya"
+                    price="1.200.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard4.png"
-                        status="Tersedia"
-                        title="Jl. Veteran, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard4.png"
+                    title="Jl. Veteran, Malang"
+                    tags={[
                         { text: "3 x 9", Icon: Grid2X2 },
                         { text: "Portrait", Icon: Rotate3D },
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/4"
-                    />
+                    ]}
+                    detailHref="/billboard/4"
+                    sellerImage="/seller-logo1.png"
+                    rating="5.0"
+                    orders="(310)"
+                    sellerName="Media Kreatif"
+                    price="2.100.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard1.png"
-                        status="Tidak Tersedia"
-                        title="Simpang Balapan, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard1.png"
+                    title="Simpang Balapan, Malang"
+                    tags={[
                         { text: "8 x 6", Icon: Grid2X2 },
                         { text: "Landscape", Icon: Rotate3D },
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/5"
-                    />
+                    ]}
+                    detailHref="/billboard/5"
+                    sellerImage="/seller-logo2.png"
+                    rating="4.8"
+                    orders="(154)"
+                    sellerName="Citra Advertising"
+                    price="2.500.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard2.png"
-                        status="Tersedia"
-                        title="Jl. Mayjen Panjaitan, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard2.png"
+                    title="Jl. Mayjen Panjaitan, Malang"
+                    tags={[
                         { text: "7 x 7", Icon: Grid2X2 },
                         { text: "Square", Icon: Rotate3D },
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/6"
-                    />
+                    ]}
+                    detailHref="/billboard/6"
+                    sellerImage="/seller-logo3.png"
+                    rating="4.9"
+                    orders="(198)"
+                    sellerName="Promo Jaya"
+                    price="3.000.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard3.png"
-                        status="Tersedia"
-                        title="Jl. MT Haryono, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard3.png"
+                    title="Jl. MT Haryono, Malang"
+                    tags={[
                         { text: "6 x 3", Icon: Grid2X2 },
                         { text: "Landscape", Icon: Rotate3D },
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/7"
-                    />
+                    ]}
+                    detailHref="/billboard/7"
+                    sellerImage="/seller-logo1.png"
+                    rating="4.6"
+                    orders="(75)"
+                    sellerName="Media Kreatif"
+                    price="950.000"
+                />
 
-                    <BillboardCard
-                        image="/billboard4.png"
-                        status="Tidak Tersedia"
-                        title="Jl. Ciliwung, Malang"
-                        tags={[
+                <BillboardCard
+                    image="/billboard4.png"
+                    title="Jl. Ciliwung, Malang"
+                    tags={[
                         { text: "5 x 5", Icon: Grid2X2 },
                         { text: "Square", Icon: Rotate3D },
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
-                        ]}
-                        detailHref="/billboard/8"
-                    />
+                    ]}
+                    detailHref="/billboard/8"
+                    sellerImage="/seller-logo2.png"
+                    rating="5.0"
+                    orders="(250)"
+                    sellerName="Citra Advertising"
+                    price="1.800.000"
+                />    
 
                 </div>
             </div>
