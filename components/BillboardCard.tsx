@@ -49,7 +49,7 @@ const BillboardCard = ({
         {/* Title */}
         <div className="flex items-start space-x-2">
           <Location variant="Bold" color="var(--color-primary)" size={24} className="flex-shrink-0 mt-0.5" />
-          <span className="text-black text-lg md:text-xl font-medium">{title}</span>
+          <span className="text-black text-lg md:text-xl font-medium truncate">{title}</span>
         </div>
 
         {/* Tags */}
@@ -90,7 +90,7 @@ const BillboardCard = ({
         <div className="mt-auto pt-4">
           <a
             href={detailHref}
-            className="block w-full bg-[var(--color-primary)] text-white text-lg md:text-xl py-2 px-4 rounded-[10px] font-medium text-center transition-transform duration-200 hover:scale-105 active:scale-100"
+            className="block w-full bg-[var(--color-primary)] text-white text-lg md:text-xl py-2 px-4 rounded-[10px] font-medium text-center hover:text-[var(--color-primary)] hover:bg-gray-200"
           >
             Detail
           </a>

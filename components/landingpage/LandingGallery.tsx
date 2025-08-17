@@ -8,7 +8,7 @@ export default function LandingGallery() {
             id="gallery" 
             className="flex items-center justify-center bg-white w-full px-4 sm:px-6 lg:px-8 mt-16 md:mt-24"
         >
-            <div className="flex flex-col items-center space-y-2 md:space-y-3">
+            <div className="flex flex-col items-center space-y-2 md:space-y-3 w-11/12">
                 <SectionTag 
                     text="OUR GALLERY"
                     bgColor="var(--color-primary)"
@@ -19,12 +19,12 @@ export default function LandingGallery() {
                     Showcase Placers
                 </h1>
 
-                <p className="text-black text-lg sm:text-xl lg:text-2xl text-center max-w-3xl">
+                <p className="text-black text-lg sm:text-xl lg:text-2xl text-center">
                     Jelajahi titik-titik billboard strategis terbaik dari Placers untuk mendukung promosi bisnis Anda.
                 </p>
 
                 {/* gallery cards container */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8 md:pt-10 w-11/12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8 md:pt-10">
 
                 <BillboardCard
                     image="/billboard1.png"
