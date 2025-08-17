@@ -42,33 +42,33 @@ export default function LandingFAQ() {
             <div className="w-11/12 space-y-4 md:space-y-5 2xl:space-y-6 mt-8 md:mt-10">
 
                 <FAQPoint
-                question="Apa itu Placers dan bagaimana cara kerjanya?"
-                answer="Placers adalah platform yang menghubungkan pemilik billboard dengan pengiklan secara langsung melalui teknologi digital yang efisien dan transparan."
+                question="Upload Lokasi Mudah dan Fleksibel"
+                answer="Upload titik billboard bisa dilakukan di mana saja dan kapan saja, tanpa batasan wilayah atau waktu."
                 />
 
                 <FAQPoint
-                question="Bagaimana cara menjadi investor di platform ini?"
-                answer="Anda dapat mendaftar melalui website resmi kami dan mengikuti proses verifikasi untuk mulai berinvestasi dalam proyek yang tersedia."
+                question="Cari Titik Billboard Tanpa Ribet"
+                answer="Dengan teknologi pencarian pintar, temukan lokasi billboard sesuai target audiens Anda dengan cepat dan akurat."
                 />
 
                 <FAQPoint
-                question="Apakah platform ini aman untuk berinvestasi?"
-                answer="Kami menggunakan sistem yang transparan dan aman untuk memastikan perlindungan data dan kepercayaan pengguna."
+                question="Hemat Biaya & Transparan"
+                answer="Proses transaksi langsung dengan pemilik titik lokasi atau penerima kuasa, tanpa perantara, membuat biaya lebih efisien dan transparan."
                 />
 
                 <FAQPoint
-                question="Berapa jumlah minimal untuk mulai berinvestasi?"
-                answer="Jumlah minimal investasi tergantung pada proyek yang dipilih, namun rata-rata dimulai dari Rp5.000.000."
+                question="Live Streaming Traffic & Laporan Real-Time"
+                answer="Nikmati fasilitas pemantauan trafik live streaming dan akses laporan data akurat dan real-time untuk evaluasi efektivitas iklan Anda."
                 />
 
                 <FAQPoint
-                question="Bagaimana sistem keuntungan bekerja bagi investor?"
-                answer="Investor akan mendapatkan bagi hasil dari pendapatan yang dihasilkan proyek, sesuai dengan porsi investasi masing-masing."
+                question="Menuju Billboard Cerdas"
+                answer="Terus berkembang menuju sistem billboard pintar dengan dukungan teknologi IoT (Internet of Things) dan AI (Artificial Intelligence)."
                 />
 
                 <FAQPoint
-                question="Apakah saya bisa memilih proyek yang ingin saya danai?"
-                answer="Ya, Anda bisa memilih proyek berdasarkan preferensi seperti lokasi, jenis proyek, dan estimasi imbal hasil."
+                question="Remote Monitoring Management (RMM)"
+                answer="Semua titik iklan dapat dipantau dan dikelola dari jarak jauh menggunakan sistem RMM, memastikan performa dan keandalan terus terjaga."
                 />
 
             </div>
