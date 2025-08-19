@@ -35,7 +35,7 @@ export default function LandingGallery() {
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/1"
-                    sellerImage="/seller-logo1.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.8"
                     orders="(120)"
                     sellerName="Media Kreatif"
@@ -51,7 +51,7 @@ export default function LandingGallery() {
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/2"
-                    sellerImage="/seller-logo2.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.9"
                     orders="(215)"
                     sellerName="Citra Advertising"
@@ -67,7 +67,7 @@ export default function LandingGallery() {
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/3"
-                    sellerImage="/seller-logo3.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.7"
                     orders="(88)"
                     sellerName="Promo Jaya"
@@ -83,7 +83,7 @@ export default function LandingGallery() {
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/4"
-                    sellerImage="/seller-logo1.png"
+                    sellerImage="/seller1.jpg"
                     rating="5.0"
                     orders="(310)"
                     sellerName="Media Kreatif"
@@ -99,7 +99,7 @@ export default function LandingGallery() {
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/5"
-                    sellerImage="/seller-logo2.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.8"
                     orders="(154)"
                     sellerName="Citra Advertising"
@@ -115,7 +115,7 @@ export default function LandingGallery() {
                         { text: "Dua Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/6"
-                    sellerImage="/seller-logo3.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.9"
                     orders="(198)"
                     sellerName="Promo Jaya"
@@ -131,7 +131,7 @@ export default function LandingGallery() {
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/7"
-                    sellerImage="/seller-logo1.png"
+                    sellerImage="/seller1.jpg"
                     rating="4.6"
                     orders="(75)"
                     sellerName="Media Kreatif"
@@ -147,7 +147,7 @@ export default function LandingGallery() {
                         { text: "Satu Sisi", Icon: PanelLeftOpen },
                     ]}
                     detailHref="/billboard/8"
-                    sellerImage="/seller-logo2.png"
+                    sellerImage="/seller1.jpg"
                     rating="5.0"
                     orders="(250)"
                     sellerName="Citra Advertising"
