@@ -4,6 +4,12 @@ interface FootLinkTitleProps {
 
 export default function FootLinkTitle({ text }: FootLinkTitleProps) {
     return (
-        <h1 className="font-semibold text-[22px]">{text}</h1>
+        <h3 
+            className="font-semibold text-lg whitespace-nowrap
+                       lg:text-xl 
+                       2xl:text-[22px]"
+        >
+            {text}
+        </h3>
     );
 }
