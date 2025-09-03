@@ -1,21 +1,18 @@
 
-import { FC, SVGProps } from 'react';
-
-export interface BillboardTag {
-    text: string;
-    Icon: FC<SVGProps<SVGSVGElement>>;
-}
-
 export interface Billboard {
     id: number;
     image: string;
+    type: string;
     title: string;
-    tags: BillboardTag[];
-    sellerImage: string;
+    size: string;
+    orientation: string;
+    sides: string;
     rating: string;
     orders: string;
-    sellerName: string;
     price: string;
+    sellerImage: string;
+    sellerName: string;
+    detailHref: string;
 }
 
 export interface Bookmark {
