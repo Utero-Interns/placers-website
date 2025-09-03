@@ -54,7 +54,7 @@ const BookmarksPage: React.FC = () => {
   const allSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length;
 
   return (
-    <div className="bg-white min-h-screen font-sans">
+    <div className="bg-white min-h-screen">
       <NavBar />
 
       <div className="container mx-auto max-w-11/12 p-4 sm:p-8">

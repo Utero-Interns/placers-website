@@ -1,33 +1,34 @@
 import { Location } from "iconsax-react";
-import { Star } from "lucide-react";
+import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
 import BillboardTag from "./BillboardTag";
-
-type BillboardTagType = {
-  text: string;
-  Icon: React.ComponentType<any>;
-};
 
 type BillboardCardProps = {
   image: string;
-  sellerImage: string;
+  type: string;
+  title: string;
+  size: string;
+  orientation: string;
+  sides: string;
   rating: string;
   orders: string;
-  title: string;
-  tags: BillboardTagType[];
-  sellerName: string;
   price: string;
+  sellerImage: string;
+  sellerName: string;
   detailHref: string;
 };
 
 const BillboardCard = ({
   image,
-  sellerImage,
+  type,
+  title,
+  size,
+  orientation,
+  sides,
   rating,
   orders,
-  title,
-  tags,
-  sellerName,
   price,
+  sellerImage,
+  sellerName,
   detailHref,
 }: BillboardCardProps) => {
 
@@ -39,12 +40,12 @@ const BillboardCard = ({
           alt="Billboard"
           className="w-full aspect-video object-cover" // Changed from fixed height to aspect-ratio
         />
-        <h1 className="absolute bottom-2 left-4 font-bold text-xl md:text-2xl">
-          BILLBOARD
-        </h1>
       </div>
 
       <div className="px-4 py-5 flex flex-col flex-1 space-y-3">
+        <h1 className="font-bold text-xl md:text-2xl text-black">
+          {type}
+        </h1>
         
         {/* Title */}
         <div className="flex items-start space-x-2">
@@ -54,9 +55,9 @@ const BillboardCard = ({
 
         {/* Tags */}
         <div className="flex flex-wrap items-center gap-2">
-          {tags.map(({ text, Icon }, i) => (
-            <BillboardTag key={i} text={text} Icon={Icon} />
-          ))}
+          <BillboardTag text={size} Icon={Grid2X2} />
+          <BillboardTag text={orientation} Icon={Rotate3D} />
+          <BillboardTag text={sides} Icon={SidebarOpen} />
         </div>
 
         {/* Star */}

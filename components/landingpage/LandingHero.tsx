@@ -15,7 +15,7 @@ const LandingHero: React.FC = () => {
               <span className="text-[var(--color-primary)]">Placers</span> menghubungkan pemilik titik billboard dengan pengiklan secara langsung, memudahkan Anda menemukan dan memesan lokasi iklan luar ruang kapan saja dan di mana saja.
             </p>
             
-            <a href="#" className="font-semibold text-white bg-[var(--color-primary)] rounded-[15px] hover:text-[var(--color-primary)] hover:bg-gray-200
+            <a href="/homepage" className="font-semibold text-white bg-[var(--color-primary)] rounded-[15px] hover:text-[var(--color-primary)] hover:bg-gray-200
             2xl:text-2xl 2xl:py-4 2xl:px-[22px]
             xl:text-lg xl:py-3 xl:px-5
             lg:text-sm lg:py-2 lg:px-4
