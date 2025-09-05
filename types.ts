@@ -1,4 +1,4 @@
-
+// Used for billboard cards / listings
 export interface Billboard {
     id: number;
     image: string;
@@ -15,6 +15,7 @@ export interface Billboard {
     detailHref: string;
 }
 
+// Used for bookmarked billboards
 export interface Bookmark {
   id: string;
   merchant: string;
@@ -28,4 +29,18 @@ export interface Bookmark {
   imageUrl: string;
   avatarUrl: string;
   statusAvailable: boolean;
+}
+
+// Used for user profile
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  phone: string;
+  avatarUrl: string;
+}
+
+export interface PasswordData {
+  oldPassword?: string;
+  newPassword?: string;
 }

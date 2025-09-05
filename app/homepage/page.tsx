@@ -9,6 +9,7 @@ import { Billboard } from '@/types';
 import { fetchBillboards } from '@/services/billboardService';
 import NavBar from '@/components/NavBar';
 import FootBar from '@/components/footer/FootBar';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const Homepage: React.FC = () => {
   const [billboards, setBillboards] = useState<Billboard[]>([]);
@@ -33,15 +34,7 @@ const Homepage: React.FC = () => {
   if (loading) {
     // Splashscreen
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[var(--color-primary)]">
-        <div className="flex flex-col items-center">
-          <img
-            src="/logo-placers-white.png"
-            alt="App Logo"
-            className="w-40 h-40 animate-bounce mb-6"
-          />
-        </div>
-      </div>
+      <LoadingScreen />
     );
   }
 
