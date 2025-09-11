@@ -14,7 +14,7 @@ const Hero: React.FC = () => {
         <img 
           src="/map.png" 
           alt="Map of Indonesia with ad locations" 
-          className="w-full h-auto object-contain max-w-5xl mx-auto"
+          className="w-full object-contain mx-auto"
         />
       </div>
     </div>
