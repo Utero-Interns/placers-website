@@ -9,21 +9,20 @@ type CardGridProps = {
 const CardGrid: React.FC<CardGridProps> = ({ billboards }) => {
   return (
     <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {billboards.map((billboard) => (
+      {billboards.map((b) => (
         <BillboardCard
-          key={billboard.id}
-            image={billboard.image}
-            type={billboard.type}
-            title={billboard.title}
-            size={billboard.size}
-            orientation={billboard.orientation}
-            sides={billboard.sides}   
-            rating={billboard.rating}
-            orders={billboard.orders.length.toString()}
-            price={billboard.price.toLocaleString()} 
-            sellerImage={billboard.sellerImage}
-            sellerName={billboard.sellerName}
-            detailHref={`/billboard/${billboard.id}`}
+          key={b.id}
+          image={b.image[0]?.url || "/billboard-placeholder.png"}
+          type={b.category?.name || "Billboard"}
+          title={b.location}
+          size={b.size}
+          orientation={b.orientation}
+          sides={b.display}
+          rating={b.averageRating}
+          price={b.rentPrice}
+          sellerImage={"/seller-placeholder.png"}
+          sellerName={b.owner?.fullname || "Unknown"}
+          id={b.id}
         />
       ))}
     </div>

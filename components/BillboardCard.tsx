@@ -9,12 +9,12 @@ type BillboardCardProps = {
   size: string;
   orientation: string;
   sides: string;
-  rating: string;
-  orders: string;
+  rating: number;
+  // orders: string;
   price: string;
   sellerImage: string;
   sellerName: string;
-  detailHref: string;
+  id: string;
 };
 
 const BillboardCard = ({
@@ -25,11 +25,11 @@ const BillboardCard = ({
   orientation,
   sides,
   rating,
-  orders,
+  // orders,
   price,
   sellerImage,
   sellerName,
-  detailHref,
+  id,
 }: BillboardCardProps) => {
 
   return (
@@ -39,6 +39,9 @@ const BillboardCard = ({
           src={image}
           alt="Billboard"
           className="w-full aspect-video object-cover" // Changed from fixed height to aspect-ratio
+          onError={(e) => {
+            e.currentTarget.src = "/billboard-placeholder.png";
+          }}
         />
       </div>
 
@@ -67,10 +70,10 @@ const BillboardCard = ({
             <h1 className="font-medium text-base md:text-lg text-black">{rating}</h1>
           </div>
             
-            <div
+            {/* <div
               className="w-1.5 h-1.5 rounded-full bg-black"
             ></div>
-            <h1 className="font-medium text-base md:text-lg text-black">{orders} Pesanan</h1>
+            <h1 className="font-medium text-base md:text-lg text-black">{orders} Pesanan</h1> */}
         </div>
 
         {/* Price */}
@@ -83,6 +86,9 @@ const BillboardCard = ({
         <div className="flex items-center space-x-2">
           <img src={sellerImage} alt="Seller Picture"
               className="h-10 w-10 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/seller-placeholder.png";
+              }}
           />
           <h1 className="font-medium text-base md:text-lg text-black truncate">{sellerName}</h1>
         </div>
@@ -90,7 +96,7 @@ const BillboardCard = ({
         {/* Detail button */}
         <div className="mt-auto pt-4">
           <a
-            href={detailHref}
+            href={`/billboard-detail/${id}`}
             className="block w-full bg-[var(--color-primary)] text-white text-lg md:text-xl py-2 px-4 rounded-[10px] font-medium text-center hover:text-[var(--color-primary)] hover:bg-gray-200"
           >
             Detail
