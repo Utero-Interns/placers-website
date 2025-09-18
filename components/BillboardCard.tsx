@@ -38,7 +38,7 @@ const BillboardCard = ({
         <img
           src={image}
           alt="Billboard"
-          className="w-full aspect-video object-cover" // Changed from fixed height to aspect-ratio
+          className="w-full aspect-video object-cover" 
           onError={(e) => {
             e.currentTarget.src = "/billboard-placeholder.png";
           }}
@@ -66,7 +66,7 @@ const BillboardCard = ({
         {/* Star */}
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
-            <Star className="fill-[var(--color-browngold)] text-[var(--color-browngold)] w-5 h-5"/>
+            <Star className="fill-[var(--color-star)] text-[var(--color-star)] w-5 h-5"/>
             <h1 className="font-medium text-base md:text-lg text-black">{rating}</h1>
           </div>
             

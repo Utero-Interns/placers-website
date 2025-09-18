@@ -16,7 +16,6 @@ export const fetchBillboards = async (): Promise<Billboard[]> => {
     const json = await res.json();
     console.log("...data received.", json);
 
-    // Extract only the array
     const billboards: Billboard[] = json.data || [];
 
     return billboards;
@@ -26,10 +25,9 @@ export const fetchBillboards = async (): Promise<Billboard[]> => {
   }
 };
 
-// billboardDetailService.ts
-import type { BillboardApiResponse } from "@/types";
+import type { BillboardDetailApiResponse } from "@/types";
 
-export async function fetchBillboardById(id: string): Promise<BillboardApiResponse | null> {
+export async function fetchBillboardById(id: string): Promise<BillboardDetailApiResponse | null> {
   try {
     const res = await fetch(`/api/billboard/${id}`, {
       headers: { "Content-Type": "application/json" },
@@ -37,7 +35,7 @@ export async function fetchBillboardById(id: string): Promise<BillboardApiRespon
     });
 
     if (!res.ok) return null;
-    return (await res.json()) as BillboardApiResponse; // ✅ matches your state
+    return (await res.json()) as BillboardDetailApiResponse; 
   } catch (error) {
     console.error("Error fetching billboard:", error);
     return null;

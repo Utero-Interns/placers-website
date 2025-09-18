@@ -56,6 +56,9 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
           className="w-10 h-10 rounded-full border-2 border-white"
           src={sellerImage}
           alt={sellerName}
+          onError={(e) => {
+            e.currentTarget.src = "/seller-placeholder.png";
+          }}
         />
         <span className="text-white font-semibold pr-2">{sellerName}</span>
       </div>

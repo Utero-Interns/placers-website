@@ -13,7 +13,7 @@ const BillboardPriceCTA: React.FC<Props> = ({ rating, price, isAvailable }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t border-gray-200">
       <div className="flex items-center space-x-2">
-        <StarIcon className="w-6 h-6 text-[var(--color-browngold)] fill-[var(--color-browngold)]" />
+        <StarIcon className="w-6 h-6 text-[var(--color-star)] fill-[var(--color-star)]" />
         <span className="text-xl font-bold text-gray-800">{rating.toFixed(1)}</span>
         <span className="text-xl font-bold text-gray-800">·</span>
         <span className="text-xl font-bold text-gray-800">{formatPrice(Number(price))}</span>
