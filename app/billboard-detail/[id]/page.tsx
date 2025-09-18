@@ -39,7 +39,7 @@ const BillboardPage: React.FC = () => {
   const formatPrice = (price: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
   const { data: billboard, averageRating } = billboardData;
   const isAvailable = billboard.status === 'Available';
-  const mainImageUrl = billboard.image[0]?.url || '/billboard-placeholder.png';
+  const images = billboard.image?.length > 0 ? billboard.image : [{ url: '/billboard-placeholder.png' }];
   const fullLocation = `${billboard.location}, ${billboard.cityName}, ${billboard.provinceName}`;
   const sellerImageUrl = 'https://i.pravatar.cc/40?u=merchant';
 
@@ -47,9 +47,9 @@ const BillboardPage: React.FC = () => {
     <div className="bg-white min-h-screen flex flex-col">
         <NavBar />
         <div className="min-h-screen bg-white p-2 sm:p-4 lg:p-6 flex justify-center">
-        <main className="bg-white rounded-2xl shadow-xl max-w-6xl w-full overflow-hidden">
+        <main className="bg-white rounded-2xl shadow-xl max-w-11/12 w-full overflow-hidden">
             <BillboardImage
-            imageSrc={mainImageUrl}
+            images={images}
             imageAlt={billboard.category.name}
             sellerImage={sellerImageUrl}
             sellerName={billboard.owner.companyName}

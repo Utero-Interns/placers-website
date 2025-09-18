@@ -10,7 +10,7 @@ interface BillboardHeaderProps {
 const BillboardHeader: React.FC<BillboardHeaderProps> = ({ title, location, onShare }) => (
   <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
     <div>
-      <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">{title}</h1>
+      <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight mb-4">{title}</h1>
       <div className="flex items-start text-black mt-2">
         <MapPinIcon className="w-8 h-8 mr-2 text-[var(--color-primary)]" />
         <span className="text-2xl md:text-3xl">{location}</span>
