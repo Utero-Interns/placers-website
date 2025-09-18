@@ -19,7 +19,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
           </div>
         </div>
         <div className="flex items-center space-x-1">
-          <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+          <Star className="w-5 h-5 text-[var(--color-browngold)] fill-[var(--color-browngold)]" />
           <span className="font-bold text-gray-700">{review.rating.toFixed(1)}</span>
         </div>
       </div>

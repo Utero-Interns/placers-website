@@ -36,7 +36,7 @@ const BillboardPage: React.FC = () => {
 
   if (loading) return <LoadingScreen />;
   if (!billboardData) return <div className="flex justify-center items-center min-h-screen">Billboard not found</div>;
-
+  const formatPrice = (price: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
   const { data: billboard, averageRating } = billboardData;
   const isAvailable = billboard.status === 'Available';
   const mainImageUrl = billboard.image[0]?.url || '/billboard-placeholder.png';
@@ -63,7 +63,51 @@ const BillboardPage: React.FC = () => {
 
             <div className="pt-6 border-t border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Informasi Tambahan</h2>
-                <p className="text-gray-600 leading-relaxed">{billboard.tax}</p>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+                  {/* Description gets full width */}
+                  <div className="sm:col-span-2">
+                    <dt className="font-medium text-gray-900">Deskripsi</dt>
+                    <dd className="leading-relaxed mt-1 text-gray-600 whitespace-pre-line break-words">
+                      {billboard.description?.trim()
+                        ? billboard.description
+                        : "Tidak ada deskripsi tersedia"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Alamat</dt>
+                    <dd className="leading-relaxed">{billboard.location}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Kota</dt>
+                    <dd className="leading-relaxed">{billboard.cityName}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Provinsi</dt>
+                    <dd className="leading-relaxed">{billboard.provinceName}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Kepemilikan Tanah</dt>
+                    <dd className="leading-relaxed">{billboard.landOwnership}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Harga Jasa</dt>
+                    <dd className="leading-relaxed">
+                      {formatPrice(Number(billboard.servicePrice))}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-gray-900">Pajak</dt>
+                    <dd className="leading-relaxed">{billboard.tax}</dd>
+                  </div>
+                </dl>
+
+
             </div>
             </div>
         </main>

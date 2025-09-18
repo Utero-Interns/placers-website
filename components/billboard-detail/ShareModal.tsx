@@ -75,7 +75,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, url }) => {
           />
           <button
             onClick={handleCopy}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors w-32"
+            className="bg-[var(--color-primary)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-primary)]/80 transition-colors w-32"
           >
             {copied ? 'Copied!' : 'Copy'}
           </button>

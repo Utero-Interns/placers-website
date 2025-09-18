@@ -8,20 +8,19 @@ interface Props {
 }
 
 const BillboardPriceCTA: React.FC<Props> = ({ rating, price, isAvailable }) => {
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+  const formatPrice = (price: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t border-gray-200">
       <div className="flex items-center space-x-2">
-        <StarIcon className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+        <StarIcon className="w-6 h-6 text-[var(--color-browngold)] fill-[var(--color-browngold)]" />
         <span className="text-xl font-bold text-gray-800">{rating.toFixed(1)}</span>
         <span className="text-xl font-bold text-gray-800">·</span>
         <span className="text-xl font-bold text-gray-800">{formatPrice(Number(price))}</span>
       </div>
       <button
         disabled={!isAvailable}
-        className="w-full md:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="w-full md:w-auto bg-[var(--color-primary)] text-white font-bold py-3 px-10 rounded-lg hover:bg-[var(--color-primary)]/80 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         Sewa
       </button>
