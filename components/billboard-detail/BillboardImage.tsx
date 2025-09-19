@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import Link from "next/link";
 
 interface BillboardImageProps {
   images: { url: string }[];
   imageAlt: string;
   sellerImage: string;
+  sellerId: string;
   sellerName: string;
   isAvailable: boolean;
 }
@@ -15,6 +17,7 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
   images,
   imageAlt,
   sellerImage,
+  sellerId,
   sellerName,
   isAvailable,
 }) => {
@@ -51,16 +54,21 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
       )}
 
       {/* Seller Avatar */}
-      <div className="absolute bottom-4 left-4 flex items-center space-x-3 bg-white/20 backdrop-blur-sm p-2 rounded-full">
-        <img
-          className="w-10 h-10 rounded-full border-2 border-white"
-          src={sellerImage}
-          alt={sellerName}
-          onError={(e) => {
-            e.currentTarget.src = "/seller-placeholder.png";
-          }}
-        />
-        <span className="text-white font-semibold pr-2">{sellerName}</span>
+      <div className="absolute bottom-4 left-4">
+        <Link
+          href={`/seller/${sellerId}`}
+          className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition"
+        >
+          <img
+            className="w-10 h-10 rounded-full border-2 border-white"
+            src={sellerImage}
+            alt={sellerName}
+            onError={(e) => {
+              e.currentTarget.src = "/seller-placeholder.png";
+            }}
+          />
+          <span className="text-white font-semibold pr-2">{sellerName}</span>
+        </Link>
       </div>
 
       {/* Navigation Columns */}

@@ -67,6 +67,7 @@ const BillboardPage: React.FC = () => {
             images={images}
             imageAlt={billboard.category.name}
             sellerImage={sellerImageUrl}
+            sellerId={billboard.owner.id}
             sellerName={billboard.owner.companyName}
             isAvailable={isAvailable}
             />
@@ -122,10 +123,10 @@ const BillboardPage: React.FC = () => {
                     <dd className="leading-relaxed">{billboard.tax}</dd>
                   </div>
                 </dl>
-                {/* Reviews */}
-                <BillboardReviews averageRating={averageRating} ratings={ratings} />
-
               </div>
+
+              {/* Reviews */}
+                <BillboardReviews averageRating={averageRating} ratings={ratings} />
 
             </div>
         </main>
