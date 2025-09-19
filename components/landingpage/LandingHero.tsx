@@ -19,7 +19,7 @@ const LandingHero: React.FC = () => {
             2xl:text-2xl 2xl:py-4 2xl:px-[22px]
             xl:text-lg xl:py-3 xl:px-5
             lg:text-sm lg:py-2 lg:px-4
-            md:text-lg md:py-4 md:px-5
+            text-lg py-4 px-5
             ">Jelajahi Titik Iklan Sekarang</a>
 
           </div>
