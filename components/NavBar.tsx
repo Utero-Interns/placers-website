@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { Globe, Menu, X, ChevronDown } from 'lucide-react';
+import { Globe, Menu, X, ChevronDown, TicketPercent, Newspaper } from 'lucide-react';
 import { useState } from "react";
 
 export default function NavBar() {
@@ -41,13 +41,24 @@ export default function NavBar() {
                         <a href="/" className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Beranda</a>
                     </li>
                     <li className="relative group">
-                        <button className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Populer</button>
-                        <ul className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10">
-                            <li>
-                                <a href="/news" className="block px-4 py-2 text-gray-700 hover:bg-red-100">News</a>
+                        <button className="flex items-center gap-1 text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)] group-hover:text-[var(--color-primary)]">
+                            Populer
+                            <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" />
+                        </button>
+                        {/* Dropdown */}
+                        <ul className="absolute left-0 mt-3 w-44 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-3"> {/*border border-[0.5px] border-[#A5A5A5]*/}
+                            {/* Item Promo */}
+                            <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
+                                {/* Icon placeholder */}
+                                <TicketPercent className="w-5 h-5 text-gray-700" />
+                                <a href="/promo" className="text-gray-800 font-medium">Promo</a>
                             </li>
-                            <li>
-                                <a href="/updates" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Promos</a>
+
+                            {/* Item Blog */}
+                            <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
+                                {/* Icon placeholder */}
+                                <Newspaper className="w-5 h-5 text-gray-700" />
+                                <a href="/blog" className="text-gray-800 font-medium">Blog</a>
                             </li>
                         </ul>
                     </li>
@@ -61,19 +72,17 @@ export default function NavBar() {
             <div className="hidden lg:flex items-center lg:space-x-3 xl:space-x-6 2xl:space-x-9">
                 {/* Language Dropdown */}
                 <div className="relative group">
-                    <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)]">
+                    <button className="flex items-center gap-1 text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)] group-hover:text-[var(--color-primary)]">
                         <Globe className="lg:w-4 xl:w-6 2xl:w-10 lg:h-4 xl:h-6 2xl:h-10" />
+                        <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" />
                     </button>
-                    <ul className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10">
-                        <li>
-                            <a href="/lang/en" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
-                                English
-                            </a>
+                    {/* Dropdown */}
+                    <ul className="absolute right-0 mt-3 w-44 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-3">
+                        <li className="px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
+                            <a href="/lang/en" className="text-gray-800 font-medium">English</a>
                         </li>
-                        <li>
-                            <a href="/lang/id" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
-                                Bahasa Indonesia
-                            </a>
+                        <li className="px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
+                            <a href="/lang/id" className="text-gray-800 font-medium">Bahasa Indonesia</a>
                         </li>
                     </ul>
                 </div>
