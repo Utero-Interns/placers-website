@@ -4,9 +4,9 @@ import React from 'react';
 
 const LandingHero: React.FC = () => {
   return (
-    <section id="hero" className="flex flex-col lg:flex-row items-center justify-center bg-white w-full min-h-screen lg:h-[calc(100vh-80px)] 2xl:h-[calc(100vh-200px)] overflow-hidden">
+    <section id="hero" className="flex flex-col lg:flex-row bg-white w-full min-h-screen lg:h-[calc(100vh-80px)] 2xl:h-[calc(100vh-200px)] overflow-hidden">
       {/* Left Column: Text Content & Search Bar */}
-      <div id="left" className="flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 space-y-6 text-center lg:text-left order-2 lg:order-1 px-6 md:px-12 2xl:px-20 py-16 lg:py-0">
+      <div id="left" className="flex flex-col lg:items-start w-full lg:w-1/2 space-y-6lg:text-left order-2 lg:order-1 px-6 md:px-12 2xl:px-20 py-16 lg:py-0">
         <h1 className="font-semibold text-4xl sm:text-5xl 2xl:text-[64px] text-black leading-snug 2xl:font-[600] mb-4">
           Marketplace Billboard Cerdas Pertama di Indonesia
         </h1>
@@ -16,7 +16,7 @@ const LandingHero: React.FC = () => {
 
         <a
           href="/homepage"
-          className="font-semibold text-white bg-[var(--color-primary)] rounded-[15px] text-base py-3 px-6"
+          className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[15px] text-base py-3 px-6"
         >
           Jelajahi Titik Iklan Sekarang
         </a>
