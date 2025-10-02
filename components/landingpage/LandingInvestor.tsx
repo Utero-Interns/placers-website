@@ -22,7 +22,7 @@ export default function LandingInvestor() {
                     className="w-full md:w-3/4 lg:w-5/12 h-auto rounded-lg object-cover"
                 />
 
-                <div className="w-full lg:w-7/12 flex flex-col items-center lg:items-start text-center lg:text-left">
+                <div className="w-full lg:w-7/12 flex flex-col lg:text-left">
                     <h1 className="font-bold text-black leading-snug lg:leading-normal
                                    text-2xl
                                    xl:text-3xl 
