@@ -67,7 +67,7 @@ export interface Billboard {
   view: number;
   score: number | null;
   scoreAt: string | null;
-  owner: BillboardOwner;
+  owner: Owner;
   image: BillboardImageFile[];
   category: BillboardCategory;
   averageRating: number;

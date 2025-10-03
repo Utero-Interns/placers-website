@@ -12,7 +12,7 @@ export default function LandingGallery() {
 
   useEffect(() => {
     fetchBillboards().then((data) => {
-      setBillboards(data);
+      setBillboards(data.slice(0, 8));
       setLoading(false);
     });
   }, []);
@@ -45,22 +45,33 @@ export default function LandingGallery() {
               Loading billboards...
             </p>
           ) : (
-            billboards.map((b) => (
-              <BillboardCard
-                key={b.id}
-                image={b.image[0]?.url || "/billboard-placeholder.png"}
-                type={b.category?.name || "Billboard"}
-                title={b.location}
-                size={b.size}
-                orientation={b.orientation}
-                sides={b.display}
-                rating={b.averageRating}
-                price={b.rentPrice}
-                sellerImage={"/seller-placeholder.png"} 
-                sellerName={b.owner?.fullname || "Unknown"}
-                id={b.id}
-              />
-            ))
+            billboards.map((b) => {
+              const imageUrl =
+                b.image?.length > 0
+                  ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
+                  : "/billboard-placeholder.png";
+              
+              const sellerImageUrl = b.owner.user.profilePicture
+                  ? `/api/uploads/${b.owner.user.profilePicture.replace(/^uploads\//, "")}`
+                  : '/seller-placeholder.png';
+
+              return (
+                <BillboardCard
+                  key={b.id}
+                  image={imageUrl}
+                  type={b.category?.name || "Billboard"}
+                  title={b.location}
+                  size={b.size}
+                  orientation={b.orientation}
+                  sides={b.display}
+                  rating={b.averageRating}
+                  price={b.rentPrice}
+                  sellerImage={sellerImageUrl}
+                  sellerName={b.owner?.fullname || "Unknown"}
+                  id={b.id}
+                />
+              );
+            })
           )}
         </div>
       </div>
