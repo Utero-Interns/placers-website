@@ -1,6 +1,7 @@
 import { Location } from "iconsax-react";
 import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
 import BillboardTag from "./BillboardTag";
+import { formatPrice } from "@/utils/formatPrice";
 
 type BillboardCardProps = {
   image: string;
@@ -79,7 +80,7 @@ const BillboardCard = ({
         {/* Price */}
         <div className="flex items-baseline">
           <h1 className="font-medium text-base md:text-lg text-black mr-1">Mulai Dari Rp.</h1>
-          <span className="font-bold text-xl md:text-2xl text-black">{price}</span>
+          <span className="font-bold text-xl md:text-2xl text-black">{formatPrice(Number(price))}</span>
         </div>
 
         {/* Seller */}
