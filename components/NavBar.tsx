@@ -122,10 +122,10 @@ export default function NavBar() {
                             {isPopulerOpen && (
                                 <ul className="mt-2 w-full bg-gray-50 border rounded shadow-inner">
                                     <li>
-                                        <a href="/news" className="block px-4 py-2 text-gray-700 hover:bg-red-100">News</a>
+                                        <a href="/promo" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Promo</a>
                                     </li>
                                     <li>
-                                        <a href="/updates" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Promos</a>
+                                        <a href="/blog" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Blog</a>
                                     </li>
                                 </ul>
                             )}
