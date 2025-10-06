@@ -5,9 +5,9 @@ import Link from "next/link"
 
 export default function SellerPage() {
     return (
-        <>
+        <div className="flex flex-col min-h-screen bg-white">
             <Navbar />
-            <main className="px-6 md:px-16 lg:px-24 py-12">
+            <main className="px-6 md:px-16 lg:px-24 py-12 text-black">
 
                 {/* Hero Section */}
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
@@ -19,7 +19,7 @@ export default function SellerPage() {
                             Gabung bersama ratusan Merchant dan kelola bisnis lebih mudah dengan Placers.
                         </p>
                         <Link href="/seller/register">
-                            <button className="bg-[var(--color-primary)] hover:bg-red-700 text-white rounded-md px-6 py-3">
+                            <button className="bg-[var(--color-primary)] hover:bg-red-700 text-white rounded-md px-5 py-2 text-base">
                                 Daftar jadi Seller Sekarang
                             </button>
                         </Link>
@@ -134,6 +134,6 @@ export default function SellerPage() {
 
             </main>
             <Footer />
-        </>
+        </div>
     )
 }
