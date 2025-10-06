@@ -5,7 +5,7 @@ import FootLink from "./FootLink";
 
 export default function FootBar() {
     return (
-        <footer className="flex flex-col items-center bg-[var(--color-black2)] px-6 py-10 2xl:py-16">
+        <footer className="flex flex-col items-center bg-[var(--color-black2)] text-white px-6 py-10 2xl:py-16">
             <div className="flex w-full flex-col gap-12 mb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8 2xl:w-11/12 2xl:items-center 2xl:mb-11">
 
                 {/* Logo hanya tampil di desktop */}
