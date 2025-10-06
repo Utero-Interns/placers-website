@@ -31,7 +31,7 @@ export default function BlogContent({
         </div>
 
         {/* Teks */}
-        <span className="text-sm font-medium">Kembali ke Blog</span>
+        <span className="text-sm font-normal">Kembali ke Blog</span>
       </Link>
 
       {/* Judul */}
