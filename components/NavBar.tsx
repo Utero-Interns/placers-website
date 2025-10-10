@@ -63,7 +63,7 @@ export default function NavBar() {
                         </ul>
                     </li>
                     <li>
-                        <a href="/" className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
+                        <a href="/seller" className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
                     </li>
                 </ul>
             </div>
@@ -131,7 +131,7 @@ export default function NavBar() {
                             )}
                         </li>
                         <li className="w-full">
-                            <a href="/" className="block text-center p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
+                            <a href="/seller" className="block text-center p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
                         </li>
 
                         <li className="w-full border-t pt-4 mt-2 flex flex-col items-center space-y-4">
