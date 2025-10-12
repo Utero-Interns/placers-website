@@ -10,6 +10,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-poppins: var(--font-poppins);
+  --color-primary: 	#CE181E;
+  --color-secondary: #5A5A5A;
+  --color-info: #2F80ED;
+  --color-success: #07DC61;
+  --color-warning: #FBC216;
+  --color-error: #F64040;
+  --color-gray1: #5A5A5A;
+  --color-gray2: #A5A5A5;
+  --color-browngold: #B58800;
+  --color-black2: #32393A;
+  --color-star: #FDC700;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +34,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins);
 }
