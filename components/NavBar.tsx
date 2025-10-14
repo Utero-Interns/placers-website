@@ -3,11 +3,23 @@
 import Image from "next/image";
 import { Globe, Menu, X, ChevronDown, TicketPercent, Newspaper } from 'lucide-react';
 import { useState } from "react";
+import { usePathname } from 'next/navigation';
 
 export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isPopulerOpen, setIsPopulerOpen] = useState(false);
     const [isLangOpen, setIsLangOpen] = useState(false);
+
+    const pathname = usePathname() ?? '/';
+
+    // Helper to check active link
+    const isActive = (href: string) => {
+        if (href === '/') return pathname === '/';
+        return pathname.startsWith(href);
+    };
+
+    // Parent "Populer" is active if any child page is active
+    const isPopulerActive = isActive('/promo') || isActive('/blog');
 
     // Function to close all mobile dropdowns
     const closeAllDropdowns = () => {
@@ -22,6 +34,10 @@ export default function NavBar() {
         }
         setIsMenuOpen(!isMenuOpen);
     };
+
+    // NOTE: remove default text color from base class and apply text color conditionally
+    const baseNoColor = "font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]";
+    const activeClass = "text-[var(--color-primary)]";
 
     return (
         <nav className="flex items-center justify-between lg:px-2 xl:px-7 2xl:px-14 lg:pt-6 xl:pt-8 2xl:pt-[74px] lg:pb-2 xl:pb-3 2xl:pb-1 p-4 relative">
@@ -38,32 +54,30 @@ export default function NavBar() {
                 {/* Desktop Menu */}
                 <ul className="hidden lg:flex lg:space-x-3 xl:space-x-8 2xl:space-x-12">
                     <li>
-                        <a href="/" className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Beranda</a>
+                        <a href="/" className={`${baseNoColor} ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</a>
                     </li>
                     <li className="relative group">
-                        <button className="flex items-center gap-1 text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)] group-hover:text-[var(--color-primary)]">
+                        <button className={`flex items-center gap-1 ${baseNoColor} ${isPopulerActive ? activeClass : 'text-gray-700'} group-hover:text-[var(--color-primary)]`}>
                             Populer
                             <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" />
                         </button>
                         {/* Dropdown */}
-                        <ul className="absolute left-0 mt-3 w-44 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-3"> {/*border border-[0.5px] border-[#A5A5A5]*/}
+                        <ul className="absolute left-0 mt-3 w-44 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-3">
                             {/* Item Promo */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
-                                {/* Icon placeholder */}
                                 <TicketPercent className="w-5 h-5 text-gray-700" />
-                                <a href="/promo" className="text-gray-800 font-medium">Promo</a>
+                                <a href="/promo" className={`font-medium ${isActive('/promo') ? activeClass : 'text-gray-800'}`}>Promo</a>
                             </li>
 
                             {/* Item Blog */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
-                                {/* Icon placeholder */}
                                 <Newspaper className="w-5 h-5 text-gray-700" />
-                                <a href="/blog" className="text-gray-800 font-medium">Blog</a>
+                                <a href="/blog" className={`font-medium ${isActive('/blog') ? activeClass : 'text-gray-800'}`}>Blog</a>
                             </li>
                         </ul>
                     </li>
                     <li>
-                        <a href="/seller" className="text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
+                        <a href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</a>
                     </li>
                 </ul>
             </div>
@@ -72,7 +86,7 @@ export default function NavBar() {
             <div className="hidden lg:flex items-center lg:space-x-3 xl:space-x-6 2xl:space-x-9">
                 {/* Language Dropdown */}
                 <div className="relative group">
-                    <button className="flex items-center gap-1 text-gray-700 font-medium lg:text-sm xl:text-base 2xl:text-2xl hover:text-[var(--color-primary)] group-hover:text-[var(--color-primary)]">
+                    <button className={`${baseNoColor} ${'text-gray-700'} flex items-center gap-1 group-hover:text-[var(--color-primary)]`}>
                         <Globe className="lg:w-4 xl:w-6 2xl:w-10 lg:h-4 xl:h-6 2xl:h-10" />
                         <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" />
                     </button>
@@ -108,13 +122,13 @@ export default function NavBar() {
                 <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-md z-20">
                     <ul className="flex flex-col items-center space-y-2 p-4">
                         <li className="w-full">
-                            <a href="/" className="block text-center p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]">Beranda</a>
+                            <a href="/" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</a>
                         </li>
                         {/* Mobile Populer Dropdown */}
                         <li className="w-full text-center">
                             <button
                                 onClick={() => setIsPopulerOpen(!isPopulerOpen)}
-                                className="flex items-center justify-center w-full p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]"
+                                className={`flex items-center justify-center w-full p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isPopulerActive ? activeClass : 'text-gray-700'}`}
                             >
                                 Populer
                                 <ChevronDown className={`w-5 h-5 ml-1 transition-transform duration-200 ${isPopulerOpen ? 'rotate-180' : ''}`} />
@@ -122,16 +136,16 @@ export default function NavBar() {
                             {isPopulerOpen && (
                                 <ul className="mt-2 w-full bg-gray-50 border rounded shadow-inner">
                                     <li>
-                                        <a href="/promo" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Promo</a>
+                                        <a href="/promo" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/promo') ? activeClass : 'text-gray-700'}`}>Promo</a>
                                     </li>
                                     <li>
-                                        <a href="/blog" className="block px-4 py-2 text-gray-700 hover:bg-red-100">Blog</a>
+                                        <a href="/blog" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/blog') ? activeClass : 'text-gray-700'}`}>Blog</a>
                                     </li>
                                 </ul>
                             )}
                         </li>
                         <li className="w-full">
-                            <a href="/seller" className="block text-center p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]">Upgrade ke Seller</a>
+                            <a href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</a>
                         </li>
 
                         <li className="w-full border-t pt-4 mt-2 flex flex-col items-center space-y-4">
@@ -139,7 +153,7 @@ export default function NavBar() {
                             <div className="w-full text-center">
                                 <button
                                     onClick={() => setIsLangOpen(!isLangOpen)}
-                                    className="flex items-center justify-center w-full p-2 text-gray-700 font-medium text-lg hover:text-[var(--color-primary)]"
+                                    className={`flex items-center justify-center w-full p-2 font-medium text-lg hover:text-[var(--color-primary)] ${'text-gray-700'}`}
                                 >
                                     <Globe className="w-6 h-6 mr-2" />
                                     Bahasa
