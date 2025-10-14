@@ -18,7 +18,6 @@ export default function FootBar() {
                 {/* Site Map */}
                 <div className="flex flex-col self-start space-y-4">
                     <FootLinkTitle text="SITE MAP" />
-                    <FootLink href="/populer" text="Populer" />
                     <FootLink href="/promo" text="Promo" />
                     <FootLink href="/blog" text="Blog" />
                 </div>
