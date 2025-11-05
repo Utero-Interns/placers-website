@@ -79,7 +79,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   if (!blog) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-white">
         <NavBar />
         <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-8 py-10">
           <h1 className="text-2xl font-bold">Artikel tidak ditemukan</h1>
@@ -90,10 +90,10 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
 
-      <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-8 py-10">
+      <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-8 py-10 text-black">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Konten utama */}
           <div className="lg:col-span-2">

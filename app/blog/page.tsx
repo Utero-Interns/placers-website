@@ -22,7 +22,7 @@ export default function BlogPage() {
       <NavBar />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-8 py-10">
+      <main className="flex-1 max-w-7xl mx-auto px-6 lg:px-8 py-10 text-black">
         <BlogHero />
         
         {/* Grid Artikel */}

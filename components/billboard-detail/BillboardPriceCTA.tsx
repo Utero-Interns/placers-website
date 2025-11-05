@@ -1,5 +1,6 @@
 import { StarIcon } from 'lucide-react';
 import React from 'react';
+import { formatPrice } from "@/utils/formatPrice";
 
 interface Props {
   rating: number;
@@ -8,7 +9,6 @@ interface Props {
 }
 
 const BillboardPriceCTA: React.FC<Props> = ({ rating, price, isAvailable }) => {
-  const formatPrice = (price: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t border-gray-200">

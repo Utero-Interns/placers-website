@@ -67,7 +67,7 @@ export interface Billboard {
   view: number;
   score: number | null;
   scoreAt: string | null;
-  owner: BillboardOwner;
+  owner: Owner;
   image: BillboardImageFile[];
   category: BillboardCategory;
   averageRating: number;
@@ -247,3 +247,43 @@ export interface UserRating {
 }
 
 // end of billboard/detail
+
+
+
+// booking form
+export interface BookingFormData {
+  // Step 1: Data Pemesanan
+  nama: string;
+  noTelepon: string;
+  alamat: string;
+  periodeAwal: string;
+  periodeAkhir: string;
+
+  // Fix: Add properties for AdministrasiPajakStep to resolve type errors.
+  penerangan: string;
+  lahan: string;
+  pajakPPN: string;
+  pajakPPH: string;
+
+  // Step 3: Add-On
+  pengawasanMedia: boolean;
+  asuransi: boolean;
+  nomorAsuransi: string;
+  maintenanceMedia: boolean;
+  rmm: boolean;
+  augmentedReality: number;
+  trafficDataReporting: number;
+  catatan: string;
+}
+
+export type StepName =
+  | 'Data Pemesanan'
+  | 'Add-On'
+  | 'Include'
+  | 'Review & Submit';
+
+export interface Step {
+  name: StepName;
+  icon: React.ComponentType<{ className?: string }>;
+}
+// end of booking form

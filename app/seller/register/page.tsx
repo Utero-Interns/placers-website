@@ -98,10 +98,10 @@ export default function SellerRegisterPage() {
         }`
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-white">
             <NavBar />
 
-            <main className="flex-1 w-full px-6 md:px-12 lg:px-20 py-10">
+            <main className="flex-1 w-full px-6 md:px-12 lg:px-20 py-10 text-black">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     {/* Kiri: Ilustrasi + Text */}
                     <div className="space-y-3">
