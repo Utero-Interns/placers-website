@@ -46,7 +46,7 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
 
       {/* Availability Overlay */}
       {!isAvailable && (
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-4">
           <h2 className="text-2xl md:text-4xl font-bold tracking-wider text-white">
             Tidak Tersedia
           </h2>

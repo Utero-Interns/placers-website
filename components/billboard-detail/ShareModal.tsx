@@ -46,7 +46,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, url }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
       aria-modal="true"
       role="dialog"

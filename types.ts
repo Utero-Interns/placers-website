@@ -287,3 +287,57 @@ export interface Step {
   icon: React.ComponentType<{ className?: string }>;
 }
 // end of booking form
+
+
+
+// Order History
+
+export enum OrderStatus {
+  Upcoming = 'Upcoming',
+  Completed = 'Completed',
+  Ongoing = 'Ongoing',
+}
+
+export interface OrderItem {
+  description: string;
+  category: string;
+  duration: string;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Order {
+  id: string;
+  invoiceNumber: string;
+  orderDate: string;
+  invoiceDate: string;
+  category: string;
+  location: string;
+  totalCost: number;
+  paymentStatus: 'Lunas';
+  status: OrderStatus;
+  seller: string;
+  specifications: string;
+  adminDetails: string[];
+  serviceDetails: string[];
+  billTo: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  sellerInfo: {
+    name: string;
+    address: string;
+    phone: string;
+  };
+  items: OrderItem[];
+  subtotal: number;
+  pph: number;
+  ppn: number;
+  serviceFee: number;
+  jobFee: number;
+  promo: number;
+  notes: string;
+}
+
+// end of Order History
