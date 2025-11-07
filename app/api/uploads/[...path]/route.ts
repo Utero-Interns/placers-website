@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ path: string[] }> } 
+  context: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const { path } = await context.params; 
-    const filePath = path.join("/");
+    const { path: pathSegments } = await context.params;
+    const filePath = pathSegments.join("/");
 
     const targetUrl = `${process.env.NEXT_PUBLIC_API_URL}/uploads/${filePath}`;
 
@@ -20,10 +20,13 @@ export async function GET(
     }
 
     const blob = await res.blob();
+
     return new Response(blob, {
-      headers: { "Content-Type": res.headers.get("content-type") || "image/jpeg" },
+      headers: {
+        "Content-Type": res.headers.get("content-type") || "image/jpeg",
+      },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

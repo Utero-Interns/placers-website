@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SectionTag from "./SectionTag";
 
 export default function LandingInvestor() {
@@ -16,7 +17,7 @@ export default function LandingInvestor() {
 
             <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-11/12 mt-8 md:mt-12 2xl:mt-[60px] gap-10 lg:gap-16">
 
-                <img
+                <Image
                     src="/investor.png"
                     alt="Investor discussing plans"
                     className="w-full md:w-3/4 lg:w-5/12 h-auto rounded-lg object-cover"

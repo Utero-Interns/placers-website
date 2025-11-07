@@ -11,6 +11,7 @@ import AuthUsernameInput from '@/components/auth/AuthUsernameInput';
 import AuthEmailInput from '@/components/auth/AuthEmailInput';
 import AuthPasswordInput from '@/components/auth/AuthPasswordInput';
 import AuthSubmitButton from '@/components/auth/AuthSubmitBtn';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -44,12 +45,20 @@ export default function RegisterPage() {
       console.log('Registration successful:', data);
       
       router.push('/auth/login');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <AuthForm className="mx-auto" onSubmit={handleSubmit}>
