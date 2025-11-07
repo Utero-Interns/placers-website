@@ -40,7 +40,6 @@ const initialFormData: BookingFormData = {
   catatan: '',
 };
 
-
 function Booking() {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
@@ -60,7 +59,7 @@ function Booking() {
       try {
         const result = await submitBooking(formData);
         setSubmissionResult(result);
-      } catch (error) {
+      } catch {
         setSubmissionResult({ success: false, message: 'An error occurred during submission.' });
       } finally {
         setIsSubmitting(false);
@@ -73,14 +72,13 @@ function Booking() {
       setCurrentStep(currentStep - 1);
     }
   };
-  
+
   const isNextDisabled = useMemo(() => {
-    if(currentStep === 0) {
+    if (currentStep === 0) {
       return !formData.nama || !formData.noTelepon || !formData.alamat;
     }
     return false;
   }, [currentStep, formData]);
-
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -96,31 +94,34 @@ function Booking() {
         return null;
     }
   };
-  
+
   if (submissionResult?.success) {
     return (
-       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <div className="max-w-md w-full text-center bg-white p-8 rounded-xl shadow-lg">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-             <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-             </svg>
+            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
           <h3 className="text-lg leading-6 font-medium text-gray-900 mt-4">Booking Submitted!</h3>
           <div className="mt-2 px-7 py-3">
-             <p className="text-sm text-gray-500">{submissionResult.message}</p>
+            <p className="text-sm text-gray-500">{submissionResult.message}</p>
           </div>
           <div className="mt-4">
-            <button onClick={() => {
+            <button
+              onClick={() => {
                 setSubmissionResult(null);
                 setCurrentStep(0);
                 setFormData(initialFormData);
-            }} className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] rounded-lg shadow-sm hover:bg-[var(--color-primary)]/80">
-                Create New Booking
+              }}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] rounded-lg shadow-sm hover:bg-[var(--color-primary)]/80"
+            >
+              Create New Booking
             </button>
           </div>
         </div>
-       </div>
+      </div>
     );
   }
 
@@ -128,11 +129,10 @@ function Booking() {
     <div className="bg-white min-h-screen font-sans text-gray-800">
       <NavBar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-
         <header className="text-center mb-12 md:mb-16">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2">Lengkapi Form dibawah ini</h1>
           <p className="text-base sm:text-lg text-gray-500 max-w-3xl mx-auto">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </p>
         </header>
 
@@ -149,9 +149,9 @@ function Booking() {
               onNext={handleNext}
               isNextDisabled={isNextDisabled}
             />
-             {submissionResult && !submissionResult.success && (
-                <p className="text-sm text-[var(--color-primary)] mt-4 text-right">{submissionResult.message}</p>
-             )}
+            {submissionResult && !submissionResult.success && (
+              <p className="text-sm text-[var(--color-primary)] mt-4 text-right">{submissionResult.message}</p>
+            )}
           </div>
         </main>
       </div>

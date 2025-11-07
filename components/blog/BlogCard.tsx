@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 interface BlogCardProps {
@@ -21,7 +22,7 @@ export default function BlogCard({
     <Link href={`/blog/${id}`}>
       <div className="rounded-lg shadow-md overflow-hidden bg-white cursor-pointer hover:shadow-lg transition">
         {/* Full Image (sudah ada teks di dalam gambar) */}
-        <img
+        <Image
           src={image}
           alt={title}
           className="w-full h-48 object-cover"

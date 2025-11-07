@@ -1,16 +1,16 @@
 import React from 'react';
 import type { Bookmark } from '../../types';
 import { MapPin, Star, Grid2X2, Rotate3D, PanelLeftOpen } from 'lucide-react';
+import Image from 'next/image';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
   isEditing: boolean;
   isSelected: boolean;
   onSelect: (id: string, isChecked: boolean) => void;
-  statusAvailable: boolean;
 }
 
-const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSelected, onSelect, statusAvailable }) => {
+const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSelected, onSelect }) => {
   const { id, merchant, type, location, size, orientation, sides, rating, price, imageUrl, avatarUrl } = bookmark;
 
   return (
@@ -28,7 +28,7 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSele
       <div className={`flex-grow flex flex-col md:flex-row items-center bg-white rounded-2xl p-4 transition-all duration-300 border w-full ${isSelected && isEditing ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-gray-200'}`}>
         
         <div className="flex-shrink-0 w-full md:w-56 relative">
-        <img
+        <Image
             className={`h-48 w-full md:h-40 md:w-56 object-cover rounded-xl ${
             !bookmark.statusAvailable ? "grayscale" : ""
             }`}
@@ -44,7 +44,7 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSele
 
         <div className="flex-grow w-full md:w-auto pt-4 md:pt-0 md:pl-6">
           <div className="flex items-center mb-2">
-            <img className="h-6 w-6 rounded-full object-cover" src={avatarUrl} alt={merchant} />
+            <Image className="h-6 w-6 rounded-full object-cover" src={avatarUrl} alt={merchant} />
             <p className="ml-2 text-sm font-semibold text-gray-800">{merchant} • {type}</p>
           </div>
           <div className="flex items-start mb-3">

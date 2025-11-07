@@ -1,4 +1,5 @@
 
+import Image from 'next/image';
 import React from 'react';
 
 const Hero: React.FC = () => {
@@ -11,7 +12,7 @@ const Hero: React.FC = () => {
         Jelajahi berbagai titik iklan dan media luar ruang di seluruh Indonesia. Gunakan filter lokasi, kategori, dan kriteria lainnya untuk menemukan titik yang tepat; sederhana, efisien, membeli, mempromosikan, atau menjalin kerja sama.
       </p>
       <div className="mt-8">
-        <img 
+        <Image
           src="/map.png" 
           alt="Map of Indonesia with ad locations" 
           className="w-full object-contain mx-auto"

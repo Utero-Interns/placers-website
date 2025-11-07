@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Bookmark } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import { Dropdown } from './Dropdown';
 
 interface BookmarkHeaderProps {

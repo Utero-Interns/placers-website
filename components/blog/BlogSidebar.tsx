@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 type Blog = {
@@ -25,7 +26,7 @@ export default function BlogSidebar({ blogs }: BlogSidebarProps) {
         href={`/blog/${first.id}`}
         className="block group"
       >
-        <img
+        <Image
           src={first.image}
           alt={first.title}
           className="w-full h-40 object-cover rounded-lg"
@@ -44,7 +45,7 @@ export default function BlogSidebar({ blogs }: BlogSidebarProps) {
         href={`/blog/${blog.id}`}
         className="flex items-start gap-2 hover:bg-gray-50 p-1 rounded-lg transition"
           >
-        <img
+        <Image
           src={blog.image}
           alt={blog.title}
           className="w-20 h-16 object-cover rounded-md flex-shrink-0"

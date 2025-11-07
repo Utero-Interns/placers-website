@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Link from "next/link";
+import Image from 'next/image';
 
 interface BillboardImageProps {
   images: { url: string }[];
@@ -36,7 +37,7 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
   return (
     <div className="relative w-full aspect-video md:aspect-[2/1] bg-gray-300 overflow-hidden group">
       {/* Current Image */}
-      <img
+      <Image
         key={currentIndex}
         src={currentImage}
         alt={imageAlt}
@@ -59,7 +60,7 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
           href={`/seller/${sellerId}`}
           className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition"
         >
-          <img
+          <Image
             className="w-10 h-10 rounded-full border-2 border-white"
             src={sellerImage}
             alt={sellerName}

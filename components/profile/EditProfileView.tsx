@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { User } from '@/types';
 import { Upload } from 'lucide-react';
+import Image from 'next/image';
 
 interface EditProfileViewProps {
   user: User;
@@ -80,7 +81,7 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onSave, onCance
           >
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar Preview" className="mx-auto h-24 w-24 rounded-full object-cover mb-4" />
+              <Image src={avatarPreview} alt="Avatar Preview" className="mx-auto h-24 w-24 rounded-full object-cover mb-4" />
             ) : (
               <div className="flex flex-col items-center text-gray-500">
                 <Upload className="w-12 h-12 mb-2" />

@@ -2,6 +2,7 @@ import { Location } from "iconsax-react";
 import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
 import BillboardTag from "./BillboardTag";
 import { formatPrice } from "@/utils/formatPrice";
+import Image from "next/image";
 
 type BillboardCardProps = {
   image: string;
@@ -36,7 +37,7 @@ const BillboardCard = ({
   return (
     <div className="w-full h-full rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
       <div className="relative">
-        <img
+        <Image
           src={image}
           alt="Billboard"
           className="w-full aspect-video object-cover" 
@@ -85,7 +86,7 @@ const BillboardCard = ({
 
         {/* Seller */}
         <div className="flex items-center space-x-2">
-          <img src={sellerImage} alt="Seller Picture"
+          <Image src={sellerImage} alt="Seller Picture"
               className="h-10 w-10 rounded-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = "/seller-placeholder.png";

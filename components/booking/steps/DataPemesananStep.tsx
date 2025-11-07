@@ -1,6 +1,6 @@
 import React from 'react';
 import type { BookingFormData } from '@/types';
-import { MapPinIcon, CalendarIcon } from 'lucide-react';
+import { MapPinIcon } from 'lucide-react';
 
 interface DataPemesananStepProps {
   data: BookingFormData;
@@ -10,12 +10,6 @@ interface DataPemesananStepProps {
 export const DataPemesananStep: React.FC<DataPemesananStepProps> = ({ data, updateData }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateData({ [e.target.name]: e.target.value });
-  };
-
-  const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return 'mm/dd/yyyy';
-    const [year, month, day] = dateString.split('-');
-    return `${month}/${day}/${year}`;
   };
 
   return (

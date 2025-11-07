@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import type { User } from '@/types';
 import { UserIcon, Mail, Phone  } from 'lucide-react';
 import Modal from './Modal';
+import Image from 'next/image';
 
 interface ProfileViewProps {
   user: User;
@@ -26,7 +27,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onEditProfile, onEditPa
     return (
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md space-y-8">
             <div className="flex flex-col sm:flex-row items-center sm:space-x-6 space-y-4 sm:space-y-0">
-                <img
+                <Image
                     src={user.avatarUrl}
                     alt="User Avatar"
                     className="w-24 h-24 rounded-full object-cover"

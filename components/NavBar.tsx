@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Globe, Menu, X, ChevronDown, TicketPercent, Newspaper } from 'lucide-react';
 import { useState } from "react";
 import { usePathname } from 'next/navigation';
+import Link from "next/link";
 
 export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -54,7 +55,7 @@ export default function NavBar() {
                 {/* Desktop Menu */}
                 <ul className="hidden lg:flex lg:space-x-3 xl:space-x-8 2xl:space-x-12">
                     <li>
-                        <a href="/" className={`${baseNoColor} ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</a>
+                        <Link href="/" className={`${baseNoColor} ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</Link>
                     </li>
                     <li className="relative group">
                         <button className={`flex items-center gap-1 ${baseNoColor} ${isPopulerActive ? activeClass : 'text-gray-700'} group-hover:text-[var(--color-primary)]`}>
@@ -66,18 +67,18 @@ export default function NavBar() {
                             {/* Item Promo */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
                                 <TicketPercent className="w-5 h-5 text-gray-700" />
-                                <a href="/promo" className={`font-medium ${isActive('/promo') ? activeClass : 'text-gray-800'}`}>Promo</a>
+                                <Link href="/promo" className={`font-medium ${isActive('/promo') ? activeClass : 'text-gray-800'}`}>Promo</Link>
                             </li>
 
                             {/* Item Blog */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
                                 <Newspaper className="w-5 h-5 text-gray-700" />
-                                <a href="/blog" className={`font-medium ${isActive('/blog') ? activeClass : 'text-gray-800'}`}>Blog</a>
+                                <Link href="/blog" className={`font-medium ${isActive('/blog') ? activeClass : 'text-gray-800'}`}>Blog</Link>
                             </li>
                         </ul>
                     </li>
                     <li>
-                        <a href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</a>
+                        <Link href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</Link>
                     </li>
                 </ul>
             </div>
@@ -93,10 +94,10 @@ export default function NavBar() {
                     {/* Dropdown */}
                     <ul className="absolute right-0 mt-3 w-44 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-3">
                         <li className="px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
-                            <a href="/lang/en" className="text-gray-800 font-medium">English</a>
+                            <Link href="/lang/en" className="text-gray-800 font-medium">English</Link>
                         </li>
                         <li className="px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
-                            <a href="/lang/id" className="text-gray-800 font-medium">Bahasa Indonesia</a>
+                            <Link href="/lang/id" className="text-gray-800 font-medium">Bahasa Indonesia</Link>
                         </li>
                     </ul>
                 </div>
@@ -122,7 +123,7 @@ export default function NavBar() {
                 <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-md z-20">
                     <ul className="flex flex-col items-center space-y-2 p-4">
                         <li className="w-full">
-                            <a href="/" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</a>
+                            <Link href="/" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/') ? activeClass : 'text-gray-700'}`}>Beranda</Link>
                         </li>
                         {/* Mobile Populer Dropdown */}
                         <li className="w-full text-center">
@@ -136,16 +137,16 @@ export default function NavBar() {
                             {isPopulerOpen && (
                                 <ul className="mt-2 w-full bg-gray-50 border rounded shadow-inner">
                                     <li>
-                                        <a href="/promo" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/promo') ? activeClass : 'text-gray-700'}`}>Promo</a>
+                                        <Link href="/promo" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/promo') ? activeClass : 'text-gray-700'}`}>Promo</Link>
                                     </li>
                                     <li>
-                                        <a href="/blog" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/blog') ? activeClass : 'text-gray-700'}`}>Blog</a>
+                                        <Link href="/blog" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/blog') ? activeClass : 'text-gray-700'}`}>Blog</Link>
                                     </li>
                                 </ul>
                             )}
                         </li>
                         <li className="w-full">
-                            <a href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</a>
+                            <Link href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</Link>
                         </li>
 
                         <li className="w-full border-t pt-4 mt-2 flex flex-col items-center space-y-4">
@@ -162,14 +163,14 @@ export default function NavBar() {
                                 {isLangOpen && (
                                     <ul className="mt-2 w-full bg-gray-50 border rounded shadow-inner">
                                         <li>
-                                            <a href="/lang/en" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
+                                            <Link href="/lang/en" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
                                                 English
-                                            </a>
+                                            </Link>
                                         </li>
                                         <li>
-                                            <a href="/lang/id" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
+                                            <Link href="/lang/id" className="block px-4 py-2 text-gray-700 hover:bg-red-100">
                                                 Bahasa Indonesia
-                                            </a>
+                                            </Link>
                                         </li>
                                     </ul>
                                 )}

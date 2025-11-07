@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Rating } from '@/types';
 import { Star } from 'lucide-react';
+import Image from 'next/image';
 
 interface ReviewCardProps {
   review: Rating;
@@ -12,7 +13,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
     <div className="flex-shrink-0 w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.666rem)] p-6 border border-gray-200 rounded-xl bg-white">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <img
+          <Image
             className="w-10 h-10 rounded-full bg-gray-200"
             src={
               review.user.profilePicture
