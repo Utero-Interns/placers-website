@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 
 export const IncludeStep: React.FC = () => {
@@ -32,7 +33,7 @@ export const IncludeStep: React.FC = () => {
   </div>
 
   <div className="flex justify-end items-center lg:col-span-1">
-    <img src="/checklist.png" alt="Clipboard with checklist" className="max-w-xs md:max-w-sm w-full" />
+    <Image src="/checklist.png" alt="Clipboard with checklist" className="max-w-xs md:max-w-sm w-full" />
   </div>
 </div>
  

@@ -20,26 +20,40 @@ export default function LandingGallery() {
   return (
     <section
       id="gallery"
-      className="flex items-center justify-center bg-white w-full px-4 sm:px-6 lg:px-8 mt-16 md:mt-24"
+      className="flex flex-col items-center justify-center 
+             bg-white w-full 
+             px-6 md:px-12 2xl:px-20 
+             py-14 md:py-18 lg:py-20"
     >
-      <div className="flex flex-col items-center space-y-2 md:space-y-3 w-11/12">
+      <div className="w-full max-w-7xl mx-auto flex flex-col items-center">
+        {/* Tag */}
         <SectionTag
           text="OUR GALLERY"
           bgColor="var(--color-primary)"
           textColor="white"
         />
 
-        <h1 className="text-black text-4xl sm:text-5xl lg:text-6xl font-bold text-center leading-tight">
-          Showcase Placers
-        </h1>
+        {/* Heading & Description */}
+        <div className="flex flex-col items-center text-center mt-2 md:mt-4 space-y-2">
+          <h1
+            className="text-black font-bold leading-snug
+               text-xl sm:text-2xl md:text-3xl lg:text-4xl"
+          >
+            Showcase Placers
+          </h1>
 
-        <p className="text-black text-lg sm:text-xl lg:text-2xl text-center">
-          Jelajahi titik-titik billboard strategis terbaik dari Placers untuk
-          mendukung promosi bisnis Anda.
-        </p>
+          <p
+            className="text-black text-sm sm:text-base md:text-lg leading-relaxed"
+          >
+            Jelajahi titik-titik billboard strategis terbaik dari Placers untuk mendukung promosi bisnis Anda.
+          </p>
+        </div>
 
-        {/* gallery cards container */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8 md:pt-10">
+        {/* Gallery Cards */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
+             gap-6 mt-10 w-full"
+        >
           {loading ? (
             <p className="col-span-full text-center text-gray-500">
               Loading billboards...

@@ -12,6 +12,7 @@ import AuthGoogleButton from '@/components/auth/AuthGoogleBtn';
 import AuthPasswordInput from '@/components/auth/AuthPasswordInput';
 import AuthSubmitButton from '@/components/auth/AuthSubmitBtn';
 import AuthTitle from '@/components/auth/AuthTitle';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -42,12 +43,20 @@ export default function LoginPage() {
       console.log('Login successful:', data);
       // You can redirect here or save token
       router.push('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <AuthForm className="mx-auto" onSubmit={handleSubmit}>

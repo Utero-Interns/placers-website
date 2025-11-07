@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 interface BlogContentProps {
@@ -11,7 +12,6 @@ interface BlogContentProps {
 }
 
 export default function BlogContent({
-  id,
   title,
   author,
   date,
@@ -43,7 +43,7 @@ export default function BlogContent({
       </p>
 
       {/* Gambar */}
-      <img
+      <Image
         src={image}
         alt={title}
         className="w-full rounded-lg mb-6"
