@@ -36,3 +36,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins);
 }
+
+@media print {
+  nav,
+  footer {
+    display: none !important;
+  }
+}
