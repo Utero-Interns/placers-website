@@ -119,7 +119,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                           setRowsPerPage(Number(e.target.value));
                           setCurrentPage(1);
                       }}
-                      className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/80"
+                      className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/80 cursor-pointer"
                       aria-label="Rows per page"
                   >
                       <option value={3}>3</option>
@@ -138,7 +138,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                   setActiveTab(tab);
                   setCurrentPage(1);
                 }}
-                className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors
+                className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer
                   ${
                     activeTab === tab
                       ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
@@ -186,10 +186,10 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                   <span className="font-bold text-gray-900">{formatCurrency(order.totalCost)}</span>
                  </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button onClick={() => handleOpenModal(order)} className="w-full sm:w-auto text-sm bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 rounded-lg px-4 py-2 font-semibold">
+                  <button onClick={() => handleOpenModal(order)} className="w-full sm:w-auto text-sm bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 rounded-lg px-4 py-2 font-semibold cursor-pointer">
                     Lihat Detail
                   </button>
-                  <button onClick={() => onShowInvoice(order)} className="w-full sm:w-auto text-sm flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-4 py-2 font-semibold">
+                  <button onClick={() => onShowInvoice(order)} className="w-full sm:w-auto text-sm flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-4 py-2 font-semibold cursor-pointer">
                     Lihat Nota <ChevronRight size={16} />
                   </button>
                 </div>
@@ -212,7 +212,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
             <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-gray-600 hover:bg-gray-100 font-medium"
+                className="px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-gray-600 hover:bg-gray-100 font-medium cursor-pointer"
             >
                 <ChevronLeft size={16} />
                 <span className="hidden sm:inline">Previous</span>
@@ -221,7 +221,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                 <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 rounded-md ${
+                    className={`w-9 h-9 rounded-md cursor-pointer ${
                         currentPage === page
                             ? 'bg-[var(--color-primary)] text-white shadow-sm'
                             : 'bg-white text-gray-600 hover:bg-gray-100'
@@ -233,7 +233,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
             <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-gray-600 hover:bg-gray-100 font-medium"
+                className="px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-gray-600 hover:bg-gray-100 font-medium cursor-pointer"
             >
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight size={16} />
