@@ -107,7 +107,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                           setSearchTerm(e.target.value);
                           setCurrentPage(1);
                       }}
-                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/80 bg-gray-50"
+                      className="pl-10 pr-4 py-2 w-full text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/80 bg-gray-50"
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               </div>

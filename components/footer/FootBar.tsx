@@ -13,6 +13,8 @@ export default function FootBar() {
                 <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
+                    width={500}
+                    height={500}
                     className="hidden lg:block h-24 w-24 mx-auto lg:mx-0 lg:my-auto lg:h-32 lg:w-32 2xl:h-48 2xl:w-48"
                 />
 
@@ -54,6 +56,8 @@ export default function FootBar() {
                 <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
+                    height={500}
+                    width={500}
                     className="h-8 w-8 lg:hidden"
                 />
 
