@@ -29,6 +29,8 @@ const LandingHero: React.FC = () => {
         <Image
           src="/hero-billboard.png"
           alt="Hero Billboard"
+          width={1000}
+          height={800}
           className="h-auto w-full max-w-sm md:max-w-md lg:max-w-none object-contain"
         />
       </div>

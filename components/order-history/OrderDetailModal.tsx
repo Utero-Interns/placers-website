@@ -36,7 +36,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, on
                 <div>
                     <h2 className="text-xl font-bold text-gray-800">Detail Pesanan</h2>
                 </div>
-                <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <X size={24} />
                 </button>
             </div>
@@ -46,7 +46,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, on
                     <h3 className="text-lg font-semibold text-gray-900">{order.category} - {order.seller}</h3>
                     <p className="text-sm text-gray-500">Spesifikasi: {order.specifications}</p>
                 </div>
-                <button onClick={onPrint} className="w-full sm:w-auto text-sm bg-white text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-red-50 rounded-lg px-4 py-2 font-semibold">
+                <button onClick={onPrint} className="w-full sm:w-auto text-sm bg-white text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-red-50 rounded-lg px-4 py-2 font-semibold cursor-pointer">
                     Cetak Nota
                 </button>
             </div>
@@ -67,10 +67,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, on
             </div>
 
             <div className="flex flex-col sm:flex-row justify-end gap-3">
-                <button onClick={onClose} className="text-sm bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 rounded-lg px-6 py-2.5 font-semibold">
+                <button onClick={onClose} className="text-sm bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 rounded-lg px-6 py-2.5 font-semibold cursor-pointer">
                     Tutup
                 </button>
-                <button className="text-sm bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-6 py-2.5 font-semibold">
+                <button className="text-sm bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-6 py-2.5 font-semibold cursor-pointer">
                     Laporan Pemasangan
                 </button>
             </div>

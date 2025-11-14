@@ -30,6 +30,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onEditProfile, onEditPa
                 <Image
                     src={user.avatarUrl}
                     alt="User Avatar"
+                    width={500}
+                    height={500}
                     className="w-24 h-24 rounded-full object-cover"
                 />
                 <div className="flex-grow text-center sm:text-left">
