@@ -21,7 +21,7 @@ const InvoicePage: React.FC<InvoicePageProps> = ({ order, onBack }) => {
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 2xl:max-w-4xl">
       <div className="mb-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium print:hidden">
+        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium print:hidden cursor-pointer">
           <ArrowLeft size={20} />
           Kembali ke Riwayat Pesanan
         </button>
@@ -187,7 +187,7 @@ const InvoicePage: React.FC<InvoicePageProps> = ({ order, onBack }) => {
       <div className="mt-8 flex justify-end print:hidden">
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-5 py-2.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-red-700 rounded-lg px-5 py-2.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
         >
           <Printer size={18} />
           Cetak / Unduh

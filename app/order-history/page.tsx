@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { Order } from '@/types';
 import OrderHistoryPage from '@/components/order-history/OrderHistoryPage';
 import InvoicePage from '@/components/order-history/InvoicePage';
+import NavBar from '@/components/NavBar';
+import FootBar from '@/components/footer/FootBar';
 
-const App: React.FC = () => {
+const OrderHistory: React.FC = () => {
   const [view, setView] = useState<'list' | 'invoice'>('list');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -21,12 +23,16 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
-      {view === 'list' && <OrderHistoryPage onShowInvoice={handleShowInvoice} />}
-      {view === 'invoice' && selectedOrder && (
-        <InvoicePage order={selectedOrder} onBack={handleBackToList} />
-      )}
+      <NavBar />
+      <main>
+        {view === 'list' && <OrderHistoryPage onShowInvoice={handleShowInvoice} />}
+        {view === 'invoice' && selectedOrder && (
+          <InvoicePage order={selectedOrder} onBack={handleBackToList} />
+        )}
+      </main>
+      <FootBar />
     </div>
   );
 };
 
-export default App;
+export default OrderHistory;
