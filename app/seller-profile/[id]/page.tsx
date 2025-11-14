@@ -7,6 +7,8 @@ import { fetchBillboards } from "@/services/billboardService";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import type { Billboard } from "@/types";
+import NavBar from "@/components/NavBar";
+import FootBar from "@/components/footer/FootBar";
 
 const SellerProfile: React.FC = () => {
   const categories = ["Semua", "Billboard", "Baliho", "Videotron", "Roadsign"];
@@ -44,7 +46,8 @@ const SellerProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <NavBar />
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-5 mt-5">
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -92,9 +95,9 @@ const SellerProfile: React.FC = () => {
                   sides={billboard.display || "-"}
                   rating={billboard.averageRating || 0}
                   price={billboard.sellPrice || billboard.rentPrice || "0"}
-                  image={billboard.image?.[0]?.url || "/dummy/no-image.jpg"}
+                  image={billboard.image?.[0]?.url || "/billboard-placeholder.png"}
                   sellerName={billboard.owner?.fullname || "Unknown Seller"}
-                  sellerImage={billboard.owner?.user?.profilePicture || "/dummy/profile.jpg"}
+                  sellerImage={billboard.owner?.user?.profilePicture || "/seller-placeholder.png"}
                 />
               ))}
             </div>
@@ -105,6 +108,7 @@ const SellerProfile: React.FC = () => {
           )}
         </main>
       </div>
+      <FootBar />
     </div>
   );
 };
