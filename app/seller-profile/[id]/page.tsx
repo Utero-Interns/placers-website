@@ -5,6 +5,7 @@ import BillboardCard from "@/components/BillboardCard";
 import CategoryTabs from "@/components/seller-profile/CategoryTabs";
 import { fetchBillboards } from "@/services/billboardService";
 import { Plus } from "lucide-react";
+import Image from "next/image";
 
 const SellerProfile: React.FC = () => {
   const categories = ["Semua", "Billboard", "Baliho", "Videotron", "Roadsign"];
@@ -47,9 +48,11 @@ const SellerProfile: React.FC = () => {
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center space-x-4">
-            <img
-              src="/dummy/profile.jpg"
+            <Image
+              src="/seller-placeholder.png"
               alt="Seller"
+              width={250}
+              height={250}
               className="h-16 w-16 rounded-full object-cover"
             />
             <div>
