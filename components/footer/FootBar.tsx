@@ -56,8 +56,8 @@ export default function FootBar() {
                 <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
-                    height={500}
-                    width={500}
+                    height={250}
+                    width={250}
                     className="h-8 w-8 lg:hidden"
                 />
 

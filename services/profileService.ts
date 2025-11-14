@@ -6,7 +6,7 @@ let mockUser: User = {
   username: 'User',
   email: 'user@gmail.com',
   phone: '081234567891',
-  avatarUrl: 'https://picsum.photos/200',
+  avatarUrl: '/seller-placeholder.png',
 };
 
 export const userService = {

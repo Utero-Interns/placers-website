@@ -14,6 +14,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <Image
+            width={250}
+            height={250}
             className="w-10 h-10 rounded-full bg-gray-200"
             src={
               review.user.profilePicture

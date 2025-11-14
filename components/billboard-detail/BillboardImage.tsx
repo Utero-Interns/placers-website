@@ -41,6 +41,8 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
         key={currentIndex}
         src={currentImage}
         alt={imageAlt}
+        width={800}
+        height={800}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out"
         onError={(e) => (e.currentTarget.src = '/billboard-placeholder.png')}
       />
@@ -61,6 +63,8 @@ const BillboardImage: React.FC<BillboardImageProps> = ({
           className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition"
         >
           <Image
+            width={500}
+            height={500}
             className="w-10 h-10 rounded-full border-2 border-white"
             src={sellerImage}
             alt={sellerName}
