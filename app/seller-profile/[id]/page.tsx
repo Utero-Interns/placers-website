@@ -6,12 +6,13 @@ import CategoryTabs from "@/components/seller-profile/CategoryTabs";
 import { fetchBillboards } from "@/services/billboardService";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import type { Billboard } from "@/types";
 
 const SellerProfile: React.FC = () => {
   const categories = ["Semua", "Billboard", "Baliho", "Videotron", "Roadsign"];
 
   const [activeCategory, setActiveCategory] = useState("Billboard");
-  const [billboards, setBillboards] = useState<any[]>([]);
+  const [billboards, setBillboards] = useState<Billboard[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
