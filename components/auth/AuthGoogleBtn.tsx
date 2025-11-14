@@ -17,6 +17,8 @@ export default function AuthGoogleButton({ onClick }: AuthGoogleButtonProps) {
       <Image 
         src="/google-logo.png" 
         alt="google logo"
+        width={300}
+        height={300}
         className="w-5 h-5"
       />
       Google

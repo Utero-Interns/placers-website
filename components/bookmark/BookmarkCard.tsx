@@ -29,6 +29,8 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSele
         
         <div className="flex-shrink-0 w-full md:w-56 relative">
         <Image
+            width={500}
+            height={500}
             className={`h-48 w-full md:h-40 md:w-56 object-cover rounded-xl ${
             !bookmark.statusAvailable ? "grayscale" : ""
             }`}
@@ -44,7 +46,7 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSele
 
         <div className="flex-grow w-full md:w-auto pt-4 md:pt-0 md:pl-6">
           <div className="flex items-center mb-2">
-            <Image className="h-6 w-6 rounded-full object-cover" src={avatarUrl} alt={merchant} />
+            <Image className="h-6 w-6 rounded-full object-cover" src={avatarUrl} width={250} height={250} alt={merchant} />
             <p className="ml-2 text-sm font-semibold text-gray-800">{merchant} • {type}</p>
           </div>
           <div className="flex items-start mb-3">

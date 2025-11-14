@@ -15,7 +15,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, isEditing, selec
   if (bookmarks.length === 0) {
     return <div className="flex w-full justify-center">
         <div className="flex flex-col text-center py-20 text-[var(--color-gray2)] w-1/3">
-            <Image src="/bookmark-illust.png" alt="Bookmark Illustration" className="grayscale-100"/>
+            <Image src="/bookmark-illust.png" alt="Bookmark Illustration" width={800} height={800} className="grayscale-100"/>
             <h1 className="font-medium text-[20px]">Belum ada yang Anda simpan</h1>
             <p className="text-[16px]">Yuk, simpan favorit Anda agar mudah ditemukan di sini!</p>
         </div>;

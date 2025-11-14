@@ -30,7 +30,7 @@ const InvoicePage: React.FC<InvoicePageProps> = ({ order, onBack }) => {
       <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12" id="invoice-content">
         {/* Header */}
         <header className="flex justify-between items-start mb-10">
-          <Image src="/placers-logo-text-red.png" className="h-16 w-auto" alt="Placers Logo" />
+          <Image src="/placers-logo-text-red.png" width={500} height={500} className="h-16 w-auto" alt="Placers Logo" />
           <div className="text-right">
             <h1 className="text-3xl font-bold text-gray-800 tracking-tight">INVOICE</h1>
             <p className="text-sm text-gray-500">#{order.invoiceNumber}</p>

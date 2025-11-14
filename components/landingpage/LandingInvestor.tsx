@@ -20,6 +20,8 @@ export default function LandingInvestor() {
                 <Image
                     src="/investor.png"
                     alt="Investor discussing plans"
+                    width={800}
+                    height={800}
                     className="w-full md:w-3/4 lg:w-5/12 h-auto rounded-lg object-cover"
                 />
 

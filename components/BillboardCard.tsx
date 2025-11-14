@@ -40,6 +40,8 @@ const BillboardCard = ({
         <Image
           src={image}
           alt="Billboard"
+          width={500}
+          height={500}
           className="w-full aspect-video object-cover" 
           onError={(e) => {
             e.currentTarget.src = "/billboard-placeholder.png";
@@ -87,6 +89,8 @@ const BillboardCard = ({
         {/* Seller */}
         <div className="flex items-center space-x-2">
           <Image src={sellerImage} alt="Seller Picture"
+              width={250}
+              height={250}
               className="h-10 w-10 rounded-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = "/seller-placeholder.png";
