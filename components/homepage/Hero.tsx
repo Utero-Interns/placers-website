@@ -1,6 +1,7 @@
+'use client';
 
-import Image from 'next/image';
 import React from 'react';
+import SimpleMap from '../SimpleMap';
 
 const Hero: React.FC = () => {
   return (
@@ -12,13 +13,7 @@ const Hero: React.FC = () => {
         Jelajahi berbagai titik iklan dan media luar ruang di seluruh Indonesia. Gunakan filter lokasi, kategori, dan kriteria lainnya untuk menemukan titik yang tepat; sederhana, efisien, membeli, mempromosikan, atau menjalin kerja sama.
       </p>
       <div className="mt-8">
-        <Image
-          src="/map.png" 
-          alt="Map of Indonesia with ad locations" 
-          width={1000}
-          height={800}
-          className="w-full object-contain mx-auto"
-        />
+        <SimpleMap />
       </div>
     </div>
   );
