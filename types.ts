@@ -71,6 +71,8 @@ export interface Billboard {
   image: BillboardImageFile[];
   category: BillboardCategory;
   averageRating: number;
+  latitude: number;
+  longitude: number;
 }
 
 // export interface Review {

@@ -42,7 +42,7 @@ const Homepage: React.FC = () => {
     <div className="bg-gray-100 min-h-screen">
       <NavBar />
       <main className="container mx-auto px-4 py-8">
-        <Hero />
+        <Hero billboards={billboards}/>
         <div className="bg-white rounded-xl shadow-md p-4 md:p-6 mt-8">
           <Filters />
           <CardGrid billboards={billboards} />

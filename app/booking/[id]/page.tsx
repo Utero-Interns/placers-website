@@ -132,7 +132,7 @@ function Booking() {
         <header className="text-center mb-12 md:mb-16">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2">Lengkapi Form dibawah ini</h1>
           <p className="text-base sm:text-lg text-gray-500 max-w-3xl mx-auto">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ikuti langkah-langkah berikut untuk menyelesaikan proses pemesanan titik iklan Anda.
           </p>
         </header>
 

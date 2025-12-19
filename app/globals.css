@@ -43,3 +43,27 @@ body {
     display: none !important;
   }
 }
+
+/* Remove default hover effect */
+.gm-ui-hover-effect {
+  display: none !important;
+}
+
+/* Remove default InfoWindow white frame & padding */
+.gm-style-iw {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove inner padding wrapper */
+.gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+/* Remove bottom white tip / tail */
+.gm-style-iw-t::after {
+  display: none !important;
+}

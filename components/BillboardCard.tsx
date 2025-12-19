@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Location } from "iconsax-react";
 import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
 import BillboardTag from "./BillboardTag";
@@ -12,7 +13,6 @@ type BillboardCardProps = {
   orientation: string;
   sides: string;
   rating: number;
-  // orders: string;
   price: string;
   sellerImage: string;
   sellerName: string;
@@ -27,24 +27,29 @@ const BillboardCard = ({
   orientation,
   sides,
   rating,
-  // orders,
   price,
   sellerImage,
   sellerName,
   id,
 }: BillboardCardProps) => {
+  // ✅ State-based fallbacks
+  const [billboardSrc, setBillboardSrc] = useState(image);
+  const [sellerSrc, setSellerSrc] = useState(sellerImage);
 
   return (
     <div className="w-full h-full rounded-[15px] border-[0.5px] border-[var(--color-gray2)] overflow-hidden shadow-[0_4px_10px_var(--color-gray2)] flex flex-col">
+      {/* Billboard image */}
       <div className="relative">
         <Image
-          src={image}
+          src={billboardSrc}
           alt="Billboard"
           width={500}
           height={500}
-          className="w-full aspect-video object-cover" 
-          onError={(e) => {
-            e.currentTarget.src = "/billboard-placeholder.png";
+          className="w-full aspect-video object-cover"
+          onError={() => {
+            if (billboardSrc !== "/billboard-placeholder.png") {
+              setBillboardSrc("/billboard-placeholder.png");
+            }
           }}
         />
       </div>
@@ -53,11 +58,18 @@ const BillboardCard = ({
         <h1 className="font-bold text-xl md:text-2xl text-black">
           {type}
         </h1>
-        
+
         {/* Title */}
         <div className="flex items-start space-x-2">
-          <Location variant="Bold" color="var(--color-primary)" size={24} className="flex-shrink-0 mt-0.5" />
-          <span className="text-black text-lg md:text-xl font-medium truncate">{title}</span>
+          <Location
+            variant="Bold"
+            color="var(--color-primary)"
+            size={24}
+            className="flex-shrink-0 mt-0.5"
+          />
+          <span className="text-black text-lg md:text-xl font-medium truncate">
+            {title}
+          </span>
         </div>
 
         {/* Tags */}
@@ -67,36 +79,43 @@ const BillboardCard = ({
           <BillboardTag text={sides} Icon={SidebarOpen} />
         </div>
 
-        {/* Star */}
+        {/* Rating */}
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
-            <Star className="fill-[var(--color-star)] text-[var(--color-star)] w-5 h-5"/>
-            <h1 className="font-medium text-base md:text-lg text-black">{rating}</h1>
+            <Star className="fill-[var(--color-star)] text-[var(--color-star)] w-5 h-5" />
+            <h1 className="font-medium text-base md:text-lg text-black">
+              {rating}
+            </h1>
           </div>
-            
-            {/* <div
-              className="w-1.5 h-1.5 rounded-full bg-black"
-            ></div>
-            <h1 className="font-medium text-base md:text-lg text-black">{orders} Pesanan</h1> */}
         </div>
 
         {/* Price */}
         <div className="flex items-baseline">
-          <h1 className="font-medium text-base md:text-lg text-black mr-1">Mulai Dari Rp.</h1>
-          <span className="font-bold text-xl md:text-2xl text-black">{formatPrice(Number(price))}</span>
+          <h1 className="font-medium text-base md:text-lg text-black mr-1">
+            Mulai Dari Rp.
+          </h1>
+          <span className="font-bold text-xl md:text-2xl text-black">
+            {formatPrice(Number(price))}
+          </span>
         </div>
 
         {/* Seller */}
         <div className="flex items-center space-x-2">
-          <Image src={sellerImage} alt="Seller Picture"
-              width={250}
-              height={250}
-              className="h-10 w-10 rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/seller-placeholder.png";
-              }}
+          <Image
+            src={sellerSrc}
+            alt="Seller Picture"
+            width={250}
+            height={250}
+            className="h-10 w-10 rounded-full object-cover"
+            onError={() => {
+              if (sellerSrc !== "/seller-placeholder.png") {
+                setSellerSrc("/seller-placeholder.png");
+              }
+            }}
           />
-          <h1 className="font-medium text-base md:text-lg text-black truncate">{sellerName}</h1>
+          <h1 className="font-medium text-base md:text-lg text-black truncate">
+            {sellerName}
+          </h1>
         </div>
 
         {/* Detail button */}
