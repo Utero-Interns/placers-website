@@ -4,11 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Components
+import { toast } from 'sonner';
+import { authService } from '@/app/lib/auth';
+
+// Components
 import AuthForm from '@/components/auth/AuthForm';
 import AuthTitle from '@/components/auth/AuthTitle';
 import AuthGoogleButton from '@/components/auth/AuthGoogleBtn';
 import AuthUsernameInput from '@/components/auth/AuthUsernameInput';
 import AuthEmailInput from '@/components/auth/AuthEmailInput';
+import AuthPhoneInput from '@/components/auth/AuthPhoneInput';
 import AuthPasswordInput from '@/components/auth/AuthPasswordInput';
 import AuthSubmitButton from '@/components/auth/AuthSubmitBtn';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -17,6 +22,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +31,7 @@ export default function RegisterPage() {
 
   const googleRegister = () => {
     console.log('Google Register');
+    toast.info('Fitur ini belum tersedia');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,25 +39,36 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
 
+    if (password !== confirmPassword) {
+      setError('Password dan Konfirmasi Password tidak sama');
+      return;
+    }
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username, password, confirmPassword }),
+      const res = await authService.register({
+        email,
+        phone,
+        username,
+        password,
+        confirmPassword
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      if (!res.status) {
+        throw new Error(res.message || 'Registrasi gagal');
+      }
 
-      console.log('Registration successful:', data);
-      
-      router.push('/auth/login');
+      toast.success('Registrasi berhasil, silakan masuk');
+
+      // Redirect to login
+      router.push('/login');
     } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError('Terjadi kesalahan yang tidak diketahui');
+        toast.error('Terjadi kesalahan yang tidak diketahui');
+      }
     } finally {
       setLoading(false);
     }
@@ -66,7 +84,7 @@ export default function RegisterPage() {
         title="Daftar Sekarang"
         description="Sudah punya akun?"
         linkText="Masuk"
-        linkHref="/auth/login"
+        linkHref="/login"
       />
 
       <AuthGoogleButton onClick={googleRegister} />
@@ -78,6 +96,7 @@ export default function RegisterPage() {
       </div>
 
       <AuthEmailInput value={email} onChange={e => setEmail(e.target.value)} />
+      <AuthPhoneInput value={phone} onChange={e => setPhone(e.target.value)} />
       <AuthUsernameInput value={username} onChange={e => setUsername(e.target.value)} />
       <AuthPasswordInput
         placeholder="Password"
@@ -94,7 +113,7 @@ export default function RegisterPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <AuthSubmitButton isLogin={false}/>
+      <AuthSubmitButton isLogin={false} />
     </AuthForm>
   );
 }

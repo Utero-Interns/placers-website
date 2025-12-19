@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { authService } from '@/app/lib/auth';
 
 
 // Components
@@ -15,7 +17,7 @@ import AuthTitle from '@/components/auth/AuthTitle';
 import LoadingScreen from '@/components/LoadingScreen';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,7 @@ export default function LoginPage() {
 
   const googleLogin = () => {
     console.log('Google Login');
+    toast.info('Fitur ini belum tersedia');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,24 +34,30 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await authService.login(identifier, password);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
+      if (!res.status) {
+        throw new Error(res.message || 'Login gagal');
+      }
 
-      console.log('Login successful:', data);
-      // You can redirect here or save token
-      router.push('/');
+      toast.success('Login berhasil');
+
+      // Redirect based on user level
+      const userLevel = res.user?.level;
+      if (userLevel === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
+
     } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError('Terjadi kesalahan yang tidak diketahui');
+        toast.error('Terjadi kesalahan yang tidak diketahui');
+      }
     } finally {
       setLoading(false);
     }
@@ -64,7 +73,7 @@ export default function LoginPage() {
         title="Masuk ke Placers"
         description="Belum punya akun Placers?"
         linkText="Daftar"
-        linkHref="/auth/register"
+        linkHref="/register"
       />
 
       <AuthGoogleButton onClick={googleLogin} />
@@ -75,7 +84,7 @@ export default function LoginPage() {
         <hr className="flex-1 border-gray-300" />
       </div>
 
-      <AuthEmailInput value={email} onChange={e => setEmail(e.target.value)} />
+      <AuthEmailInput value={identifier} onChange={e => setIdentifier(e.target.value)} />
 
       <AuthPasswordInput
         placeholder="Password"

@@ -30,13 +30,21 @@ interface ModuleConfig<T> {
 export class AdminDashboard {
     private root: HTMLElement;
     private state: DashboardState;
-    private data: typeof store.data;
+    private data: typeof store.data; // Keep for other modules
+    private apiData: {
+        users: any[];
+        currentUser: any | null;
+    };
 
     constructor(rootId: string) {
         const root = document.getElementById(rootId);
         if (!root) throw new Error(`Root element #${rootId} not found`);
         this.root = root;
         this.data = store.data;
+        this.apiData = {
+            users: [],
+            currentUser: null
+        };
         this.state = {
             activeTab: 'Dashboard',
             searchQuery: '',
@@ -45,16 +53,50 @@ export class AdminDashboard {
             filters: {},
             currentPage: 1,
             itemsPerPage: 10,
-            isSidebarOpen: false // Default closed on mobile, handled by CSS for desktop
+            isSidebarOpen: false
         };
 
         this.init();
     }
 
-    private init() {
+    private async init() {
+        await this.fetchCurrentUser();
         this.renderLayout();
         this.attachGlobalListeners();
+
+        // Initial fetch for users if that's the active tab or just pre-fetch
+        await this.fetchUsers();
+
         this.renderContent();
+    }
+
+    private async fetchCurrentUser() {
+        try {
+            const res = await fetch('/api/proxy/auth/me', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                this.apiData.currentUser = data.user || data.data || data; // Handle various response structures
+            }
+        } catch (e) {
+            console.error('Failed to fetch current user', e);
+        }
+    }
+
+    private async fetchUsers() {
+        try {
+            // Using the proxy or direct URL if configured next.config
+            // Assuming we use the direct URL provided in prompt via proxy or absolute if client-side allow
+            // The prompt gave: http://utero.viewdns.net:3100/user
+            // We should use a proxy to avoid CORS if possible, or try direct.
+            // Let's try direct first but wrapped in function
+            const res = await fetch('http://utero.viewdns.net:3100/user');
+            const json = await res.json();
+            if (json.status && json.data) {
+                this.apiData.users = json.data;
+            }
+        } catch (e) {
+            console.error('Failed to fetch users', e);
+        }
     }
 
     private attachGlobalListeners() {
@@ -81,6 +123,8 @@ export class AdminDashboard {
     }
 
     private renderLayout() {
+        const username = this.apiData.currentUser?.username || 'Admin';
+
         this.root.innerHTML = `
       <div class="admin-container">
         <aside class="sidebar">
@@ -97,12 +141,14 @@ export class AdminDashboard {
               <button class="mobile-toggle">☰</button>
               <h1 class="page-title">Dashboard</h1>
             </div>
-            <div class="user-menu">
+            <div class="user-menu" style="display: flex; align-items: center; gap: 1rem;">
+              <span class="font-medium">Hello, ${username}</span>
               <button class="btn btn-outline btn-sm">Logout</button>
             </div>
           </header>
           <div id="content-area">
             <!-- Content injected here -->
+            <div class="loading-spinner">Loading...</div>
           </div>
         </main>
       </div>
@@ -129,6 +175,13 @@ export class AdminDashboard {
         modalOverlay?.addEventListener('click', (e) => {
             if (e.target === modalOverlay) this.closeModal();
         });
+
+        // Logout listener
+        const logoutBtn = this.root.querySelector('.user-menu button');
+        logoutBtn?.addEventListener('click', async () => {
+            // Handle logout
+            window.location.href = '/login';
+        });
     }
 
     private renderSidebarNav() {
@@ -151,7 +204,7 @@ export class AdminDashboard {
         });
     }
 
-    private setActiveTab(tab: ModuleName) {
+    private async setActiveTab(tab: ModuleName) {
         this.state.activeTab = tab;
         this.state.searchQuery = '';
         this.state.sortColumn = null;
@@ -161,6 +214,11 @@ export class AdminDashboard {
         // Update UI
         this.renderSidebarNav();
         this.root.querySelector('.page-title')!.textContent = tab;
+
+        if (tab === 'Users' && this.apiData.users.length === 0) {
+            await this.fetchUsers();
+        }
+
         this.renderContent();
 
         // Close sidebar on mobile after selection
@@ -182,7 +240,7 @@ export class AdminDashboard {
 
     private renderDashboardOverview(container: Element) {
         const stats = [
-            { label: 'Total Users', value: this.data.users.length, change: '+12%' },
+            { label: 'Total Users', value: this.apiData.users.length || this.data.users.length, change: '+12%' },
             { label: 'Active Sellers', value: this.data.sellers.length, change: '+5%' },
             { label: 'Total Billboards', value: this.data.billboards.length, change: '+8%' },
             { label: 'Total Revenue', value: 'Rp 2.5B', change: '+25%' },
@@ -300,13 +358,34 @@ export class AdminDashboard {
         container.querySelector('.add-new-btn')?.addEventListener('click', () => {
             this.openModal('Add New ' + this.state.activeTab.slice(0, -1)); // Simple singularization
         });
+
+        // Action buttons listeners
+        container.querySelectorAll('.action-view').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLElement).dataset.id;
+                if (id) {
+                    if (this.state.activeTab === 'Users') {
+                        window.location.href = `/admin/users/${id}`;
+                    } else {
+                        alert(`View ${id} (Implementation pending for this module)`);
+                    }
+                }
+            });
+        });
+
+        container.querySelectorAll('.action-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLElement).dataset.id;
+                if (id) alert(`Delete ${id} (Implementation pending)`);
+            });
+        });
     }
 
     private getModuleConfig() {
         switch (this.state.activeTab) {
             case 'Users':
                 return {
-                    data: this.data.users,
+                    data: this.apiData.users,
                     columns: [
                         { key: 'username', label: 'Username' },
                         { key: 'email', label: 'Email' },
@@ -314,7 +393,17 @@ export class AdminDashboard {
                         { key: 'level', label: 'Level', render: (v: string) => `<span class="badge badge-info">${v}</span>` },
                         { key: 'provider', label: 'Provider' },
                         { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
-                        { key: 'actions', label: 'Actions', render: () => `<button class="btn btn-sm btn-outline">Edit</button>` }
+                        {
+                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline">Actions</button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="action-view" data-id="${row.id}">View</a>
+                                    <a href="#" class="action-edit" data-id="${row.id}">Edit</a>
+                                    <a href="#" class="action-delete" data-id="${row.id}">Delete</a>
+                                </div>
+                            </div>
+                        ` }
                     ],
                     filters: [
                         { key: 'level', label: 'Level', options: ['ADMIN', 'BUYER', 'SELLER'] },
@@ -510,7 +599,10 @@ export class AdminDashboard {
 
     // Helpers
     private getUserName(id: string) {
-        const user = this.data.users.find(u => u.id === id);
+        // Fallback to static data if not in apiData, or better logic
+        // For transactions, we might still reference this.data.users which is the mock data 
+        // unless we replace that too. For now let's check both or just static since mock transactions assume mock users.
+        const user = this.data.users.find(u => u.id === id) || this.apiData.users.find(u => u.id === id);
         return user ? user.username : id;
     }
 
