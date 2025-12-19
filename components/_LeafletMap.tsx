@@ -1,8 +1,15 @@
 "use client";
 
 import { fetchBillboards } from "@/services/billboardService";
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
+import { Billboard } from "@/types";
+import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
 import { useEffect, useRef, useState } from "react";
+
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
 
 type Listing = {
   id: string;
@@ -34,22 +41,11 @@ const mapStyle: google.maps.MapTypeStyle[] = [
     elementType: "labels.text.fill",
     stylers: [{ color: "#6B7280" }],
   },
-
-  /* 🏔️ Mountains / Terrain */
   {
     featureType: "landscape.natural",
     elementType: "geometry",
     stylers: [{ color: "#ffffff" }],
   },
-
-  /* Optional: remove terrain labels */
-  {
-    featureType: "landscape.natural",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-
-  /* Optional: man-made landscape (parks, etc.) */
   {
     featureType: "landscape.man_made",
     elementType: "geometry",
@@ -57,22 +53,15 @@ const mapStyle: google.maps.MapTypeStyle[] = [
   },
 ];
 
-
-
-
 export default function GoogleMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const [listings, setListings] = useState<Listing[]>([]);
 
-  /* ===========================
-     📡 LOAD BILLBOARD DATA
-  =========================== */
   useEffect(() => {
     async function loadData() {
       const data = await fetchBillboards();
-
       const mappedListings: Listing[] = data
-        .map((b: any) => {
+        .map((b: Billboard) => {
           const billboardImageUrl =
             b.image?.length > 0
               ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
@@ -95,9 +84,6 @@ export default function GoogleMap() {
     loadData();
   }, []);
 
-  /* ===========================
-     🗺️ INIT MAP
-  =========================== */
   useEffect(() => {
     if (!mapRef.current || !window.google || listings.length === 0) return;
 
@@ -106,11 +92,7 @@ export default function GoogleMap() {
         "maps"
       )) as google.maps.MapsLibrary;
 
-      const center = { lat: -7.9813, lng: 112.6304 };
-
       const map = new Map(mapRef.current!, {
-        center,
-        zoom: 12,
         styles: mapStyle,
         mapTypeControl: false,
         streetViewControl: false,
@@ -118,14 +100,9 @@ export default function GoogleMap() {
         clickableIcons: false,
       });
 
-      const infoWindow = new InfoWindow({
-        disableAutoPan: false,
-      });
+      const infoWindow = new InfoWindow({ disableAutoPan: false });
 
-      /* ===========================
-         📍 CREATE MARKERS
-      =========================== */
-      const markers = listings.map((listing) => {
+      const markers: google.maps.Marker[] = listings.map((listing) => {
         const marker = new google.maps.Marker({
           position: { lat: listing.lat, lng: listing.lng },
           icon: {
@@ -142,18 +119,48 @@ export default function GoogleMap() {
         return marker;
       });
 
-      /* ===========================
-         🔴 CLUSTER MARKERS
-      =========================== */
+      const bounds = new google.maps.LatLngBounds();
+      markers.forEach((marker) => bounds.extend(marker.getPosition()!));
+      map.fitBounds(bounds);
+
+      // Create the cluster renderer
+      const clusterRenderer = {
+        render: (cluster: Cluster) => {
+          const count = cluster.count;
+          const position = cluster.position;
+          
+          const positionLiteral: google.maps.LatLngLiteral = {
+            lat: (typeof position.lat === 'function' ? position.lat() : position.lat) as number,
+            lng: (typeof position.lng === 'function' ? position.lng() : position.lng) as number,
+          };
+
+          return new google.maps.Marker({
+            position: positionLiteral,
+            icon: {
+              url:
+                "data:image/svg+xml;charset=UTF-8," +
+                encodeURIComponent(`
+                  <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
+                    <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
+                      ${count}
+                    </text>
+                  </svg>
+                `),
+              scaledSize: new google.maps.Size(44, 44),
+            },
+            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
+          });
+        },
+      };
+
       new MarkerClusterer({
         map,
         markers,
         renderer: clusterRenderer,
       });
 
-      map.addListener("click", () => {
-        infoWindow.close();
-      });
+      map.addListener("click", () => infoWindow.close());
     }
 
     initMap();
@@ -162,9 +169,6 @@ export default function GoogleMap() {
   return <div ref={mapRef} className="w-full h-[500px] rounded-xl" />;
 }
 
-/* ===========================
-   🪟 POPUP CONTENT
-=========================== */
 function popupContent(listing: Listing) {
   return `
     <a
@@ -262,28 +266,3 @@ function popupContent(listing: Listing) {
     </a>
   `;
 }
-
-/* ===========================
-   🔴 CLUSTER STYLE (CLASSIC)
-=========================== */
-const clusterRenderer = {
-  render: ({ count, position }: any) => {
-    return new google.maps.Marker({
-      position,
-      icon: {
-        url:
-          "data:image/svg+xml;charset=UTF-8," +
-          encodeURIComponent(`
-            <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
-              <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white">
-                ${count}
-              </text>
-            </svg>
-          `),
-        scaledSize: new google.maps.Size(44, 44),
-      },
-      zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-    });
-  },
-};
