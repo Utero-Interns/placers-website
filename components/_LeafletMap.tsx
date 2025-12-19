@@ -1,110 +1,264 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { Billboard } from "@/types";
+import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
+import { useEffect, useRef, useState } from "react";
 
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import "leaflet.markercluster";
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
 
-import type { Map as LeafMap } from 'leaflet';
+type Listing = {
+  id: string;
+  type: string;
+  address: string;
+  image: string;
+  lat: number;
+  lng: number;
+};
 
-export default function LeafletMap() {
-  type LeafletMapWithId = LeafMap & {
-    _leaflet_id?: number;
-  };
+const mapStyle: google.maps.MapTypeStyle[] = [
+  {
+    featureType: "poi",
+    elementType: "all",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "transit",
+    elementType: "all",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.stroke",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#6B7280" }],
+  },
+  {
+    featureType: "landscape.natural",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }],
+  },
+  {
+    featureType: "landscape.man_made",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }],
+  },
+];
 
+export default function GoogleMap({ billboards }: { billboards: Billboard[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (billboards) {
+      const mappedListings: Listing[] = billboards
+        .map((b: Billboard) => {
+          const billboardImageUrl =
+            b.image?.length > 0
+              ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
+              : "/billboard-placeholder.png";
 
-    // Prevent duplicate map initialization
-    if ((mapRef.current as unknown as LeafletMapWithId)?._leaflet_id) return;
+          return {
+            id: b.id,
+            type: b.category?.name || "Undefined",
+            address: b.location,
+            image: billboardImageUrl,
+            lat: Number(b.latitude),
+            lng: Number(b.longitude),
+          };
+        })
+        .filter((l) => !isNaN(l.lat) && !isNaN(l.lng));
 
-    // 📍 Alun-Alun Malang
-    const center: [number, number] = [-7.9813, 112.6304];
+      setListings(mappedListings);
+    }
+  }, [billboards]);
 
-    const map = L.map(mapRef.current).setView(center, 16);
+  useEffect(() => {
+    if (!mapRef.current || !window.google || listings.length === 0) return;
 
-    // OSM tile layer
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-      {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; CARTO',
-      }
-    ).addTo(map);
+    async function initMap() {
+      const { Map, InfoWindow } = (await google.maps.importLibrary(
+        "maps"
+      )) as google.maps.MapsLibrary;
 
-    // Street name layer
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19 }
-    ).addTo(map);
-
-    // Custom pin icon  
-    const pinIcon = L.icon({
-      iconUrl: "/artboard.png",
-      iconSize: [40, 40],
-      iconAnchor: [16, 40],
-      popupAnchor: [0, -35],
-    });
-
-    // Marker cluster group
-    const clusterGroup = L.markerClusterGroup({
-        iconCreateFunction: (cluster) => {
-          const count = cluster.getChildCount();
-
-          return L.divIcon({
-            html: `
-              <div class="cluster-custom" style="
-                background:#CE181E;
-                color:white;
-                border-radius:9999px;
-                border: solid;
-                border-color: white;
-                width:40px;
-                height:40px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-weight:600;
-                box-shadow:0 4px 10px rgba(0,0,0,0.3);
-              ">
-                ${count}
-              </div>
-            `,
-            className: "",
-            iconSize: L.point(40, 40),
-          });
-        },
+      const map = new Map(mapRef.current!, {
+        styles: mapStyle,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        clickableIcons: false,
       });
 
+      const infoWindow = new InfoWindow({ disableAutoPan: false });
 
-    // Example markers around Alun-Alun
-    const locations: [number, number][] = [
-      [-7.9813, 112.6304], // center
-      [-7.9810, 112.6310],
-      [-7.9820, 112.6315],
-      [-7.9805, 112.6298],
-    ];
+      const markers: google.maps.Marker[] = listings.map((listing) => {
+        const marker = new google.maps.Marker({
+          position: { lat: listing.lat, lng: listing.lng },
+          icon: {
+            url: "/artboard.png",
+            scaledSize: new google.maps.Size(40, 40),
+          },
+        });
 
-    locations.forEach((loc, i) => {
-      const marker = L.marker(loc, { icon: pinIcon }).bindPopup(
-        `Billboard ${i + 1}`
-      );
-      clusterGroup.addLayer(marker);
-    });
+        marker.addListener("click", () => {
+          infoWindow.setContent(popupContent(listing));
+          infoWindow.open(map, marker);
+        });
 
-    map.addLayer(clusterGroup);
+        return marker;
+      });
 
-    // Cleanup
-    return () => {
-      map.remove();
-    };
-  }, []);
+      const bounds = new google.maps.LatLngBounds();
+      markers.forEach((marker) => bounds.extend(marker.getPosition()!));
+      map.fitBounds(bounds);
 
-  return <div ref={mapRef} className="w-full h-[500px]" />;
+      // Create the cluster renderer
+      const clusterRenderer = {
+        render: (cluster: Cluster) => {
+          const count = cluster.count;
+          const position = cluster.position;
+          
+          const positionLiteral: google.maps.LatLngLiteral = {
+            lat: (typeof position.lat === 'function' ? position.lat() : position.lat) as number,
+            lng: (typeof position.lng === 'function' ? position.lng() : position.lng) as number,
+          };
+
+          return new google.maps.Marker({
+            position: positionLiteral,
+            icon: {
+              url:
+                "data:image/svg+xml;charset=UTF-8," +
+                encodeURIComponent(`
+                  <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
+                    <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
+                      ${count}
+                    </text>
+                  </svg>
+                `),
+              scaledSize: new google.maps.Size(44, 44),
+            },
+            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
+          });
+        },
+      };
+
+      new MarkerClusterer({
+        map,
+        markers,
+        renderer: clusterRenderer,
+      });
+
+      map.addListener("click", () => infoWindow.close());
+    }
+
+    initMap();
+  }, [listings]);
+
+  return <div ref={mapRef} className="w-full h-[500px] rounded-xl" />;
+}
+
+function popupContent(listing: Listing) {
+  return `
+    <a
+      href="/billboard-detail/${listing.id}"
+      style="
+        display:block;
+        width:260px;
+        height:150px;
+        border-radius:14px;
+        overflow:hidden;
+        font-family:Inter, Arial, sans-serif;
+        position:relative;
+        text-decoration:none;
+      "
+    >
+      <button
+        onclick="event.stopPropagation(); event.preventDefault();
+          this.closest('.gm-style-iw').querySelector('button[title=Close]').click();"
+        onmouseenter="this.style.backgroundColor='#CE181E'"
+        onmouseleave="this.style.backgroundColor='rgba(0,0,0,0.55)'"
+        style="
+          position:absolute;
+          top:8px;
+          right:8px;
+          z-index:10;
+          background:rgba(0,0,0,0.55);
+          color:white;
+          border:none;
+          width:26px;
+          height:26px;
+          border-radius:999px;
+          font-size:14px;
+          cursor:pointer;
+          transition: background-color 0.2s ease;
+        "
+      >
+        ✕
+      </button>
+
+      <div
+        style="
+          width:100%;
+          height:100%;
+          background-image:url('${listing.image}');
+          background-size:cover;
+          background-position:center;
+          position:relative;
+        "
+      >
+        <div
+          style="
+            position:absolute;
+            inset:0;
+            background:linear-gradient(
+              to top,
+              rgba(0,0,0,0.65),
+              rgba(0,0,0,0),
+              rgba(0,0,0,0)
+            );
+          "
+        ></div>
+
+        <div
+          style="
+            position:absolute;
+            bottom:12px;
+            left:12px;
+            right:12px;
+            color:white;
+            text-align:left;
+          "
+        >
+          <div
+            style="
+              font-size:11px;
+              font-weight:700;
+              letter-spacing:0.06em;
+              margin-bottom:6px;
+            "
+          >
+            ${listing.type}
+          </div>
+
+          <div
+            style="
+              font-size:13px;
+              font-weight:600;
+              line-height:1.35;
+            "
+          >
+            ${listing.address}
+          </div>
+        </div>
+      </div>
+    </a>
+  `;
 }
