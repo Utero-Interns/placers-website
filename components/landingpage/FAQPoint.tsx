@@ -10,41 +10,39 @@ type FAQPointProps = {
 export default function FAQPoint({ question, answer, expanded, onClick }: FAQPointProps) {
   return (
     <div
-      className={`flex flex-col transition-all duration-300 ${
-        expanded
+      className={`flex flex-col transition-all duration-300 ${expanded
           ? "bg-gradient-to-r from-[#680C0F] to-[var(--color-primary)]"
           : "bg-white"
-      } border border-gray-300 rounded-[15px] py-4 px-6 md:py-5 md:px-7`}
+        } border border-gray-300 rounded-[15px] py-3 px-4 md:py-4 md:px-6`}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between cursor-pointer"
+        className="flex items-center justify-between cursor-pointer gap-4"
         onClick={onClick}
       >
         <p
-          className={`text-base md:text-lg font-semibold ${
-            expanded ? "text-white" : "text-black"
-          }`}
+          className={`text-sm md:text-base font-semibold ${expanded ? "text-white" : "text-black"
+            }`}
         >
           {question}
         </p>
-        {expanded ? (
-          <CircleMinus className="w-7 h-7 md:w-9 md:h-9 text-white hover:text-[var(--color-gray2)] transition-colors" />
-        ) : (
-          <CirclePlus className="w-7 h-7 md:w-9 md:h-9 text-black hover:text-[var(--color-gray2)] transition-colors" />
-        )}
+        <div className="shrink-0">
+          {expanded ? (
+            <CircleMinus className="w-5 h-5 md:w-6 md:h-6 text-white hover:text-[var(--color-gray2)] transition-colors" />
+          ) : (
+            <CirclePlus className="w-5 h-5 md:w-6 md:h-6 text-black hover:text-[var(--color-gray2)] transition-colors" />
+          )}
+        </div>
       </div>
 
       {/* Answer */}
       <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          expanded ? "max-h-96 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
-        }`}
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${expanded ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0 mt-0"
+          }`}
       >
         <p
-          className={`text-sm md:text-base ${
-            expanded ? "text-white" : "text-transparent"
-          }`}
+          className={`text-xs md:text-sm ${expanded ? "text-white/90" : "text-transparent"
+            }`}
         >
           {answer}
         </p>

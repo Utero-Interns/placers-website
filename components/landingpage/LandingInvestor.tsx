@@ -17,38 +17,34 @@ export default function LandingInvestor() {
 
             <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-11/12 mt-8 md:mt-12 2xl:mt-[60px] gap-10 lg:gap-16">
 
-                <Image
-                    src="/investor.png"
-                    alt="Investor discussing plans"
-                    width={800}
-                    height={800}
-                    className="w-full md:w-3/4 lg:w-5/12 h-auto rounded-lg object-cover"
-                />
+                <div className="w-full md:w-1/2 lg:w-4/12">
+                    <Image
+                        src="/investor.png"
+                        alt="Investor discussing plans"
+                        width={600}
+                        height={600}
+                        className="w-full h-auto rounded-lg object-cover"
+                    />
+                </div>
 
-                <div className="w-full lg:w-7/12 flex flex-col lg:text-left">
-                    <h1 className="font-bold text-black leading-snug lg:leading-normal
-                                   text-2xl
-                                   xl:text-3xl 
-                                   w-full lg:w-5/6 2xl:w-2/3">
+                <div className="w-full md:w-1/2 lg:w-7/12 flex flex-col text-left">
+                    <h1 className="font-bold text-black leading-tight
+                                   text-xl md:text-2xl lg:text-2xl
+                                   w-full">
                         Bergabunglah Bersama Kami sebagai Investor Placers
                     </h1>
 
-                    <p className="mt-4 leading-relaxed
-                                text-base
-                                text-black
-                                md:text-sm
-                                xl:text-base
-                                2xl:text-lg">
+                    <p className="mt-3 leading-relaxed
+                                text-sm md:text-sm lg:text-base
+                                text-black">
                         Dukung transformasi industri periklanan luar ruang di Indonesia bersama Placers. Kami membuka peluang bagi para investor untuk berkontribusi dalam menghadirkan teknologi dan solusi inovatif yang menghubungkan pengiklan dan pemilik billboard secara langsung.
                     </p>
 
                     <a
                         href="#"
-                        className="font-bold bg-[var(--color-primary)]/10 rounded-[10px] block mt-6 w-fit hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-300
+                        className="font-bold bg-[var(--color-primary)]/10 rounded-[8px] inline-block mt-4 w-fit hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-300
                                    text-[var(--color-primary)]
-                                   text-sm py-2.5 px-8
-                                   xl:text-base
-                                   lg:text-[20px] 2xl:py-3 2xl:px-9"
+                                   text-sm py-2 px-6"
                     >
                         Jadi Investor Sekarang
                     </a>
