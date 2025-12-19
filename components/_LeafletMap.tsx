@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchBillboards } from "@/services/billboardService";
 import { Billboard } from "@/types";
 import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
 import { useEffect, useRef, useState } from "react";
@@ -53,14 +52,13 @@ const mapStyle: google.maps.MapTypeStyle[] = [
   },
 ];
 
-export default function GoogleMap() {
+export default function GoogleMap({ billboards }: { billboards: Billboard[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
-    async function loadData() {
-      const data = await fetchBillboards();
-      const mappedListings: Listing[] = data
+    if (billboards) {
+      const mappedListings: Listing[] = billboards
         .map((b: Billboard) => {
           const billboardImageUrl =
             b.image?.length > 0
@@ -80,9 +78,7 @@ export default function GoogleMap() {
 
       setListings(mappedListings);
     }
-
-    loadData();
-  }, []);
+  }, [billboards]);
 
   useEffect(() => {
     if (!mapRef.current || !window.google || listings.length === 0) return;
