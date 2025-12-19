@@ -276,6 +276,29 @@ export interface BookingFormData {
   augmentedReality: number;
   trafficDataReporting: number;
   catatan: string;
+  customAddOns?: Record<string, boolean>;
+  designId?: string | null;
+}
+
+export interface AddOnItem {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddOnApiResponse {
+  status: boolean;
+  message: string;
+  data: AddOnItem[];
+  meta?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pages: number;
+  };
 }
 
 export type StepName =

@@ -1,5 +1,5 @@
-import React from 'react';
-import type { BookingFormData } from '@/types';
+import { AddOnApiResponse, AddOnItem, BookingFormData } from '@/types';
+import React, { useEffect, useState } from 'react';
 
 interface ReviewSubmitStepProps {
   data: BookingFormData;
@@ -23,11 +23,41 @@ const ReviewItem: React.FC<{ label: string; value: string | number | React.React
 
 
 export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
+  const [fetchedAddOns, setFetchedAddOns] = useState<AddOnItem[]>([]);
+
+  useEffect(() => {
+    const fetchAddOns = async () => {
+      try {
+        const response = await fetch('/api/add-on');
+        const result: AddOnApiResponse = await response.json();
+        if (result.status && Array.isArray(result.data)) {
+          setFetchedAddOns(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch add-ons:', error);
+      }
+    };
+
+    fetchAddOns();
+  }, []);
+
+  const getSelectedAddOnNames = () => {
+      if (!data.customAddOns) return [];
+      
+      const selectedIds = Object.entries(data.customAddOns)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([id]) => id);
+      
+      return selectedIds.map(id => {
+          const addon = fetchedAddOns.find(item => item.id === id);
+          return addon ? addon.name : null;
+      }).filter(Boolean);
+  };
+
+  const dynamicAddOns = getSelectedAddOnNames();
+
   const addOnServices = [
-    data.pengawasanMedia && 'Pengawasan Media',
-    data.asuransi && `Asuransi (No: ${data.nomorAsuransi || 'N/A'})`,
-    data.maintenanceMedia && 'Maintenance Media',
-    data.rmm && 'RMM (Remote Monitoring & Management)',
+    ...dynamicAddOns,
     data.augmentedReality > 0 && `Augmented Reality (AR) x${data.augmentedReality}`,
     data.trafficDataReporting > 0 && `Traffic Data Reporting x${data.trafficDataReporting}`,
   ].filter(Boolean);
@@ -61,7 +91,9 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
                   ))}
               </ul>
           ) : <p>-</p>}
-           <ReviewItem label="Catatan" value={data.catatan} />
+           <div className="mt-4 pt-4 border-t border-gray-100">
+               <ReviewItem label="Catatan" value={data.catatan} />
+           </div>
         </ReviewSection>
       </div>
     </div>
