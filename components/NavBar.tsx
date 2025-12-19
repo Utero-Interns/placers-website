@@ -1,19 +1,45 @@
 'use client';
 
+import { authService, User } from "@/app/lib/auth";
+import { Bookmark, ChevronDown, Globe, History, LogOut, Menu, Newspaper, TicketPercent, User as UserIcon, X } from 'lucide-react';
 import Image from "next/image";
-import { Globe, Menu, X, ChevronDown, TicketPercent, Newspaper } from 'lucide-react';
-import { useState } from "react";
-import { usePathname } from 'next/navigation';
 import Link from "next/link";
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isPopulerOpen, setIsPopulerOpen] = useState(false);
     const [isLangOpen, setIsLangOpen] = useState(false);
+    
+    // Auth state
+    const [user, setUser] = useState<User | null>(null);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // For mobile or extra control if needed
 
     const pathname = usePathname() ?? '/';
+    const router = useRouter();
 
-    // Helper to check active link
+    useEffect(() => {
+        const checkAuth = async () => {
+            const result = await authService.getProfile();
+            if (result.user) {
+                setUser(result.user);
+
+            }
+        };
+        checkAuth();
+    }, []);
+
+    const handleLogout = async () => {
+        await authService.logout();
+        setUser(null);
+        toast.success("Berhasil logout");
+        router.push('/login');
+        router.refresh();
+    };
+
+    // Helper to check active active link
     const isActive = (href: string) => {
         if (href === '/') return pathname === '/';
         return pathname.startsWith(href);
@@ -102,13 +128,62 @@ export default function NavBar() {
                     </ul>
                 </div>
 
-                {/* Daftar Button */}
-                <a
-                    href="/register"
-                    className="bg-[var(--color-primary)] lg:text-sm xl:text-base 2xl:text-2xl text-white lg:px-1 xl:px-2 2xl:px-4 lg:py-0.5 xl:py-1 2xl:py-2 lg:rounded-sm xl:rounded-xl 2xl:rounded-2xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition lg:w-16 xl:w-28 2xl:w-40 lg:h-6 xl:h-10 2xl:h-16 flex items-center justify-center"
-                >
-                    Daftar
-                </a>
+                {/* Auth Button / User Menu */}
+                {user ? (
+                    <div className="relative group">
+                        <button className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                             {/* User Icon */}
+                             <div className="w-8 h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border border-gray-300">
+                                {user.profilePicture ? (
+                                    <Image src={`/api/uploads/${user.profilePicture.replace(/^uploads\//, "")}`} alt="Profile" width={48} height={48} className="w-full h-full object-cover" />
+                                ) : (
+                                    <UserIcon className="w-5 h-5 xl:w-6 xl:h-6 text-gray-600" />
+                                )}
+                             </div>
+                             <ChevronDown className="w-4 h-4 text-gray-600 transition-transform duration-200 group-hover:rotate-180" />
+                        </button>
+                        
+                        {/* User Dropdown */}
+                        <ul className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-2 border border-gray-100">
+                             <li className="px-4 py-2 border-b mb-1">
+                                <p className="font-semibold text-gray-800 truncate">{user.username || 'User'}</p>
+                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                             </li>
+                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                    <History className="w-4 h-4" />
+                                    History
+                                </Link>
+                             </li>
+                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                    <Bookmark className="w-4 h-4" />
+                                    Bookmark
+                                </Link>
+                             </li>
+                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                    <UserIcon className="w-4 h-4" />
+                                    Profile
+                                </Link>
+                             </li>
+                             <li className="my-1 border-t"></li>
+                             <li className="rounded-xl hover:bg-red-50 cursor-pointer" onClick={handleLogout}>
+                                <button className="flex w-full items-center gap-2 px-3 py-2 text-red-600 font-medium">
+                                    <LogOut className="w-4 h-4" />
+                                    Logout
+                                </button>
+                             </li>
+                        </ul>
+                    </div>
+                ) : (
+                    <a
+                        href="/register"
+                        className="bg-[var(--color-primary)] lg:text-sm xl:text-base 2xl:text-2xl text-white lg:px-1 xl:px-2 2xl:px-4 lg:py-0.5 xl:py-1 2xl:py-2 lg:rounded-sm xl:rounded-xl 2xl:rounded-2xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition lg:w-16 xl:w-28 2xl:w-40 lg:h-6 xl:h-10 2xl:h-16 flex items-center justify-center"
+                    >
+                        Daftar
+                    </a>
+                )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -176,13 +251,53 @@ export default function NavBar() {
                                 )}
                             </div>
 
-                            {/* Daftar Button */}
-                            <a
-                                href="/register"
-                                className="bg-[var(--color-primary)] text-lg text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition w-full h-12 flex items-center justify-center"
-                            >
-                                Daftar
-                            </a>
+                            {/* Mobile Auth Section */}
+                            {user ? (
+                                <div className="w-full">
+                                    <div className="flex items-center justify-center gap-3 p-2 bg-gray-50 rounded-xl mb-2">
+                                         <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                                            {user.profilePicture ? (
+                                                <Image src={`/api/uploads/${user.profilePicture.replace(/^uploads\//, "")}`} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <UserIcon className="w-6 h-6 text-gray-600" />
+                                            )}
+                                         </div>
+                                         <div className="text-left">
+                                            <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
+                                            <p className="text-xs text-gray-500">{user.email}</p>
+                                         </div>
+                                    </div>
+                                    <ul className="space-y-1">
+                                         <li>
+                                            <Link href="/order-history" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                <History className="w-5 h-5" /> History
+                                            </Link>
+                                         </li>
+                                         <li>
+                                            <Link href="/bookmark" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                <Bookmark className="w-5 h-5" /> Bookmark
+                                            </Link>
+                                         </li>
+                                         <li>
+                                            <Link href="/profile" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                <UserIcon className="w-5 h-5" /> Profile
+                                            </Link>
+                                         </li>
+                                         <li>
+                                            <button onClick={handleLogout} className="flex w-full items-center justify-center gap-2 p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                                                <LogOut className="w-5 h-5" /> Logout
+                                            </button>
+                                         </li>
+                                    </ul>
+                                </div>
+                            ) : (
+                                <a
+                                    href="/register"
+                                    className="bg-[var(--color-primary)] text-lg text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition w-full h-12 flex items-center justify-center"
+                                >
+                                    Daftar
+                                </a>
+                            )}
                         </li>
                     </ul>
                 </div>
