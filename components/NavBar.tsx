@@ -15,7 +15,6 @@ export default function NavBar() {
     
     // Auth state
     const [user, setUser] = useState<User | null>(null);
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // For mobile or extra control if needed
 
     const pathname = usePathname() ?? '/';
     const router = useRouter();
