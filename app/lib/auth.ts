@@ -12,6 +12,7 @@ export interface AuthResponse {
     message: string;
     statusCode?: number;
     user?: User;
+    data?: User;
 }
 
 // Use local proxy to handle cookies correctly
@@ -62,22 +63,26 @@ export const authService = {
         }
     },
 
-    async getProfile(): Promise<{ user?: User; error?: string }> {
+    async getProfile(): Promise<{ user?: User; data?: User; error?: string }> {
         try {
-            // Note: We might need to manually handle tokens if cookies aren't automatically sent or if it's server-side
-            // But assuming client-side call or proxy
+            console.log('Fetching profile from', `${API_BASE_URL}/me`);
             const response = await fetch(`${API_BASE_URL}/me`, {
                 method: 'GET',
                 credentials: 'include',
             });
 
+            console.log('Profile response status:', response.status);
+
             if (!response.ok) {
-                return { error: 'Failed to fetch profile' };
+                console.error('Profile fetch failed:', response.statusText);
+                return { error: 'Failed to fetch profile: ' + response.statusText };
             }
 
             const data = await response.json();
+            console.log('Profile data:', data);
             return data;
         } catch (error) {
+            console.error('Profile network error:', error);
             return { error: 'Network error' };
         }
     },

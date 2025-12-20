@@ -43,9 +43,13 @@ export default function LoginPage() {
       toast.success('Login berhasil');
 
       // Redirect based on user level
-      const userLevel = res.user?.level;
+      const userData = res.user || res.data;
+      const userLevel = userData?.level;
+
       if (userLevel === 'ADMIN') {
         router.push('/admin/dashboard');
+      } else if (userLevel === 'SELLER') {
+        router.push('/seller/dashboard');
       } else {
         router.push('/dashboard');
       }
