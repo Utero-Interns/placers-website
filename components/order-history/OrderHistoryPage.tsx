@@ -92,10 +92,10 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
             search: searchTerm,
             status: activeTab === 'Semua' ? undefined : activeTab,
         });
-
+        
         const mappedOrders = response.data.map(mapToOrder);
         setOrders(mappedOrders);
-        console.log(response);
+        
         
         if (response.meta.nextCursor) {
             setPageCursors(prev => ({ ...prev, [currentPage + 1]: response.meta.nextCursor! }));
