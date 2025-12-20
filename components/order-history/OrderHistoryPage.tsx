@@ -1,8 +1,69 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { getOrders } from '@/services/orderHistoryService';
+import { getOrders, HistoryItem } from '@/services/orderHistoryService';
 import { Order, OrderStatus } from '@/types';
+import { Calendar, ChevronLeft, ChevronRight, HistoryIcon, MapPin, Search, SquareDashed } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import OrderDetailModal from './OrderDetailModal';
-import { MapPin, Calendar, ChevronRight, Search, ChevronLeft, HistoryIcon, SquareDashed } from 'lucide-react';
+
+const mapToOrder = (item: HistoryItem): Order => {
+  const transaction = item.transaction;
+  const billboard = transaction.billboard;
+  const design = transaction.design;
+
+  // Derive status based on dates if COMPLETED/PAID
+  let status = OrderStatus.Upcoming; // Default
+  if (transaction.status === 'COMPLETED') {
+    status = OrderStatus.Completed;
+  } else if (transaction.status === 'PAID') {
+    const now = new Date();
+    const start = new Date(transaction.startDate);
+    const end = transaction.endDate ? new Date(transaction.endDate) : null;
+    
+    if (now < start) {
+      status = OrderStatus.Upcoming;
+    } else if (end && now > end) {
+      status = OrderStatus.Completed;
+    } else {
+      status = OrderStatus.Ongoing;
+    }
+  } else if (transaction.status === 'PENDING') {
+      // Map pending to upcoming or ignore?
+      status = OrderStatus.Upcoming;
+  }
+
+  return {
+    id: item.id,
+    invoiceNumber: item.transactionId,
+    orderDate: new Date(transaction.createdAt).toLocaleDateString('id-ID'),
+    invoiceDate: new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+    category: design?.name || 'Billboard',
+    location: `${billboard.cityName}, ${billboard.provinceName}`,
+    totalCost: parseFloat(transaction.totalPrice),
+    paymentStatus: 'Lunas', // Hardcoded as per mock or derived logic
+    status: status,
+    seller: 'Placers Vendor', // Placeholder
+    specifications: `${billboard.size}, ${billboard.cityName}`,
+    adminDetails: [], // Placeholder
+    serviceDetails: [], // Placeholder
+    billTo: { name: 'User', email: 'user@example.com', phone: '-' }, // Placeholder
+    sellerInfo: { name: 'Placers Vendor', address: '-', phone: '-' }, // Placeholder
+    items: [
+        {
+            description: `Sewa Billboard ${billboard.cityName}`,
+            category: 'Billboard',
+            duration: '1 Bulan', // Placeholder/Derived
+            unitPrice: parseFloat(transaction.totalPrice),
+            total: parseFloat(transaction.totalPrice)
+        }
+    ],
+    subtotal: parseFloat(transaction.totalPrice),
+    pph: 0,
+    ppn: 0,
+    serviceFee: 0,
+    jobFee: 0,
+    promo: 0,
+    notes: '-',
+  };
+};
 
 interface OrderHistoryPageProps {
   onShowInvoice: (order: Order) => void;
@@ -17,39 +78,54 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [pageCursors, setPageCursors] = useState<{[key: number]: string}>({});
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
-      const data = await getOrders();
-      setOrders(data);
-      setIsLoading(false);
+      try {
+        const cursor = currentPage === 1 ? undefined : pageCursors[currentPage];
+        const response = await getOrders({
+            take: rowsPerPage,
+            cursor: cursor,
+            search: searchTerm,
+            status: activeTab === 'Semua' ? undefined : activeTab,
+        });
+        
+        const mappedOrders = response.data.map(mapToOrder);
+        setOrders(mappedOrders);
+        
+        
+        if (response.meta.nextCursor) {
+            setPageCursors(prev => ({ ...prev, [currentPage + 1]: response.meta.nextCursor! }));
+            setHasNextPage(true);
+        } else {
+            setHasNextPage(false);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch orders", error);
+        setOrders([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchOrders();
-  }, []);
+  }, [currentPage, activeTab, searchTerm, rowsPerPage]); // Intentionally omitting pageCursors to avoid loops
 
-  const filteredOrders = useMemo(() => {
-    let currentOrders = orders;
-    if (activeTab !== 'Semua') {
-      currentOrders = currentOrders.filter((order) => order.status === activeTab);
-    }
-    if (searchTerm) {
-      const lowercasedFilter = searchTerm.toLowerCase();
-      currentOrders = currentOrders.filter(order =>
-        order.id.toLowerCase().includes(lowercasedFilter) ||
-        order.category.toLowerCase().includes(lowercasedFilter) ||
-        order.location.toLowerCase().includes(lowercasedFilter)
-      );
-    }
-    return currentOrders;
-  }, [activeTab, searchTerm, orders]);
+  // Reset cursors when filters change
+  useEffect(() => {
+      setPageCursors({});
+      setCurrentPage(1);
+  }, [activeTab, searchTerm, rowsPerPage]);
 
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    return filteredOrders.slice(startIndex, startIndex + rowsPerPage);
-  }, [filteredOrders, currentPage, rowsPerPage]);
+  // Server-side filtering/pagination handles this now, so we just pass orders through
+  const filteredOrders = orders;
+  const paginatedOrders = orders;
 
-  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
+  // Approximate total pages for UI controls
+  const totalPages = hasNextPage ? currentPage + 1 : currentPage;
 
   const handleOpenModal = (order: Order) => {
     setSelectedOrder(order);
