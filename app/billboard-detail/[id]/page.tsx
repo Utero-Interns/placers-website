@@ -75,7 +75,7 @@ const BillboardPage: React.FC = () => {
             <div className="p-6 md:p-10 space-y-10">
               <BillboardHeader title={billboard.category.name} location={fullLocation} onShare={() => setShareModalOpen(true)} />
               <BillboardSpecs size={billboard.size} orientation={billboard.orientation} display={billboard.display} />
-              <BillboardPriceCTA rating={averageRating} price={billboard.rentPrice} isAvailable={isAvailable} />
+              <BillboardPriceCTA rating={averageRating} price={billboard.rentPrice} isAvailable={isAvailable} billboardId={billboard.id} />
 
               <div className="pt-6 border-t border-gray-200">
 
