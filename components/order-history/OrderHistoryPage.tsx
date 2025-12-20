@@ -8,6 +8,7 @@ const mapToOrder = (item: HistoryItem): Order => {
   const transaction = item.transaction;
   const billboard = transaction.billboard;
   const design = transaction.design;
+  const pricing = item.pricing;
 
   // Derive status based on dates if COMPLETED/PAID
   let status = OrderStatus.Upcoming; // Default
@@ -26,35 +27,101 @@ const mapToOrder = (item: HistoryItem): Order => {
       status = OrderStatus.Ongoing;
     }
   } else if (transaction.status === 'PENDING') {
-      // Map pending to upcoming or ignore?
       status = OrderStatus.Upcoming;
+  } else if (transaction.status === 'CANCELLED' || transaction.status === 'REJECTED' || transaction.status === 'EXPIRED') {
+       // Map negative statuses to completed for now, or consider adding a Cancelled status to frontend enum
+       status = OrderStatus.Completed; 
+  }
+
+  // Construct Items and Details
+  const orderItems = [];
+  const serviceDetails: string[] = [];
+  const adminDetails: string[] = [];
+
+  // Admin Details from Billboard
+  const detailedBillboard = pricing.billboard;
+  if (detailedBillboard) {
+      if (detailedBillboard.tax) adminDetails.push(`Pajak: ${detailedBillboard.tax}`);
+      if (detailedBillboard.landOwnership) adminDetails.push(`Lahan: ${detailedBillboard.landOwnership}`);
+      if (detailedBillboard.lighting) adminDetails.push(`Penerangan: ${detailedBillboard.lighting}`);
+  }
+
+  // 1. Base Item (Billboard Rent/Buy)
+  let basePrice = 0;
+  if (pricing.prices?.base) {
+      basePrice = pricing.prices.base;
+  } else if (pricing.prices?.sellPrice) {
+      basePrice = pricing.prices.sellPrice;
+  } else if (pricing.prices?.rentPrice) {
+      basePrice = pricing.prices.rentPrice;
+  } else {
+       const total = parseFloat(transaction.totalPrice);
+       const addOnTotal = pricing.prices?.addOnTotal || 0;
+       basePrice = total - addOnTotal;
+  }
+
+  orderItems.push({
+      description: `Sewa Billboard ${billboard.cityName}`,
+      category: 'Billboard',
+      duration: '1 Bulan', 
+      unitPrice: basePrice,
+      total: basePrice
+  });
+
+  // 2. Add-ons
+  if (pricing.addOns) {
+      if (Array.isArray(pricing.addOns) && pricing.addOns.length > 0) {
+          const firstAddOn = pricing.addOns[0];
+          if (typeof firstAddOn === 'object' && firstAddOn !== null && 'price' in firstAddOn) {
+               (pricing.addOns as {name: string, price: number}[]).forEach(addon => {
+                   serviceDetails.push(addon.name); // Add to service details
+                   orderItems.push({
+                       description: addon.name,
+                       category: 'Add-On',
+                       duration: '-',
+                       unitPrice: addon.price,
+                       total: addon.price
+                   });
+               });
+          } else if (typeof firstAddOn === 'string') {
+               (pricing.addOns as string[]).forEach(addonName => {
+                   serviceDetails.push(addonName); // Add to service details
+                   let price = 0;
+                   if (addonName === 'Design Service' && pricing.prices?.designPrice) {
+                        price = Number(pricing.prices.designPrice);
+                   } else if (addonName === 'Installation' && pricing.prices?.servicePrice) {
+                        // price unknown or bundled
+                   }
+                   
+                   orderItems.push({
+                       description: addonName,
+                       category: 'Add-On',
+                       duration: '-',
+                       unitPrice: price,
+                       total: price
+                   });
+               });
+          }
+      }
   }
 
   return {
     id: item.id,
-    invoiceNumber: item.transactionId,
+    invoiceNumber: item.transactionId.substring(0, 8).toUpperCase(),
     orderDate: new Date(transaction.createdAt).toLocaleDateString('id-ID'),
     invoiceDate: new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
     category: design?.name || 'Billboard',
     location: `${billboard.cityName}, ${billboard.provinceName}`,
     totalCost: parseFloat(transaction.totalPrice),
-    paymentStatus: 'Lunas', // Hardcoded as per mock or derived logic
+    paymentStatus: 'Lunas', 
     status: status,
-    seller: 'Placers Vendor', // Placeholder
+    seller: 'Placers Vendor',
     specifications: `${billboard.size}, ${billboard.cityName}`,
-    adminDetails: [], // Placeholder
-    serviceDetails: [], // Placeholder
-    billTo: { name: 'User', email: 'user@example.com', phone: '-' }, // Placeholder
-    sellerInfo: { name: 'Placers Vendor', address: '-', phone: '-' }, // Placeholder
-    items: [
-        {
-            description: `Sewa Billboard ${billboard.cityName}`,
-            category: 'Billboard',
-            duration: '1 Bulan', // Placeholder/Derived
-            unitPrice: parseFloat(transaction.totalPrice),
-            total: parseFloat(transaction.totalPrice)
-        }
-    ],
+    adminDetails: adminDetails, 
+    serviceDetails: serviceDetails, 
+    billTo: { name: 'User', email: 'user@example.com', phone: '-' }, 
+    sellerInfo: { name: 'Placers Vendor', address: '-', phone: '-' }, 
+    items: orderItems,
     subtotal: parseFloat(transaction.totalPrice),
     pph: 0,
     ppn: 0,
