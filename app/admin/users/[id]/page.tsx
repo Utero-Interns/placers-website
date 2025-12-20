@@ -4,6 +4,8 @@ import { ArrowLeft, Award, Calendar, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
+import { authService } from '../../../lib/auth';
+import { getImageUrl } from '../../../lib/utils';
 
 interface UserDetail {
     id: string;
