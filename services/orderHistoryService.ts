@@ -1,144 +1,71 @@
-import { Order, OrderStatus } from '@/types';
 
-const MOCK_ORDERS: Order[] = [
-  {
-    id: '#20462',
-    invoiceNumber: '1234',
-    orderDate: '10/07/2025',
-    invoiceDate: '13 Desember 2025',
-    category: 'Billboard',
-    location: 'Perempatan Patimura Malang, Jawa Timur',
-    totalCost: 109005000,
-    paymentStatus: 'Lunas',
-    status: OrderStatus.Upcoming,
-    seller: 'Seller XX',
-    specifications: '4x8, Horizontal, Satu Sisi',
-    adminDetails: ['Penerangan: Frontlite', 'Lahan: Negara', 'Pajak PPN: PPN', 'Pajak PPH: Tanpa PPH'],
-    serviceDetails: ['Pengawasan Media', 'Catatan: Harus lurus, tidak boleh miring.'],
-    billTo: { name: 'User', email: 'user@gmail.com', phone: '081234567891' },
-    sellerInfo: { name: 'Seller XX', address: 'Jl. Bogor, Kota. Malang, Jawa Timur', phone: '081234567891' },
-    items: [
-      { description: 'Titik Lokasi Perempatan Patimura Malang, Jawa Timur', category: 'Billboard', duration: '1 Bulan', unitPrice: 100000000, total: 100000000 },
-      { description: 'Penerangan', category: 'Frontlite', duration: '', unitPrice: 1500000, total: 1500000 },
-      { description: 'Lahan', category: 'Swasta', duration: '', unitPrice: 2500000, total: 2500000 },
-      { description: 'Pengawasan Media', category: '', duration: '', unitPrice: 500000, total: 500000 },
-    ],
-    subtotal: 104500000,
-    pph: 0,
-    ppn: 5000000,
-    serviceFee: 5000,
-    jobFee: 500000,
-    promo: 1000000,
-    notes: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  },
-  {
-    id: '#18933',
-    invoiceNumber: '1235',
-    orderDate: '13/08/2025',
-    invoiceDate: '15 Agustus 2025',
-    category: 'Baliho',
-    location: 'Jalan Soekarno Hatta, Bandung',
-    totalCost: 75500000,
-    paymentStatus: 'Lunas',
-    status: OrderStatus.Completed,
-    seller: 'Seller YY',
-    specifications: '5x10, Vertikal, Dua Sisi',
-    adminDetails: ['Penerangan: Backlite', 'Lahan: Swasta'],
-    serviceDetails: ['Termasuk Pemasangan', 'Termasuk Pembongkaran'],
-    billTo: { name: 'User', email: 'user@gmail.com', phone: '081234567891' },
-    sellerInfo: { name: 'Seller YY', address: 'Jl. Dago, Kota. Bandung, Jawa Barat', phone: '089876543210' },
-    items: [{ description: 'Titik Lokasi Jalan Soekarno Hatta, Bandung', category: 'Baliho', duration: '2 Minggu', unitPrice: 70000000, total: 70000000 }],
-    subtotal: 70000000,
-    pph: 2500000,
-    ppn: 2500000,
-    serviceFee: 500000,
-    jobFee: 0,
-    promo: 0,
-    notes: 'Pembayaran lunas di muka.',
-  },
-  {
-    id: '#18934',
-    invoiceNumber: '1236',
-    orderDate: '20/08/2025',
-    invoiceDate: '22 Agustus 2025',
-    category: 'Billboard',
-    location: 'Simpang Lima, Semarang, Jawa Tengah',
-    totalCost: 120000000,
-    paymentStatus: 'Lunas',
-    status: OrderStatus.Ongoing,
-    seller: 'Seller ZZ',
-    specifications: '6x12, Horizontal, Satu Sisi, Digital',
-    adminDetails: ['Penerangan: Digital LED', 'Lahan: Pemerintah Kota'],
-    serviceDetails: ['Konten Dinamis', 'Maintenance 24/7'],
-    billTo: { name: 'User', email: 'user@gmail.com', phone: '081234567891' },
-    sellerInfo: { name: 'Seller ZZ', address: 'Jl. Pahlawan, Semarang, Jawa Tengah', phone: '081122334455' },
-    items: [{ description: 'Titik Lokasi Simpang Lima, Semarang', category: 'Billboard Digital', duration: '1 Bulan', unitPrice: 120000000, total: 120000000 }],
-    subtotal: 120000000,
-    pph: 0,
-    ppn: 12000000,
-    serviceFee: 1000000,
-    jobFee: 0,
-    promo: 13000000,
-    notes: 'Diskon spesial untuk klien baru.',
-  },
-  {
-    id: '#17543',
-    invoiceNumber: '1237',
-    orderDate: '01/09/2025',
-    invoiceDate: '02 September 2025',
-    category: 'Videotron',
-    location: 'Kuningan City, Jakarta Selatan',
-    totalCost: 250000000,
-    paymentStatus: 'Lunas',
-    status: OrderStatus.Upcoming,
-    seller: 'Seller AB',
-    specifications: '10x20, Vertikal, High-Res',
-    adminDetails: ['Pajak PPN: PPN', 'Pajak PPH: PPH 23'],
-    serviceDetails: ['Pembuatan Konten Video', 'Jadwal Tayang Fleksibel'],
-    billTo: { name: 'User', email: 'user@gmail.com', phone: '081234567891' },
-    sellerInfo: { name: 'Seller AB', address: 'Jl. Gatot Subroto, Jakarta Selatan', phone: '087766554433' },
-    items: [{ description: 'Videotron Kuningan City', category: 'Videotron', duration: '1 Bulan', unitPrice: 250000000, total: 250000000 }],
-    subtotal: 250000000,
-    pph: 2500000,
-    ppn: 25000000,
-    serviceFee: 2000000,
-    jobFee: 0,
-    promo: 0,
-    notes: 'Harap materi iklan dikirim H-7 penayangan.',
-  },
-    {
-    id: '#16888',
-    invoiceNumber: '1238',
-    orderDate: '15/09/2025',
-    invoiceDate: '16 September 2025',
-    category: 'Spanduk',
-    location: 'Area Kampus UI, Depok',
-    totalCost: 5000000,
-    paymentStatus: 'Lunas',
-    status: OrderStatus.Completed,
-    seller: 'Seller CD',
-    specifications: '1x5, Kain, Cetak Digital',
-    adminDetails: ['Izin Lokasi Kampus'],
-    serviceDetails: ['Pemasangan di 10 titik strategis'],
-    billTo: { name: 'User', email: 'user@gmail.com', phone: '081234567891' },
-    sellerInfo: { name: 'Seller CD', address: 'Jl. Margonda Raya, Depok', phone: '081234509876' },
-    items: [{ description: 'Pemasangan Spanduk Area Kampus UI', category: 'Spanduk', duration: '2 Minggu', unitPrice: 5000000, total: 5000000 }],
-    subtotal: 5000000,
-    pph: 0,
-    ppn: 500000,
-    serviceFee: 100000,
-    jobFee: 0,
-    promo: 600000,
-    notes: 'Termasuk biaya bongkar.',
+export interface HistoryQueryParams {
+  take?: number;
+  cursor?: string;
+  search?: string;
+  status?: string;
+  city?: string;
+  province?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+}
+
+export interface BackendTransaction {
+  id: string;
+  status: string; // PENDING | PAID | EXPIRED | REJECTED | CANCELLED | COMPLETED
+  totalPrice: string;
+  startDate: string;
+  endDate: string | null;
+  createdAt: string;
+  billboard: {
+    id: string;
+    cityName: string;
+    provinceName: string;
+    size: string;
+  };
+  design: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface HistoryItem {
+  id: string;
+  transactionId: string;
+  pricing: any;
+  createdAt: string;
+  transaction: BackendTransaction;
+}
+
+export interface HistoryApiResponse {
+  status: boolean;
+  message: string;
+  data: HistoryItem[];
+  meta: {
+    take: number;
+    nextCursor: string | null;
+  };
+}
+
+export const getOrders = async (params?: HistoryQueryParams): Promise<HistoryApiResponse> => {
+  const searchParams = new URLSearchParams();
+  
+  if (params) {
+    if (params.take) searchParams.append('take', params.take.toString());
+    if (params.cursor) searchParams.append('cursor', params.cursor);
+    if (params.search) searchParams.append('search', params.search);
+    if (params.status) searchParams.append('status', params.status);
+    if (params.city) searchParams.append('city', params.city);
+    if (params.province) searchParams.append('province', params.province);
+    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params.sortDir) searchParams.append('sortDir', params.sortDir);
   }
-];
 
+  const response = await fetch(`/api/history?${searchParams.toString()}`);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
 
-export const getOrders = (): Promise<Order[]> => {
-  return new Promise(resolve => {
-    // Simulate network delay
-    setTimeout(() => {
-      resolve(MOCK_ORDERS);
-    }, 500);
-  });
+  return response.json();
 };
