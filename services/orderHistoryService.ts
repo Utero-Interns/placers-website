@@ -29,10 +29,48 @@ export interface BackendTransaction {
   } | null;
 }
 
+export interface PricingAddOn {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export interface DetailedBillboard {
+  id: string;
+  tax?: string;
+  size: string;
+  display?: string;
+  cityName: string;
+  lighting?: string;
+  description?: string;
+  orientation?: string;
+  provinceName: string;
+  landOwnership?: string;
+}
+
+export interface HistoryPricing {
+  mode?: string;
+  addOns?: PricingAddOn[] | string[];
+  period?: {
+    startDate: string;
+    endDate: string;
+  };
+  prices?: {
+    base?: number;
+    total?: number | string;
+    rentPrice?: number | null;
+    sellPrice?: number | null;
+    addOnTotal?: number;
+    designPrice?: number | string | null;
+    servicePrice?: number | string | null;
+  };
+  billboard?: DetailedBillboard;
+}
+
 export interface HistoryItem {
   id: string;
   transactionId: string;
-  pricing: any;
+  pricing: HistoryPricing;
   createdAt: string;
   transaction: BackendTransaction;
 }

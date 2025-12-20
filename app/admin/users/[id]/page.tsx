@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft, Award, Calendar, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
-import { ArrowLeft, User, Mail, Phone, Shield, Calendar, Award } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
 
 interface UserDetail {
     id: string;
