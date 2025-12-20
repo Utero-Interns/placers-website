@@ -79,10 +79,6 @@ export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
 
     fetchAddOns();
   }, []);
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateData({ [e.target.name]: e.target.checked });
-  };
   
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updateData({ [e.target.name]: e.target.value });

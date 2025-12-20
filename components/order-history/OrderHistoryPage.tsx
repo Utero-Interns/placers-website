@@ -1,7 +1,7 @@
 import { getOrders, HistoryItem } from '@/services/orderHistoryService';
 import { Order, OrderStatus } from '@/types';
 import { Calendar, ChevronLeft, ChevronRight, HistoryIcon, MapPin, Search, SquareDashed } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import OrderDetailModal from './OrderDetailModal';
 
 const mapToOrder = (item: HistoryItem): Order => {
@@ -148,11 +148,16 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
   const [pageCursors, setPageCursors] = useState<{[key: number]: string}>({});
   const [hasNextPage, setHasNextPage] = useState(false);
 
+  // Derive the cursor for the current page outside useEffect to keep dependencies stable
+  const cursor = useMemo(() => {
+      if (currentPage === 1) return undefined;
+      return pageCursors[currentPage];
+  }, [currentPage, pageCursors]);
+
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        const cursor = currentPage === 1 ? undefined : pageCursors[currentPage];
         const response = await getOrders({
             take: rowsPerPage,
             cursor: cursor,
@@ -163,9 +168,11 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
         const mappedOrders = response.data.map(mapToOrder);
         setOrders(mappedOrders);
         
-        
         if (response.meta.nextCursor) {
-            setPageCursors(prev => ({ ...prev, [currentPage + 1]: response.meta.nextCursor! }));
+            setPageCursors(prev => {
+                if (prev[currentPage + 1] === response.meta.nextCursor) return prev;
+                return { ...prev, [currentPage + 1]: response.meta.nextCursor! };
+            });
             setHasNextPage(true);
         } else {
             setHasNextPage(false);
@@ -179,7 +186,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
       }
     };
     fetchOrders();
-  }, [currentPage, activeTab, searchTerm, rowsPerPage]); // Intentionally omitting pageCursors to avoid loops
+  }, [cursor, activeTab, searchTerm, rowsPerPage, currentPage]); 
 
   // Reset cursors when filters change
   useEffect(() => {
@@ -187,11 +194,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
       setCurrentPage(1);
   }, [activeTab, searchTerm, rowsPerPage]);
 
-  // Server-side filtering/pagination handles this now, so we just pass orders through
-  const filteredOrders = orders;
   const paginatedOrders = orders;
-
-  // Approximate total pages for UI controls
   const totalPages = hasNextPage ? currentPage + 1 : currentPage;
 
   const handleOpenModal = (order: Order) => {

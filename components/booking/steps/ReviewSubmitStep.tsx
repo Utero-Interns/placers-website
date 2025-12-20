@@ -45,7 +45,7 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
       if (!data.customAddOns) return [];
       
       const selectedIds = Object.entries(data.customAddOns)
-        .filter(([_, isSelected]) => isSelected)
+        .filter(([isSelected]) => isSelected)
         .map(([id]) => id);
       
       return selectedIds.map(id => {
