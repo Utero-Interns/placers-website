@@ -2,51 +2,19 @@
 
 import { store } from '../../lib/store';
 import { getImageUrl } from '../../lib/utils';
-
-type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Cities' | 'Media' | 'My Profile';
-
-interface DashboardState {
-    activeTab: ModuleName;
-    searchQuery: string;
-    sortColumn: string | null;
-    sortDirection: 'asc' | 'desc';
-    filters: Record<string, string>;
-    currentPage: number;
-    itemsPerPage: number;
-    isSidebarOpen: boolean;
-}
-
-interface ColumnConfig<T> {
-    key: keyof T | 'actions';
-    label: string;
-    render?: (value: any, row: T) => string;
-}
-
-interface ModuleConfig<T> {
-    data: T[];
-    columns: ColumnConfig<T>[];
-    filters: { key: keyof T; label: string; options: string[] }[];
-}
+import { DashboardState, ModuleName, ModuleConfig, ApiData, ColumnConfig } from './types';
+import { adminService } from './services';
+import { getLayoutHTML, getSidebarNavHTML } from './views/layout';
+import { getDashboardOverviewHTML } from './views/overview';
+import { getProfileFormHTML } from './views/profile';
+import { getModuleContainerHTML, getModuleControlsHTML, getPaginationHTML } from './views/modules';
+import { generateTableHTML, getStatusBadgeClass } from './views/shared';
 
 export class AdminDashboard {
     private root: HTMLElement;
     private state: DashboardState;
     private data: typeof store.data; // Keep for other modules
-    private apiData: {
-        users: any[];
-        sellers: any[];
-        billboards: any[];
-        transactions: any[];
-        categories: any[];
-        designs: any[];
-        addons: any[];
-        cities: any[];
-        provinces: any[];
-        media: any[];
-        notifications: any[];
-        unreadNotificationsCount: number;
-        currentUser: any | null;
-    };
+    private apiData: ApiData;
     private currentModalAction: (() => Promise<void>) | null = null;
     private selectedDesignFiles: File[] = [];
 
@@ -87,158 +55,71 @@ export class AdminDashboard {
     }
 
     private async init() {
-        await this.fetchCurrentUser();
+        this.apiData.currentUser = await adminService.fetchCurrentUser();
         this.renderLayout();
         this.attachGlobalListeners();
-        // Start loading GMaps but don't await blocking UI
         this.loadGoogleMapsScript().catch(console.error);
 
-        // Initial fetch for users if that's the active tab or just pre-fetch
-        await this.fetchUsers();
-        this.fetchUnreadCount();
+        this.apiData.users = await adminService.fetchUsers();
+        this.apiData.unreadNotificationsCount = await adminService.fetchUnreadCount();
 
         this.renderContent();
     }
 
     private async fetchCurrentUser() {
-        try {
-            const res = await fetch('/api/proxy/auth/me', { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                this.apiData.currentUser = data.user || data.data || data; // Handle various response structures
-            }
-        } catch (e) {
-            console.error('Failed to fetch current user', e);
-        }
+        this.apiData.currentUser = await adminService.fetchCurrentUser();
     }
 
     private async fetchUsers() {
-        try {
-            // Use the proxy to ensure cookies are passed correctly
-            const res = await fetch('/api/proxy/user', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.users = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch users', e);
-        }
+        this.apiData.users = await adminService.fetchUsers();
     }
 
     private async fetchSellers() {
-        try {
-            // Endpoint: GET http://utero.viewdns.net:3100/seller/all -> /api/proxy/seller/all
-            const res = await fetch('/api/proxy/seller/all', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.sellers = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch sellers', e);
-        }
+        this.apiData.sellers = await adminService.fetchSellers();
     }
 
     private async fetchProvinces() {
-        try {
-            const res = await fetch('/api/proxy/province', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.provinces = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch provinces', e);
-        }
+        this.apiData.provinces = await adminService.fetchProvinces();
     }
 
     private async fetchBillboards() {
-        try {
-            // Endpoint: GET http://utero.viewdns.net:3100/billboard/all -> /api/proxy/billboard/all
-            const res = await fetch('/api/proxy/billboard/all', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            // The API returns { status: true, data: [...] } based on user provided info
-            if (json.status && json.data) {
-                this.apiData.billboards = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch billboards', e);
-        }
+        this.apiData.billboards = await adminService.fetchBillboards();
     }
 
     private async fetchTransactions() {
-        try {
-            // Endpoint: GET http://utero.viewdns.net:3100/transaction/all -> /api/proxy/transaction/all
-            const res = await fetch('/api/proxy/transaction/all', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.transactions = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch transactions', e);
-        }
+        this.apiData.transactions = await adminService.fetchTransactions();
     }
 
     private async fetchCategories() {
-        try {
-            // Endpoint: GET http://utero.viewdns.net:3100/category -> /api/proxy/category
-            const res = await fetch('/api/proxy/category', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.categories = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch categories', e);
-        }
+        this.apiData.categories = await adminService.fetchCategories();
     }
 
     private async fetchDesigns() {
-        try {
-            // Endpoint: GET http://utero.viewdns.net:3100/design -> /api/proxy/design
-            const res = await fetch('/api/proxy/design', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.designs = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch designs', e);
-        }
+        this.apiData.designs = await adminService.fetchDesigns();
     }
 
     private async fetchAddons() {
-        try {
-            const res = await fetch('/api/proxy/add-on', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.addons = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch add-ons', e);
-        }
+        this.apiData.addons = await adminService.fetchAddons();
+    }
+
+    private async fetchCities() { // Ensure this exists
+        this.apiData.cities = await adminService.fetchCities();
+    }
+
+    private async fetchMedia() { // Ensure this exists
+        this.apiData.media = await adminService.fetchMedia();
+    }
+
+    private async fetchNotifications() {
+        this.apiData.notifications = await adminService.fetchNotifications();
     }
 
     private attachGlobalListeners() {
-        // Mobile toggle
         document.addEventListener('click', (e: Event) => {
             const target = e.target as HTMLElement;
             if (target.closest('.mobile-toggle')) {
                 this.toggleSidebar();
             }
-            // Close sidebar when clicking outside on mobile
             if (this.state.isSidebarOpen && !target.closest('.sidebar') && !target.closest('.mobile-toggle')) {
                 this.toggleSidebar(false);
             }
@@ -256,87 +137,20 @@ export class AdminDashboard {
 
     private renderLayout() {
         const username = this.apiData.currentUser?.username || 'Admin';
+        this.root.innerHTML = getLayoutHTML(username);
 
-        this.root.innerHTML = `
-      <div class="admin-container">
-        <aside class="sidebar">
-          <div class="sidebar-header">
-            PLACERS ADMIN
-          </div>
-          <nav class="sidebar-nav">
-            <!-- Nav items injected here -->
-          </nav>
-          <div class="sidebar-footer">
-            <div class="user-profile-section">
-              <div class="user-avatar">
-                ${username.charAt(0).toUpperCase()}
-              </div>
-              <div class="user-info">
-                 <span class="user-name">${username}</span>
-                 <span class="user-role">Administrator</span>
-              </div>
-            </div>
-            <button class="logout-btn-sidebar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-              Logout
-            </button>
-          </div>
-        </aside>
-        <main class="main-content">
-          <header class="top-header">
-            <div style="display:flex; align-items:center; gap:1rem;">
-              <button class="mobile-toggle">☰</button>
-              <h1 class="page-title">Dashboard</h1>
-            </div>
-          </header>
-          <div id="content-area">
-            <!-- Content injected here -->
-             <div class="loading-spinner">Loading...</div>
-           </div>
-           
-           <!-- Floating Notification Button -->
-           <button class="floating-notif-btn" title="Notifications">
-             <div class="notif-badge" style="display: none;">0</div>
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-           </button>
-        </main>
-      </div>
-      <div class="toast-container"></div>
-      <div id="modal-root" class="modal-overlay">
-        <div class="modal">
-          <div class="modal-header">
-            <h3 class="modal-title">Modal Title</h3>
-            <button class="modal-close">&times;</button>
-          </div>
-          <div class="modal-body"></div>
-          <div class="modal-footer">
-            <button class="btn btn-outline close-modal">Cancel</button>
-            <button class="btn btn-primary confirm-modal">Save</button>
-          </div>
-        </div>
-      </div>
-    `;
         this.renderSidebarNav();
 
-        // Modal listeners
-        const modalOverlay = this.root.querySelector('.modal-overlay');
         const closeBtns = this.root.querySelectorAll('.modal-close, .close-modal');
         closeBtns.forEach(btn => btn.addEventListener('click', () => this.closeModal()));
-
-        // Removed overlay click listener to prevent closing when clicking outside
-        // modalOverlay?.addEventListener('click', (e) => {
-        //     if (e.target === modalOverlay) this.closeModal();
-        // });
 
         this.root.querySelector('.confirm-modal')?.addEventListener('click', () => {
             if (this.currentModalAction) this.currentModalAction();
         });
 
-        // Logout listener
         const logoutBtn = this.root.querySelector('.logout-btn-sidebar');
         logoutBtn?.addEventListener('click', async () => {
-            // Handle logout
-            await fetch('/api/proxy/auth/logout', { method: 'POST' }); // Ensure proper logout call if needed or just redirect
+            await fetch('/api/proxy/auth/logout', { method: 'POST' });
             window.location.href = '/login';
         });
 
@@ -344,16 +158,13 @@ export class AdminDashboard {
     }
 
     private googleMapsPromise: Promise<void> | null = null;
-
     private loadGoogleMapsScript(): Promise<void> {
         if (this.googleMapsPromise) return this.googleMapsPromise;
-
         this.googleMapsPromise = new Promise((resolve, reject) => {
             if ((window as any).google && (window as any).google.maps) {
                 resolve();
                 return;
             }
-
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
             script.async = true;
@@ -362,7 +173,6 @@ export class AdminDashboard {
             script.onerror = (e) => reject(e);
             document.head.appendChild(script);
         });
-
         return this.googleMapsPromise;
     }
 
@@ -370,29 +180,7 @@ export class AdminDashboard {
         const nav = this.root.querySelector('.sidebar-nav');
         if (!nav) return;
 
-        const tabs: { name: ModuleName; icon: string }[] = [
-            { name: 'Dashboard', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
-            { name: 'Users', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
-            { name: 'Sellers', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 21 3"/><path d="M3 3l18 18"/></svg>' }, // Placeholder icon, will replace with shop icon
-            { name: 'Billboards', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
-            { name: 'Transactions', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
-            { name: 'Categories', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>' },
-            { name: 'Designs', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
-            { name: 'Add-ons', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' },
-            { name: 'Cities', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M8 9v2"/><path d="M8 13v2"/><path d="M8 17v2"/><path d="M16 9v2"/><path d="M16 13v2"/><path d="M16 17v2"/></svg>' },
-            { name: 'Media', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' },
-            { name: 'My Profile', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' }
-        ];
-
-        // Fix Sellers icon specifically
-        tabs[2].icon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
-
-        nav.innerHTML = tabs.map(tab => `
-      <div class="nav-item ${this.state.activeTab === tab.name ? 'active' : ''}" data-tab="${tab.name}">
-        <span class="nav-icon">${tab.icon}</span>
-        <span class="nav-text">${tab.name}</span>
-      </div>
-    `).join('');
+        nav.innerHTML = getSidebarNavHTML(this.state.activeTab);
 
         nav.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -457,56 +245,7 @@ export class AdminDashboard {
     }
 
     private renderMyProfile(container: Element) {
-        const user = this.apiData.currentUser || {};
-        container.innerHTML = `
-            <div class="table-container" style="padding: 2rem; max-width: 600px;">
-                <h3 style="margin-bottom: 2rem;">My Profile</h3>
-                
-                <form id="admin-profile-form">
-                    <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 2rem;">
-                        <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: var(--primary-red); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; position: relative;">
-                            ${user.image
-                ? `<img id="admin-profile-preview" src="${getImageUrl(user.image)}" style="width:100%; height:100%; object-fit:cover;">`
-                : `<span id="admin-profile-initial">${(user.username || 'A').charAt(0).toUpperCase()}</span>`
-            }
-                        </div>
-                        <div style="flex:1;">
-                            <label class="form-label">Profile Picture</label>
-                            <input type="file" name="file" id="admin-profile-input" class="form-control">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" value="${user.username || ''}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" value="${user.email || ''}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone</label>
-                        <input type="text" class="form-control" name="phone" value="${user.phone || ''}">
-                    </div>
-                    
-                    <div class="form-group" style="margin-top:2rem;">
-                        <label class="form-label">Change Password <span style="font-weight:normal; color:#666;">(Leave blank to keep current)</span></label>
-                        <input type="password" class="form-control" name="password" placeholder="New Password">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm New Password">
-                    </div>
-
-                    <div class="form-group">
-                         <label class="form-label">Role</label>
-                         <input type="text" class="form-control" value="${user.level || 'ADMIN'}" disabled style="background:#eee;">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Update Profile</button>
-                </form>
-            </div>
-        `;
+        container.innerHTML = getProfileFormHTML(this.apiData.currentUser!);
 
         const form = container.querySelector('#admin-profile-form');
         const imgInput = container.querySelector('#admin-profile-input') as HTMLInputElement;
@@ -516,9 +255,9 @@ export class AdminDashboard {
             if (imgInput.files && imgInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const folder = container.querySelector('.table-container div:first-child div:first-child');
-                    if (folder) {
-                        folder.innerHTML = `<img src="${e.target?.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                    const previewElement = container.querySelector('#admin-profile-preview') || container.querySelector('#admin-profile-initial');
+                    if (previewElement && previewElement.parentElement) {
+                        previewElement.parentElement.innerHTML = `<img id="admin-profile-preview" src="${e.target?.result}" style="width:100%; height:100%; object-fit:cover;">`;
                     }
                 };
                 reader.readAsDataURL(imgInput.files[0]);
@@ -561,31 +300,15 @@ export class AdminDashboard {
             { label: 'Total Revenue', value: 'Rp 2.5B', change: '+25%' },
         ];
 
-        container.innerHTML = `
-      <div class="stats-grid">
-        ${stats.map(stat => `
-          <div class="stat-card">
-            <div class="stat-label">${stat.label}</div>
-            <div class="stat-value">${stat.value}</div>
-            <div style="color: var(--success-green); font-size: 0.875rem; margin-top: 0.5rem;">
-              ${stat.change} from last month
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <div class="table-container">
-        <div class="table-controls">
-          <h3>Recent Transactions</h3>
-        </div>
-        ${this.generateTableHTML(this.data.transactions.slice(0, 5), [
+        const recentTransactions = (this.apiData.transactions.length ? this.apiData.transactions : this.data.transactions).slice(0, 5);
+
+        container.innerHTML = getDashboardOverviewHTML(stats, generateTableHTML(recentTransactions, [
             { key: 'id', label: 'ID' },
             { key: 'buyerId', label: 'Buyer', render: (v: string) => this.getUserName(v) },
             { key: 'totalPrice', label: 'Amount', render: (v: number) => `Rp ${v.toLocaleString()}` },
-            { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
+            { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${getStatusBadgeClass(v)}">${v}</span>` },
             { key: 'createdAt', label: 'Date', render: (v: string) => new Date(v).toLocaleDateString() },
-        ])}
-      </div>
-    `;
+        ], null, 'asc'));
     }
 
     private renderModule(container: Element) {
@@ -595,32 +318,28 @@ export class AdminDashboard {
         const filteredData = this.getFilteredAndSortedData(config.data);
         const paginatedData = this.getPaginatedData(filteredData);
 
-        container.innerHTML = `
-      <div class="table-container">
-        <div class="table-controls">
-          <input type="text" class="search-input" placeholder="Search..." value="${this.state.searchQuery}">
-          <div class="filters">
-            ${config.filters.map(f => `
-              <select class="form-control filter-select" style="width: auto; display: inline-block;" data-key="${String(f.key)}">
-                <option value="">All ${f.label}</option>
-                ${f.options.map(o => `<option value="${o}" ${this.state.filters[String(f.key)] === o ? 'selected' : ''}>${o}</option>`).join('')}
-              </select>
-            `).join('')}
-          </div>
-          ${!['Sellers', 'Billboards', 'Media', 'Transactions'].includes(this.state.activeTab) ? '<button class="btn btn-primary add-new-btn">Add New</button>' : ''}
-        </div>
-        ${this.generateTableHTML(paginatedData, config.columns)}
-        <div class="pagination">
-          <div class="pagination-info">
-            Showing ${(this.state.currentPage - 1) * this.state.itemsPerPage + 1} to ${Math.min(this.state.currentPage * this.state.itemsPerPage, filteredData.length)} of ${filteredData.length} entries
-          </div>
-          <div class="pagination-controls">
-            <button class="btn btn-outline btn-sm prev-page" ${this.state.currentPage === 1 ? 'disabled' : ''}>Previous</button>
-            <button class="btn btn-outline btn-sm next-page" ${this.state.currentPage * this.state.itemsPerPage >= filteredData.length ? 'disabled' : ''}>Next</button>
-          </div>
-        </div>
-      </div>
-    `;
+        const controlsHTML = getModuleControlsHTML(
+            this.state.activeTab as ModuleName,
+            config.filters,
+            this.state.filters,
+            this.state.searchQuery
+        );
+
+        const tableHTML = generateTableHTML(
+            paginatedData,
+            config.columns,
+            this.state.sortColumn,
+            this.state.sortDirection
+        );
+
+        const paginationHTML = getPaginationHTML(
+            this.state.currentPage,
+            this.state.itemsPerPage,
+            config.data.length,
+            filteredData.length
+        );
+
+        container.innerHTML = getModuleContainerHTML(controlsHTML, tableHTML, paginationHTML);
 
         // Attach listeners
         const searchInput = container.querySelector('.search-input');
@@ -641,6 +360,55 @@ export class AdminDashboard {
             });
         });
 
+        container.querySelector('.add-new-btn')?.addEventListener('click', () => {
+            if (this.state.activeTab === 'Categories') {
+                this.handleAddCategory();
+            } else if (this.state.activeTab === 'Add-ons') {
+                this.openModal('Add New Add-on');
+            } else if (this.state.activeTab === 'Cities') {
+                this.handleAddCity();
+            } else {
+                this.openModal('Add New ' + this.state.activeTab.slice(0, -1)); // Simple singularization
+            }
+        });
+
+        this.attachTableListeners(container);
+        this.attachPaginationListeners(container);
+    }
+
+    private updateModuleData(container: Element) {
+        const config = this.getModuleConfig() as ModuleConfig<any>;
+        const filteredData = this.getFilteredAndSortedData(config.data);
+        const paginatedData = this.getPaginatedData(filteredData);
+
+        // Update Table
+        const tableWrapper = container.querySelector('.data-table-wrapper');
+        if (tableWrapper) {
+            tableWrapper.outerHTML = generateTableHTML(
+                paginatedData,
+                config.columns,
+                this.state.sortColumn,
+                this.state.sortDirection
+            );
+        }
+
+        // Update Pagination
+        const paginationContainer = container.querySelector('.pagination');
+        if (paginationContainer) {
+            paginationContainer.outerHTML = getPaginationHTML(
+                this.state.currentPage,
+                this.state.itemsPerPage,
+                config.data.length,
+                filteredData.length
+            );
+        }
+
+        // Re-attach listeners
+        this.attachTableListeners(container);
+        this.attachPaginationListeners(container);
+    }
+
+    private attachPaginationListeners(container: Element) {
         container.querySelector('.prev-page')?.addEventListener('click', () => {
             if (this.state.currentPage > 1) {
                 this.state.currentPage--;
@@ -656,51 +424,6 @@ export class AdminDashboard {
                 this.updateModuleData(container);
             }
         });
-
-        container.querySelector('.add-new-btn')?.addEventListener('click', () => {
-            if (this.state.activeTab === 'Categories') {
-                this.handleAddCategory();
-            } else if (this.state.activeTab === 'Add-ons') {
-                this.openModal('Add New Add-on');
-            } else if (this.state.activeTab === 'Cities') {
-                this.handleAddCity();
-            } else {
-                this.openModal('Add New ' + this.state.activeTab.slice(0, -1)); // Simple singularization
-            }
-        });
-
-        this.attachTableListeners(container);
-    }
-
-    private updateModuleData(container: Element) {
-        const config = this.getModuleConfig() as ModuleConfig<any>;
-        const filteredData = this.getFilteredAndSortedData(config.data);
-        const paginatedData = this.getPaginatedData(filteredData);
-
-        // Update Table
-        const tableWrapper = container.querySelector('.data-table-wrapper');
-        if (tableWrapper) {
-            tableWrapper.outerHTML = this.generateTableHTML(paginatedData, config.columns);
-        }
-
-        // Re-attach table listeners because table DOM was replaced
-        this.attachTableListeners(container);
-
-        // Update Pagination
-        const paginationInfo = container.querySelector('.pagination-info');
-        if (paginationInfo) {
-            paginationInfo.textContent = `Showing ${(this.state.currentPage - 1) * this.state.itemsPerPage + 1} to ${Math.min(this.state.currentPage * this.state.itemsPerPage, filteredData.length)} of ${filteredData.length} entries`;
-        }
-
-        const prevBtn = container.querySelector('.prev-page') as HTMLButtonElement;
-        if (prevBtn) {
-            prevBtn.disabled = this.state.currentPage === 1;
-        }
-
-        const nextBtn = container.querySelector('.next-page') as HTMLButtonElement;
-        if (nextBtn) {
-            nextBtn.disabled = this.state.currentPage * this.state.itemsPerPage >= filteredData.length;
-        }
     }
 
     private attachTableListeners(container: Element) {
@@ -731,8 +454,6 @@ export class AdminDashboard {
                     } else if (this.state.activeTab === 'Transactions') {
                         this.openViewTransactionModal(id);
                     } else if (this.state.activeTab === 'Designs') {
-                        // For designs we can just open a simple view modal or link to page.
-                        // Let's use the modal since we have openViewDesignModal envisioned
                         this.openViewDesignModal(id);
                     } else if (this.state.activeTab === 'Billboards') {
                         this.openViewBillboardModal(id);
@@ -800,7 +521,6 @@ export class AdminDashboard {
                                         method: 'DELETE',
                                         credentials: 'include'
                                     });
-                                    // The ID returned by some APIs might be wrapped, but if status is ok assume deleted
                                     if (res.ok) {
                                         this.apiData.media = this.apiData.media.filter(m => m.id !== id);
                                         this.updateModuleData(this.root.querySelector('#content-area')!);
@@ -930,7 +650,7 @@ export class AdminDashboard {
                         { key: 'user', label: 'Buyer', render: (v: any) => v?.username || 'Unknown' },
                         { key: 'billboard', label: 'Billboard', render: (v: any) => v?.location || 'Unknown Location' },
                         { key: 'totalPrice', label: 'Amount', render: (v: number) => `Rp ${v ? v.toLocaleString() : '0'}` },
-                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
+                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${getStatusBadgeClass(v)}">${v}</span>` },
                         { key: 'createdAt', label: 'Date', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
                         {
                             key: 'actions', label: 'Actions', render: (v: any, row: any) => `
@@ -1145,7 +865,7 @@ export class AdminDashboard {
 
                     // Attach Mark All Read listener
                     modalBody.querySelector('#mark-all-read')?.addEventListener('click', async () => {
-                        await this.markAllNotificationsRead();
+                        await adminService.markAllNotificationsRead();
                         // Update UI
                         modalBody.querySelectorAll('.notification-item').forEach(item => {
                             (item as HTMLElement).style.background = 'transparent';
@@ -1160,7 +880,7 @@ export class AdminDashboard {
                             const target = e.currentTarget as HTMLElement;
                             const id = target.dataset.id;
                             if (id) {
-                                await this.markNotificationRead(id);
+                                await adminService.markNotificationRead(id);
                                 // Update UI to show read
                                 if (target) target.style.background = 'transparent';
                                 this.fetchUnreadCount(); // Update badge
@@ -1197,71 +917,7 @@ export class AdminDashboard {
         }
     }
 
-    private async fetchNotifications() {
-        try {
-            const res = await fetch('/api/proxy/notification/me', { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                this.apiData.notifications = Array.isArray(data) ? data : (data.data || []);
-            }
-        } catch (e) {
-            console.error('Failed to fetch notifications', e);
-            this.showToast('Failed to load notifications', 'error');
-        }
-    }
 
-    private async markAllNotificationsRead() {
-        try {
-            const res = await fetch('/api/proxy/notification/read-all', {
-                method: 'PATCH',
-                credentials: 'include'
-            });
-            if (!res.ok) throw new Error('Failed to mark all read');
-        } catch (e) {
-            console.error('Failed to mark all notifications read', e);
-            this.showToast('Failed to mark all as read', 'error');
-        }
-    }
-
-    private async markNotificationRead(id: string) {
-        try {
-            const res = await fetch(`/api/proxy/notification/${id}/read`, {
-                method: 'PATCH',
-                credentials: 'include'
-            });
-            if (!res.ok) throw new Error('Failed to mark read');
-        } catch (e) {
-            console.error('Failed to mark notification read', e);
-        }
-    }
-
-    private async fetchCities() {
-        try {
-            const res = await fetch('/api/proxy/city', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.cities = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch cities', e);
-        }
-    }
-
-    private async fetchMedia() {
-        try {
-            const res = await fetch('/api/proxy/image', {
-                credentials: 'include'
-            });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.media = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch media', e);
-        }
-    }
 
     private renderMediaGallery(container: Element) {
         const filteredData = this.getFilteredAndSortedData(this.apiData.media);
@@ -1482,35 +1138,7 @@ export class AdminDashboard {
         return data.slice(start, start + this.state.itemsPerPage);
     }
 
-    private generateTableHTML<T>(data: T[], columns: ColumnConfig<T>[]) {
-        if (data.length === 0) return '<div class="data-table-wrapper" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No data found</div>';
 
-        return `
-      <div class="data-table-wrapper" style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              ${columns.map(col => `
-                <th data-col="${String(col.key)}">
-                  ${col.label}
-                  ${this.state.sortColumn === String(col.key) ? (this.state.sortDirection === 'asc' ? '↑' : '↓') : ''}
-                </th>
-              `).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(row => `
-              <tr>
-                ${columns.map(col => `
-                  <td>${col.render ? col.render((row as any)[col.key], row) : (row as any)[col.key]}</td>
-                `).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    }
 
     // Helpers
     private getUserName(id: string) {
@@ -1526,14 +1154,7 @@ export class AdminDashboard {
         return b ? b.location : id;
     }
 
-    private getStatusBadgeClass(status: string) {
-        switch (status) {
-            case 'PAID': case 'COMPLETED': return 'badge-success';
-            case 'PENDING': return 'badge-warning';
-            case 'CANCELLED': case 'REJECTED': return 'badge-danger';
-            default: return 'badge-neutral';
-        }
-    }
+
 
     // Modal
     private openModal(title: string) {
@@ -2767,7 +2388,7 @@ export class AdminDashboard {
                         <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Transaction ID</div>
                         <h4 style="margin: 0; font-size: 1.25rem; color: var(--slate-dark); letter-spacing: -0.025em; font-family: monospace;">#${transaction.id.split('-')[0]}...</h4>
                         <div style="margin-top: 0.75rem;">
-                            <span class="badge ${this.getStatusBadgeClass(transaction.status)}" style="padding: 0.35rem 0.75rem; font-size: 0.875rem;">${transaction.status}</span>
+                            <span class="badge ${getStatusBadgeClass(transaction.status)}" style="padding: 0.35rem 0.75rem; font-size: 0.875rem;">${transaction.status}</span>
                         </div>
                     </div>
                     <div style="text-align: right;">

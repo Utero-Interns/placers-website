@@ -2,16 +2,15 @@
 
 import { store } from '../../lib/store';
 import { authService } from '../../lib/auth';
+import { getImageUrl } from '../../lib/utils'; // Use shared
+import { sellerService } from './services';
+import { getLayoutHTML, getSidebarNavHTML, ModuleName } from './views/layout';
+import { getDashboardOverviewHTML } from './views/overview';
+import { getProfileHTML } from './views/profile';
+import { generateTableHTML, getStatusBadgeClass } from '../../admin/dashboard/views/shared';
 
-function getImageUrl(path: string | null): string {
-    if (!path) return 'https://placehold.co/600x400?text=No+Image';
-    if (path.startsWith('http')) return path;
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-    return `http://utero.viewdns.net:3100/${cleanPath}`;
-}
+// Removed duplicate ModuleName type definition (imported from layout)
 
-
-type ModuleName = 'Dashboard' | 'My Billboards' | 'My Transactions' | 'My Profile' | 'History';
 
 interface DashboardState {
     activeTab: ModuleName;
@@ -107,122 +106,41 @@ export class SellerDashboard {
     }
 
     private async fetchCurrentUser() {
-        try {
-            const res = await fetch('/api/proxy/auth/me', { credentials: 'include' });
-            if (res.ok) {
-                const data = await res.json();
-                this.apiData.currentUser = data.user || data.data || data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch current user', e);
-        }
+        this.apiData.currentUser = await sellerService.fetchCurrentUser();
     }
 
     private async fetchMyBillboards() {
-        try {
-            const res = await fetch('/api/proxy/billboard/myBillboards', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.billboards = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch billboards', e);
-        }
+        this.apiData.billboards = await sellerService.fetchMyBillboards();
     }
 
     private async fetchMyTransactions() {
-        try {
-            const res = await fetch('/api/proxy/transaction/mySales', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.transactions = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch transactions', e);
-        }
+        this.apiData.transactions = await sellerService.fetchMyTransactions();
     }
 
     private async fetchMyProfile() {
-        try {
-            const res = await fetch('/api/proxy/seller/me', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.profile = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch profile', e);
-        }
+        this.apiData.profile = await sellerService.fetchMyProfile();
     }
 
     private async fetchProvinces() {
-        try {
-            const res = await fetch('/api/proxy/province', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                // Normalize data: ensure id and name
-                this.apiData.provinces = json.data.map((p: any) => ({
-                    ...p,
-                    id: p.id || p.value || p.province_id,
-                    name: p.name || p.label || p.value
-                }));
-            }
-        } catch (e) {
-            console.error('Failed to fetch provinces', e);
-        }
+        this.apiData.provinces = await sellerService.fetchProvinces();
     }
 
     private async fetchCategories() {
-        try {
-            const res = await fetch('/api/proxy/category', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.categories = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch categories', e);
-        }
+        this.apiData.categories = await sellerService.fetchCategories();
     }
 
     private async fetchCities(provinceId: string) {
-        try {
-            // Check cache first
-            if (this.apiData.allCities && this.apiData.allCities.length > 0) {
-                return this.apiData.allCities.filter((c: any) => c.provinceId === provinceId);
-            }
-
-            // Fetch all cities if not cached
-            // Endpoint: GET /api/proxy/city (returns all cities)
-            const res = await fetch('/api/proxy/city', { credentials: 'include' });
-            const json = await res.json();
-
-            if (json.status && json.data) {
-                // Normalize data
-                this.apiData.allCities = json.data.map((c: any) => ({
-                    ...c,
-                    id: c.id || c.value || c.city_id,
-                    name: c.name || c.label || c.value,
-                    provinceId: c.provinceId || c.province_id
-                }));
-                // Filter
-                return this.apiData.allCities.filter((c: any) => c.provinceId === provinceId);
-            }
-            return [];
-        } catch (e) {
-            console.error('Failed to fetch cities', e);
-            return [];
+        if (this.apiData.allCities && this.apiData.allCities.length > 0) {
+            return this.apiData.allCities.filter((c: any) => c.provinceId === provinceId);
         }
+        // Fetch all cities if not cached
+        const allCities = await sellerService.fetchAllCities();
+        this.apiData.allCities = allCities;
+        return allCities.filter((c: any) => c.provinceId === provinceId);
     }
 
     private async fetchHistory() {
-        try {
-            const res = await fetch('/api/proxy/history/mine', { credentials: 'include' });
-            const json = await res.json();
-            if (json.status && json.data) {
-                this.apiData.history = json.data;
-            }
-        } catch (e) {
-            console.error('Failed to fetch history', e);
-        }
+        this.apiData.history = await sellerService.fetchHistory();
     }
 
     private attachGlobalListeners() {
@@ -248,75 +166,7 @@ export class SellerDashboard {
 
     private renderLayout() {
         const username = this.apiData.currentUser?.username || 'Seller';
-
-        this.root.innerHTML = `
-            <div class="admin-container">
-                <aside class="sidebar">
-                    <div class="sidebar-header">
-                        SELLER DASHBOARD
-                    </div>
-                    <nav class="sidebar-nav">
-                        <!-- Nav items injected here -->
-                    </nav>
-                    <div class="sidebar-footer">
-                        <div class="user-profile-section">
-                            <div class="user-avatar">
-                                ${username.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="user-info">
-                                <span class="user-name">${username}</span>
-                                <span class="user-role">Seller</span>
-                            </div>
-                        </div>
-                        <button class="logout-btn-sidebar">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                            Logout
-                        </button>
-                    </div>
-                </aside>
-                <main class="main-content">
-                    <header class="top-header">
-                        <div style="display:flex; align-items:center; gap:1rem;">
-                            <button class="mobile-toggle">☰</button>
-                            <h1 class="page-title">Dashboard</h1>
-                        </div>
-                    </header>
-                    <div id="content-area">
-                        <div class="loading-spinner">Loading...</div>
-                    </div>
-                </main>
-            </div>
-            <div class="toast-container"></div>
-            <div id="modal-root" class="modal-overlay">
-                <div class="modal">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Modal Title</h3>
-                        <button class="modal-close">&times;</button>
-                    </div>
-                    <div class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline close-modal">Cancel</button>
-                        <button class="btn btn-primary confirm-modal">Save</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        this.renderSidebarNav();
-
-        // Listeners
-        this.root.querySelector('.logout-btn-sidebar')?.addEventListener('click', () => {
-            authService.logout().then(() => window.location.href = '/login');
-        });
-
-        const modalOverlay = this.root.querySelector('.modal-overlay');
-        this.root.querySelectorAll('.modal-close, .close-modal').forEach(btn =>
-            btn.addEventListener('click', () => this.closeModal())
-        );
-
-        this.root.querySelector('.confirm-modal')?.addEventListener('click', () => {
-            if (this.currentModalAction) this.currentModalAction();
-        });
+        this.root.innerHTML = getLayoutHTML(username);
     }
 
     private googleMapsPromise: Promise<void> | null = null;
@@ -341,21 +191,7 @@ export class SellerDashboard {
     private renderSidebarNav() {
         const nav = this.root.querySelector('.sidebar-nav');
         if (!nav) return;
-
-        const tabs: { name: ModuleName; icon: string }[] = [
-            { name: 'Dashboard', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
-            { name: 'My Billboards', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
-            { name: 'My Transactions', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
-            { name: 'My Profile', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
-            { name: 'History', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
-        ];
-
-        nav.innerHTML = tabs.map(tab => `
-            <div class="nav-item ${this.state.activeTab === tab.name ? 'active' : ''}" data-tab="${tab.name}">
-                <span class="nav-icon">${tab.icon}</span>
-                <span class="nav-text">${tab.name}</span>
-            </div>
-        `).join('');
+        nav.innerHTML = getSidebarNavHTML(this.state.activeTab);
 
         nav.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -404,136 +240,11 @@ export class SellerDashboard {
             { label: 'My Sales', value: this.apiData.transactions.length },
         ];
 
-        container.innerHTML = `
-            <div class="stats-grid">
-                ${stats.map(stat => `
-                    <div class="stat-card">
-                        <div class="stat-label">${stat.label}</div>
-                        <div class="stat-value">${stat.value}</div>
-                    </div>
-                `).join('')}
-            </div>
-            
-             <div class="table-container" style="margin-top: 2rem;">
-                <div class="table-controls">
-                    <h3>Recent Billboards</h3>
-                </div>
-                ${this.generateTableHTML(this.apiData.billboards.slice(0, 5), [
-            { key: 'location', label: 'Location' },
-            { key: 'status', label: 'Status' },
-            { key: 'rentPrice', label: 'Price', render: (v: any) => `Rp ${v.toLocaleString()}` }
-        ])}
-            </div>
-        `;
+        container.innerHTML = getDashboardOverviewHTML(stats, this.apiData.billboards.slice(0, 5));
     }
 
     private renderMyProfile(container: Element) {
-        const p = this.apiData.profile || {};
-        const c = this.apiData.currentUser || {};
-
-        container.innerHTML = `
-            <div style="padding: 0; width: 100%;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
-                    <h3>My Profile</h3>
-                    <button class="btn btn-outline" style="border-color: #fee2e2; color: #b91c1c; background:white;" id="delete-profile-btn">
-                        Delete Profile & Move to Buyer
-                    </button>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 1.5rem; align-items: start;">
-                    
-                    <!-- Section 1: Business Details (Seller Profile) - LEFT -->
-                    <div class="card" style="background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
-                             <h4 style="margin:0; color: var(--text-primary); font-size: 1.1rem;">Business Details</h4>
-                             <span class="badge badge-info">Seller</span>
-                        </div>
-                        
-                        <form id="seller-business-form">
-                            <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="form-group">
-                                    <label class="form-label">Full Name</label>
-                                    <input type="text" class="form-control" name="fullname" value="${p.fullname || ''}" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Company Name</label>
-                                    <input type="text" class="form-control" name="companyName" value="${p.companyName || ''}">
-                                </div>
-                            </div>
-                            
-                            <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="form-group">
-                                    <label class="form-label">KTP</label>
-                                    <input type="text" class="form-control" name="ktp" value="${p.ktp || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NPWP</label>
-                                    <input type="text" class="form-control" name="npwp" value="${p.npwp || ''}">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">KTP Address</label>
-                                <textarea class="form-control" name="ktpAddress" rows="2">${p.ktpAddress || ''}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Office Address</label>
-                                <textarea class="form-control" name="officeAddress" rows="2">${p.officeAddress || ''}</textarea>
-                            </div>
-                            
-                            <div style="margin-top: 2rem; display:flex; justify-content: flex-end;">
-                                <button type="submit" class="btn btn-primary">Save Business Details</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Section 2: User Account (Base User) - RIGHT -->
-                    <div class="card" style="background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
-                             <h4 style="margin:0; color: var(--text-primary); font-size: 1.1rem;">User Account</h4>
-                             <span class="badge" style="background:#f1f5f9; color:#64748b;">Login Info</span>
-                        </div>
-
-                         <form id="user-profile-form">
-                            <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 1.5rem; text-align:center;">
-                                <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: #f8fafc; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); margin-bottom: 1rem; position: relative;">
-                                    <img id="profile-preview-img" src="${c.image ? getImageUrl(c.image) : `https://ui-avatars.com/api/?name=${c.username || 'User'}&background=random`}" style="width:100%; height:100%; object-fit:cover;">
-                                </div>
-                                <label for="profile-image-input" style="cursor:pointer; font-size:0.875rem; color:var(--primary-color); font-weight:500;">Change Picture</label>
-                                <input type="file" name="file" id="profile-image-input" style="display:none;">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Username</label>
-                                <input type="text" class="form-control" name="username" value="${c.username || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" value="${c.email || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Phone</label>
-                                <input type="text" class="form-control" name="phone" value="${c.phone || ''}">
-                            </div>
-                            
-                            <div style="border-top: 1px dashed #e2e8f0; margin: 1.5rem 0; padding-top: 1.5rem;">
-                                <div class="form-group">
-                                    <label class="form-label">New Password</label>
-                                    <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Confirm Password</label>
-                                    <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm new password">
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary" style="width:100%;">Update Account</button>
-                         </form>
-                    </div>
-
-                </div>
-            </div>
-        `;
+        container.innerHTML = getProfileHTML(this.apiData.profile, this.apiData.currentUser);
 
         // --- Listener: User Account (PUT FormData) ---
         const userForm = container.querySelector('#user-profile-form');
@@ -753,7 +464,7 @@ export class SellerDashboard {
                     <h3 style="margin:0;">${this.state.activeTab}</h3>
                     ${this.state.activeTab === 'My Billboards' ? '<button class="btn btn-primary add-new-btn">Create Billboard</button>' : ''}
                 </div>
-                ${this.generateTableHTML(paginatedData, config.columns)}
+                ${generateTableHTML(paginatedData, config.columns, this.state.sortColumn, this.state.sortDirection)}
             </div>
          `;
 
@@ -811,22 +522,6 @@ export class SellerDashboard {
         });
     }
 
-    private generateTableHTML(data: any[], columns: ColumnConfig<any>[]) {
-        if (!data || data.length === 0) return '<div style="padding:1.5rem;">No data found</div>';
-
-        return `
-            <table>
-                <thead>
-                    <tr>${columns.map(c => `<th>${c.label}</th>`).join('')}</tr>
-                </thead>
-                <tbody>
-                    ${data.map(row => `
-                        <tr>${columns.map(c => `<td>${c.render ? c.render(row[c.key as string], row) : (row[c.key as string] || '-')}</td>`).join('')}</tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
 
     // --- Billboard Modals ---
 

@@ -25,7 +25,7 @@ export interface ModuleConfig<T> {
     filters: { key: keyof T; label: string; options: string[] }[];
 }
 
-export interface AdminApiData {
+export interface ApiData {
     users: any[];
     sellers: any[];
     billboards: any[];

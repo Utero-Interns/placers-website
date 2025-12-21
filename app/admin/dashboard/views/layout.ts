@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModuleName } from '../types';
-import { getImageUrl } from '../../../lib/utils';
 
-export function renderLayout(dashboard: any) {
-    const username = dashboard.apiData.currentUser?.username || 'Admin';
-
-    dashboard.root.innerHTML = `
+export const getLayoutHTML = (username: string): string => {
+    return `
       <div class="admin-container">
         <aside class="sidebar">
           <div class="sidebar-header">
@@ -38,7 +34,6 @@ export function renderLayout(dashboard: any) {
             </div>
           </header>
           <div id="content-area">
-            <!-- Content injected here -->
              <div class="loading-spinner">Loading...</div>
            </div>
            
@@ -64,33 +59,9 @@ export function renderLayout(dashboard: any) {
         </div>
       </div>
     `;
+};
 
-    renderSidebarNav(dashboard);
-
-    // Modal listeners
-    const modalOverlay = dashboard.root.querySelector('.modal-overlay');
-    const closeBtns = dashboard.root.querySelectorAll('.modal-close, .close-modal');
-    closeBtns.forEach((btn: Element) => btn.addEventListener('click', () => dashboard.closeModal()));
-
-    dashboard.root.querySelector('.confirm-modal')?.addEventListener('click', () => {
-        if (dashboard.currentModalAction) dashboard.currentModalAction();
-    });
-
-    // Logout listener
-    const logoutBtn = dashboard.root.querySelector('.logout-btn-sidebar');
-    logoutBtn?.addEventListener('click', async () => {
-        // Handle logout
-        await fetch('/api/proxy/auth/logout', { method: 'POST' });
-        window.location.href = '/login';
-    });
-
-    dashboard.attachFloatingNotificationListener();
-}
-
-export function renderSidebarNav(dashboard: any) {
-    const nav = dashboard.root.querySelector('.sidebar-nav');
-    if (!nav) return;
-
+export const getSidebarNavHTML = (activeTab: ModuleName): string => {
     const tabs: { name: ModuleName; icon: string }[] = [
         { name: 'Dashboard', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
         { name: 'Users', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
@@ -105,17 +76,10 @@ export function renderSidebarNav(dashboard: any) {
         { name: 'My Profile', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' }
     ];
 
-    nav.innerHTML = tabs.map(tab => `
-      <div class="nav-item ${dashboard.state.activeTab === tab.name ? 'active' : ''}" data-tab="${tab.name}">
+    return tabs.map(tab => `
+      <div class="nav-item ${activeTab === tab.name ? 'active' : ''}" data-tab="${tab.name}">
         <span class="nav-icon">${tab.icon}</span>
         <span class="nav-text">${tab.name}</span>
       </div>
     `).join('');
-
-    nav.querySelectorAll('.nav-item').forEach((item: Element) => {
-        item.addEventListener('click', () => {
-            const tab = item.getAttribute('data-tab') as ModuleName;
-            dashboard.setActiveTab(tab);
-        });
-    });
-}
+};
