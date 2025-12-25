@@ -496,11 +496,7 @@ export class SellerDashboard {
                             const color = status === 'PAID' ? 'green' : status === 'PENDING' ? 'orange' : 'red';
                             return `<span class="badge" style="background:${color}; color:white;">${status}</span>`;
                         }
-                    },
-                    {
-                        key: 'actions', label: 'Actions', render: (v, row) => `
-                        <button class="btn btn-sm btn-outline action-view-history" data-id="${row.id}">View Detail</button>
-                     `}
+                    }
                 ],
                 filters: []
             };
