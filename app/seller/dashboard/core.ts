@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { store } from '../../lib/store';
 import { authService } from '../../lib/auth';
 import { getImageUrl } from '../../lib/utils'; // Use shared
 import { sellerService } from './services';
 import { getLayoutHTML, getSidebarNavHTML, ModuleName } from './views/layout';
 import { getDashboardOverviewHTML } from './views/overview';
 import { getProfileHTML } from './views/profile';
-import { generateTableHTML, getStatusBadgeClass } from '../../admin/dashboard/views/shared';
 
-// Removed duplicate ModuleName type definition (imported from layout)
+import { generateTableHTML } from '../../admin/dashboard/views/shared';
 
 
 interface DashboardState {
@@ -47,6 +45,7 @@ export class SellerDashboard {
         cities: any[];
         categories: any[];
         history: any[];
+
         allCities: any[]; // Cache for all cities
         unseenNotifications: number;
     };
@@ -65,6 +64,7 @@ export class SellerDashboard {
             cities: [],
             categories: [],
             history: [],
+
             allCities: [], // Cache for all cities
             unseenNotifications: 0
         };
@@ -94,7 +94,8 @@ export class SellerDashboard {
             this.fetchMyTransactions(),
             this.fetchMyProfile(),
             this.fetchProvinces(), // Needed for forms
-            this.fetchCategories()
+            this.fetchCategories(),
+
         ]);
 
         this.renderContent();
@@ -143,6 +144,8 @@ export class SellerDashboard {
         this.apiData.history = await sellerService.fetchHistory();
     }
 
+
+
     private attachGlobalListeners() {
         document.addEventListener('click', (e: Event) => {
             const target = e.target as HTMLElement;
@@ -167,6 +170,27 @@ export class SellerDashboard {
     private renderLayout() {
         const username = this.apiData.currentUser?.username || 'Seller';
         this.root.innerHTML = getLayoutHTML(username);
+
+        this.renderSidebarNav();
+
+        const closeBtns = this.root.querySelectorAll('.modal-close, .close-modal');
+        closeBtns.forEach(btn => btn.addEventListener('click', () => this.closeModal()));
+
+        this.root.querySelector('.confirm-modal')?.addEventListener('click', async () => {
+            if (this.currentModalAction) {
+                await this.currentModalAction();
+                // If action successfully completed and modal is still open, close it
+                if (this.root.querySelector('.modal-overlay')?.classList.contains('open')) {
+                    this.closeModal();
+                }
+            }
+        });
+
+        const logoutBtn = this.root.querySelector('.logout-btn-sidebar');
+        logoutBtn?.addEventListener('click', async () => {
+            await authService.logout();
+            window.location.href = '/login';
+        });
     }
 
     private googleMapsPromise: Promise<void> | null = null;
@@ -214,6 +238,7 @@ export class SellerDashboard {
         else if (tab === 'My Profile') await this.fetchMyProfile();
         else if (tab === 'History') await this.fetchHistory();
 
+
         this.renderContent();
 
         if (window.innerWidth <= 1024) {
@@ -229,18 +254,24 @@ export class SellerDashboard {
             this.renderDashboardOverview(container);
         } else if (this.state.activeTab === 'My Profile') {
             this.renderMyProfile(container);
+
         } else {
             this.renderModule(container);
         }
     }
 
     private renderDashboardOverview(container: Element) {
+        const totalRevenue = this.apiData.transactions.reduce((sum, t) => sum + (t.totalPrice || 0), 0);
         const stats = [
             { label: 'My Billboards', value: this.apiData.billboards.length },
             { label: 'My Sales', value: this.apiData.transactions.length },
+            { label: 'Total Revenue', value: `Rp ${totalRevenue.toLocaleString()}` },
         ];
 
-        container.innerHTML = getDashboardOverviewHTML(stats, this.apiData.billboards.slice(0, 5));
+        const recentTransactions = this.apiData.transactions.slice(0, 5);
+        const recentBillboards = this.apiData.billboards.slice(0, 5);
+
+        container.innerHTML = getDashboardOverviewHTML(stats, recentBillboards, recentTransactions);
     }
 
     private renderMyProfile(container: Element) {
@@ -260,7 +291,6 @@ export class SellerDashboard {
 
         userForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
             const rawFormData = new FormData(e.target as HTMLFormElement);
 
             // Validation
@@ -304,15 +334,13 @@ export class SellerDashboard {
                 });
                 const json = await res.json();
                 if (res.ok) {
-                    this.showToast('User account updated!', 'success');
-                    this.fetchCurrentUser(); // Refresh
+                    this.showSuccessModal('User account updated!');
                 } else {
                     let msg = json.message || 'Update failed';
                     if (Array.isArray(msg)) msg = msg.join(', ');
                     this.showToast(msg, 'error');
                 }
-            } catch (err) {
-                console.error(err);
+            } catch {
                 this.showToast('Error updating user account', 'error');
             }
         });
@@ -338,8 +366,7 @@ export class SellerDashboard {
                 const json = await res.json();
 
                 if (res.ok) {
-                    this.showToast('Business details updated!', 'success');
-                    this.fetchMyProfile();
+                    this.showSuccessModal('Business details updated!');
                 } else {
                     let msg = 'Failed to update profile';
                     if (json.message) {
@@ -371,7 +398,7 @@ export class SellerDashboard {
                         } else {
                             this.showToast('Failed to delete profile', 'error');
                         }
-                    } catch (err) {
+                    } catch {
                         this.showToast('Error deleting profile', 'error');
                     }
                 } else {
@@ -380,6 +407,33 @@ export class SellerDashboard {
             });
         });
     }
+
+    private showSuccessModal(message: string) {
+        this.openModal('Success');
+        const body = this.root.querySelector('.modal-body');
+        const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
+        const cancelBtn = this.root.querySelector('.close-modal') as HTMLButtonElement;
+
+        if (body && confirmBtn && cancelBtn) {
+            body.innerHTML = `
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="width: 60px; height: 60px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0;">Success!</h3>
+                    <p style="color: var(--text-secondary);">${message}</p>
+                </div>
+            `;
+            confirmBtn.textContent = 'OK';
+            cancelBtn.style.display = 'none';
+        }
+
+        this.currentModalAction = () => {
+            location.reload();
+        };
+    }
+
+
 
     private renderModule(container: Element) {
         let config: ModuleConfig<any>;
@@ -470,6 +524,10 @@ export class SellerDashboard {
 
         this.attachModuleListeners(container);
     }
+
+
+
+
 
     private attachModuleListeners(container: Element) {
         container.querySelector('.add-new-btn')?.addEventListener('click', () => {
@@ -617,8 +675,7 @@ export class SellerDashboard {
 
         try {
             // Fetch necessary data
-            const [billboardRes, provincesRes] = await Promise.all([
-                fetch(`/api/proxy/billboard/detail/${id}`),
+            const [billboardRes] = await Promise.all([
                 fetch(`/api/proxy/billboard/detail/${id}`),
                 this.apiData.provinces.length === 0 ? this.fetchProvinces().then(() => ({ ok: true })) : Promise.resolve({ ok: true }),
                 this.apiData.categories.length === 0 ? this.fetchCategories().then(() => ({ ok: true })) : Promise.resolve({ ok: true })
@@ -652,11 +709,6 @@ export class SellerDashboard {
     }
 
     private renderBillboardForm(prefix: string, billboard: any = {}) {
-        // Prepare image previews
-        let images: string[] = [];
-        if (Array.isArray(billboard.image)) images = billboard.image.map((img: any) => img.url || img);
-        else if (billboard.image) images = [billboard.image];
-
         return `
             <form id="${prefix}-billboard-form">
                 <style>
@@ -1194,9 +1246,7 @@ export class SellerDashboard {
             const json = await res.json();
 
             if (res.ok) {
-                this.showToast('Billboard created successfully', 'success');
-                this.closeModal();
-                this.fetchMyBillboards();
+                this.showSuccessModal('Billboard created successfully');
             } else {
                 console.error('API Error Response:', json);
                 if (Array.isArray(json.message)) {
@@ -1219,17 +1269,9 @@ export class SellerDashboard {
         if (!form) return;
 
         const formData = new FormData(form);
-        const data: any = Object.fromEntries(formData.entries());
 
         // Process images
         const currentImages: (string | File)[] = (form as any).__currentImages || [];
-        const filesToUpload: File[] = [];
-        const existingImageUrls: string[] = [];  // Not really standard here, backend usually deletes all and replaces if we send list, OR we send diff.
-        // Assuming backend handles "files" for new images. But what about existing?
-        // Admin code re-hydrates existing images to Files if possible, effectively re-uploading everything or handling it.
-        // Step 100 code: "Convert all images to Files... It's a URL... Fetch it and convert to Blob -> File"
-        // This is heavy but ensures "files" array is complete.
-        // Let's copy that strategy for robustness.
 
         this.showToast('Processing images...', 'info');
 
@@ -1241,7 +1283,7 @@ export class SellerDashboard {
                 const res = await fetch(url);
                 const blob = await res.blob();
                 return new File([blob], `existing-${idx}.jpg`, { type: blob.type });
-            } catch (e) { console.error('Image rehydrate fail', e); return null; }
+            } catch { return null; }
         });
 
         const allFiles = (await Promise.all(allFilesPromise)).filter(f => f !== null) as File[];
@@ -1265,13 +1307,11 @@ export class SellerDashboard {
             });
             const json = await res.json();
             if (json.status) {
-                this.showToast('Updated successfully', 'success');
-                this.fetchMyBillboards();
-                this.closeModal();
+                this.showSuccessModal('Updated successfully');
             } else {
                 this.showToast(json.message || 'Update failed', 'error');
             }
-        } catch (e) {
+        } catch {
             this.showToast('Error updating', 'error');
         }
     }
@@ -1282,13 +1322,11 @@ export class SellerDashboard {
             try {
                 const res = await fetch(`/api/proxy/billboard/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (res.ok) {
-                    this.showToast('Deleted', 'success');
-                    this.fetchMyBillboards();
-                    this.closeModal();
+                    this.showSuccessModal('Deleted');
                 } else {
                     this.showToast('Failed to delete', 'error');
                 }
-            } catch (e) { this.showToast('Error', 'error'); }
+            } catch { this.showToast('Error', 'error'); }
         });
     }
 
@@ -1314,7 +1352,7 @@ export class SellerDashboard {
                         body.innerHTML = this.renderBillboardDetailView(json.data);
                         // Initialize map after render
                         setTimeout(() => this.initViewOnlyMap(json.data), 100);
-                        this.setupBillboardCarousel(body, json.data);
+                        this.setupBillboardCarousel(body);
                     }
                 } else {
                     this.showToast('Failed to load billboard data', 'error');
@@ -1497,9 +1535,9 @@ export class SellerDashboard {
         `;
     }
 
-    private setupBillboardCarousel(container: Element, billboard: any) {
-        const thumbnails = container.querySelectorAll('.carousel-thumbnail');
-        const mainImage = container.querySelector('#billboard-main-image') as HTMLImageElement;
+    private setupBillboardCarousel(body: Element) {
+        const thumbnails = body.querySelectorAll('.carousel-thumbnail');
+        const mainImage = body.querySelector('#billboard-main-image') as HTMLImageElement;
 
         if (!mainImage || thumbnails.length === 0) return;
 
@@ -1588,7 +1626,7 @@ export class SellerDashboard {
                     body.innerHTML = '<p class="text-red-500">Failed to load details.</p>';
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 this.root.querySelector('.modal-body')!.innerHTML = '<p>Error loading details.</p>';
             });
     }
@@ -1596,7 +1634,6 @@ export class SellerDashboard {
     private renderViewTransactionDetails(t: any) {
         if (!t) return 'No details available.';
         const formatRp = (v: any) => 'Rp ' + (Number(v) || 0).toLocaleString();
-        const formatDate = (v: any) => v ? new Date(v).toLocaleDateString() : '-';
 
         const buyer = t.buyer || t.user || {};
         const billboard = t.billboard || {};
