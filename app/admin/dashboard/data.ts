@@ -39,13 +39,7 @@ export const MockData = {
         { id: '2', transactionId: 'TRX001', userId: '1', rating: 4, comment: 'Good, but slightly delayed response.', createdAt: '2023-08-01T11:00:00Z', updatedAt: '2023-08-01T11:00:00Z' },
     ],
     notifications: [
-        { id: '1', recipientId: '1', createdById: '3', entity: 'TRANSACTION', entityId: 'TRX001', title: 'Payment Received', message: 'Your payment for TRX001 has been received.', status: 'UNREAD', createdAt: '2023-06-25T10:05:00Z', readAt: null },
         { id: '2', recipientId: '2', createdById: '3', entity: 'BILLBOARD', entityId: '2', title: 'Billboard Approved', message: 'Your billboard "Bundaran HI" has been approved.', status: 'READ', createdAt: '2023-05-10T12:05:00Z', readAt: '2023-05-10T13:00:00Z' },
-    ],
-    cities: [
-        { id: '1', name: 'Jakarta Pusat', province: 'DKI Jakarta', country: 'Indonesia', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
-        { id: '2', name: 'Jakarta Selatan', province: 'DKI Jakarta', country: 'Indonesia', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
-        { id: '3', name: 'Bandung', province: 'Jawa Barat', country: 'Indonesia', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z' },
     ],
     media: [
         { id: '1', name: 'Billboard Image 1', type: 'IMAGE', url: 'https://example.com/image1.jpg', size: '2.5MB', createdAt: '2023-05-01T10:00:00Z' },

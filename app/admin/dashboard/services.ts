@@ -66,10 +66,7 @@ export const adminService = {
     },
 
     // Add other fetch methods as needed if found later (e.g., fetchCities, fetchMedia)
-    async fetchCities() {
-        const json = await apiFetch('/api/proxy/city'); // Assuming implementation
-        return json.status && json.data ? json.data : [];
-    },
+
 
     async fetchMedia() {
         const json = await apiFetch('/api/proxy/image');
