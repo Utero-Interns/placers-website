@@ -4,8 +4,14 @@ import { ArrowLeft, Award, Calendar, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
-import { authService } from '../../../lib/auth';
-import { getImageUrl } from '../../../lib/utils';
+import { authService, User } from '@/app/lib/auth';
+import { getImageUrl } from '@/app/lib/utils';
+import '@/app/admin/dashboard/styles.css';
+
+interface Seller {
+    id: string;
+    // Add other seller properties if known
+}
 
 interface UserDetail {
     id: string;
@@ -17,7 +23,7 @@ interface UserDetail {
     profilePicture: string;
     createdAt: string;
     updatedAt: string;
-    seller: any;
+    seller: Seller | null;
 }
 
 const SIDEBAR_ITEMS = [
@@ -29,7 +35,7 @@ const SIDEBAR_ITEMS = [
 export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const [user, setUser] = useState<UserDetail | null>(null);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -57,7 +63,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                 } else {
                     setError(json.message || 'Failed to fetch user');
                 }
-            } catch (err) {
+            } catch {
                 setError('Network error or invalid response');
             } finally {
                 setLoading(false);

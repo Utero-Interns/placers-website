@@ -3,8 +3,8 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, DollarSign, Monitor, Move, Layers, Calendar, Info, Image as ImageIcon } from 'lucide-react';
-import { authService } from '@/app/lib/auth';
+import { ArrowLeft, MapPin, DollarSign, Layers, Info, Image as ImageIcon } from 'lucide-react';
+import { authService, User } from '@/app/lib/auth';
 import { getImageUrl } from '@/app/lib/utils';
 import '@/app/admin/dashboard/styles.css';
 
@@ -45,7 +45,7 @@ const SIDEBAR_ITEMS = [
 export default function BillboardDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const [billboard, setBillboard] = useState<BillboardDetail | null>(null);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -73,7 +73,7 @@ export default function BillboardDetailPage({ params }: { params: Promise<{ id: 
                 } else {
                     setError(json.message || 'Failed to fetch billboard');
                 }
-            } catch (err) {
+            } catch {
                 setError('Network error or invalid response');
             } finally {
                 setLoading(false);

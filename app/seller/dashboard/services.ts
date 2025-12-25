@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const apiFetch = async (endpoint: string) => {
+const apiFetch = async (endpoint: string, options?: RequestInit) => {
     try {
-        const res = await fetch(endpoint, { credentials: 'include' });
+        const headers = new Headers(options?.headers);
+        const accessToken = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+
+        if (accessToken) {
+            headers.set('Authorization', `Bearer ${accessToken}`);
+        }
+
+        const res = await fetch(endpoint, { ...options, headers });
         const json = await res.json();
         return json;
     } catch (e) {

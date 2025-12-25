@@ -428,7 +428,7 @@ export class SellerDashboard {
             cancelBtn.style.display = 'none';
         }
 
-        this.currentModalAction = () => {
+        this.currentModalAction = async () => {
             location.reload();
         };
     }
@@ -464,10 +464,6 @@ export class SellerDashboard {
                     { key: 'totalPrice', label: 'Total', render: (v) => `Rp ${v.toLocaleString()}` },
                     { key: 'status', label: 'Status' },
                     { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() },
-                    {
-                        key: 'actions', label: 'Actions', render: (v, row) => `
-                        <button class="btn btn-sm btn-outline action-view-transaction" data-id="${row.billboardId || row.id}">View Detail</button>
-                     `}
                 ],
                 filters: []
             };

@@ -1,8 +1,8 @@
 import { ModuleConfig, ModuleName } from '../types';
 
-export const getModuleControlsHTML = (
+export const getModuleControlsHTML = <T>(
     activeTab: ModuleName,
-    filters: ModuleConfig<any>['filters'],
+    filters: ModuleConfig<T>['filters'],
     currentFilters: Record<string, string>,
     searchQuery: string
 ): string => {

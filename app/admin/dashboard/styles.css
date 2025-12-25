@@ -392,7 +392,8 @@ tr:hover {
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   transform: scale(0.95);
   transition: transform 0.2s;
 }
@@ -407,6 +408,10 @@ tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: var(--white);
+  z-index: 1;
 }
 
 .modal-title {
@@ -425,6 +430,8 @@ tr:hover {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
@@ -433,6 +440,10 @@ tr:hover {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--white);
+  z-index: 1;
 }
 
 /* Forms */

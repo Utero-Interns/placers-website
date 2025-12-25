@@ -25,7 +25,7 @@ export const generateTableHTML = <T>(
             ${data.map(row => `
               <tr>
                 ${columns.map(col => `
-                  <td>${col.render ? col.render((row as any)[col.key], row) : (row as any)[col.key]}</td>
+                  <td>${col.render ? col.render(row[col.key as keyof T], row) : row[col.key as keyof T]}</td>
                 `).join('')}
               </tr>
             `).join('')}

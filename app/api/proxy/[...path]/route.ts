@@ -27,12 +27,13 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
     const query = request.nextUrl.search;
     const targetUrl = `${API_URL}/${path}${query}`;
 
-    console.log(`[Proxy] Forwarding ${request.method} request to: ${targetUrl}`);
-
     try {
         const headers = new Headers(request.headers);
         headers.delete('host');
         headers.delete('connection');
+
+        console.log(`[Proxy] Request headers being sent: ${JSON.stringify(Object.fromEntries(headers.entries()))}`);
+        console.log(`[Proxy] Cookie header: ${headers.get('Cookie')}`);
 
         // Ensure content-type is passed correctly, typically handled by fetch but good to be explicit if manipulating
 
@@ -47,7 +48,7 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
             // crucial: do not let the backend follow redirects automatically if we want to pass them back?
             // usually fine to default.
             redirect: 'manual',
-            // @ts-ignore - duplex is required for streaming bodies in some environments (Node 18+)
+            // @ts-expect-error - duplex is required for streaming bodies in some environments (Node 18+)
             duplex: 'half'
         });
 

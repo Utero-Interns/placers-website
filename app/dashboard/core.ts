@@ -1,5 +1,28 @@
-
 import { authService, User } from '../lib/auth';
+
+interface Billboard {
+    location: string;
+    city: string;
+    type: string;
+    price: number;
+    status: string;
+}
+
+interface Transaction {
+    id: string;
+    billboard: {
+        location: string;
+    };
+    totalPrice: number;
+    createdAt: string;
+    status: string;
+}
+
+interface HistoryItem {
+    action: string;
+    createdAt: string;
+}
+
 
 // Use strict proxy path for all business logic
 const API_PREFIX = '/api/proxy';
@@ -86,7 +109,7 @@ export class UserDashboard {
     if (!navContainer) return;
 
     const role = this.user.level;
-    const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(role as any));
+    const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(role as 'BUYER' | 'SELLER'));
 
     navContainer.innerHTML = visibleItems.map(item => `
         <div class="nav-item ${this.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}">
@@ -168,7 +191,7 @@ export class UserDashboard {
 
         const activeBillboards = Array.isArray(billboards) ? billboards.length : 0;
         const totalSales = Array.isArray(sales) ? sales.length : 0;
-        const revenue = Array.isArray(sales) ? sales.reduce((acc: any, t: any) => acc + (t.status === 'PAID' ? t.totalPrice : 0), 0) : 0;
+        const revenue = Array.isArray(sales) ? sales.reduce((acc: number, t: Transaction) => acc + (t.status === 'PAID' ? t.totalPrice : 0), 0) : 0;
 
         statsHtml = `
                     <div class="stats-grid animate-fade-in">
@@ -238,7 +261,7 @@ export class UserDashboard {
                             </tr>
                         </thead>
                         <tbody>
-                            ${billboards.length > 0 ? billboards.map((b: any) => `
+                            ${billboards.length > 0 ? billboards.map((b: Billboard) => `
                                 <tr>
                                     <td class="font-medium">${b.location}</td>
                                     <td>${b.city || '-'}</td>
@@ -260,8 +283,8 @@ export class UserDashboard {
         alert('Create Billboard Modal placeholder');
       });
 
-    } catch (error) {
-      container.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Error loading billboards: ${error}</div>`;
+    } catch {
+      container.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Error loading billboards</div>`;
     }
   }
 
@@ -284,7 +307,7 @@ export class UserDashboard {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sales.length > 0 ? sales.map((t: any) => `
+                            ${sales.length > 0 ? sales.map((t: Transaction) => `
                                 <tr>
                                     <td class="font-mono text-sm">${t.id.substring(0, 8)}...</td>
                                     <td>${t.billboard?.location || 'Billboard Item'}</td>
@@ -297,8 +320,8 @@ export class UserDashboard {
                     </table>
                 </div>
             `;
-    } catch (error) {
-      container.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Error loading sales: ${error}</div>`;
+    } catch {
+      container.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded">Error loading sales</div>`;
     }
   }
 
@@ -312,7 +335,7 @@ export class UserDashboard {
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
                     <h3 class="font-bold mb-4">Activity Log</h3>
                     <ul class="space-y-4">
-                        ${history.length > 0 ? history.map((h: any) => `
+                        ${history.length > 0 ? history.map((h: HistoryItem) => `
                             <li class="flex items-start gap-4 pb-4 border-b border-slate-100 last:border-0">
                                 <div class="w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
                                 <div>
@@ -324,7 +347,7 @@ export class UserDashboard {
                     </ul>
                 </div>
             `;
-    } catch (error) {
+    } catch {
       container.innerHTML = `<div class="text-red-500">Error loading history</div>`;
     }
   }
@@ -362,7 +385,7 @@ export class UserDashboard {
                     </div>
                 </div>
             `;
-    } catch (error) {
+    } catch {
       container.innerHTML = `<div class="text-red-500">Error loading profile data</div>`;
     }
   }

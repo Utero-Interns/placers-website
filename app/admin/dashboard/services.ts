@@ -107,5 +107,39 @@ export const adminService = {
             console.error('Failed to mark notification read', e);
             return false;
         }
+    },
+
+    async fetchRecycleBinBillboards() {
+        const json = await apiFetch('/api/proxy/billboard/recycle-bin');
+        if (json.status && json.data && Array.isArray(json.data.data)) {
+            return json.data.data;
+        }
+        return [];
+    },
+
+    async restoreBillboard(id: string) {
+        try {
+            const res = await fetch(`/api/proxy/billboard/${id}/restore`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            return await res.json();
+        } catch (e) {
+            console.error('Failed to restore billboard', e);
+            return { status: false, message: 'Network error' };
+        }
+    },
+
+    async purgeBillboard(id: string) {
+        try {
+            const res = await fetch(`/api/proxy/billboard/${id}/purge?confirm=true`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            return await res.json();
+        } catch (e) {
+            console.error('Failed to purge billboard', e);
+            return { status: false, message: 'Network error' };
+        }
     }
 };

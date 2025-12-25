@@ -15,8 +15,13 @@ export interface AuthResponse {
     data?: User;
 }
 
-// Use local proxy to handle cookies correctly
-// using local proxy to handle cookies correctly (Solution for localhost)
+export interface RegisterData {
+    username: string;
+    email: string;
+    password?: string;
+    phone?: string;
+}
+
 const API_BASE_URL = '/api/proxy/auth';
 
 export const authService = {
@@ -28,7 +33,7 @@ export const authService = {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ identifier, password }),
-                credentials: 'include', // Important for cookies if backend sets them
+                credentials: 'include',
             });
 
             const data = await response.json();
@@ -42,7 +47,7 @@ export const authService = {
         }
     },
 
-    async register(data: any): Promise<AuthResponse> {
+    async register(data: RegisterData): Promise<AuthResponse> {
         try {
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
@@ -90,7 +95,7 @@ export const authService = {
     async logout(): Promise<void> {
         try {
             await fetch(`${API_BASE_URL}/logout`, {
-                method: 'POST', // or GET depending on backend
+                method: 'POST',
                 credentials: 'include',
             });
         } catch (error) {

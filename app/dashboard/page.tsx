@@ -3,14 +3,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/app/lib/auth';
+import { authService, User } from '@/app/lib/auth';
 import { UserDashboard } from './core';
 import './styles.css';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // 1. Check Authentication
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function DashboardPage() {
         }
 
         // Valid BUYER or SELLER
-        setUser(userData);
+        setUser(userData ?? null);
         setIsAuthorized(true);
       } catch (err) {
         console.error("Auth check failed", err);

@@ -120,6 +120,8 @@ body {
     margin-left: var(--sidebar-width);
     padding: 2rem;
     transition: margin-left 0.3s ease;
+    width: calc(100% - var(--sidebar-width)); /* Explicitly define width */
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Sidebar */
@@ -387,14 +389,15 @@ tr:hover {
 }
 
 .modal {
-    background: var(--white);
-    border-radius: 0.5rem;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: scale(0.95);
-    transition: transform 0.2s;
+  background: var(--white);
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95);
+  transition: transform 0.2s;
 }
 
 .modal.modal-lg {
@@ -406,15 +409,15 @@ tr:hover {
 }
 
 .modal-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: var(--white);
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: var(--white);
+  z-index: 1;
 }
 
 .modal-title {
@@ -432,15 +435,21 @@ tr:hover {
 }
 
 .modal-body {
-    padding: 1.5rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--white);
+  z-index: 1;
 }
 
 /* Forms */
@@ -511,6 +520,7 @@ tr:hover {
 
     .main-content {
         margin-left: 0;
+        width: 100%; /* Ensure full width when sidebar is hidden */
     }
 
     .mobile-toggle {

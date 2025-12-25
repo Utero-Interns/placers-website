@@ -2,7 +2,6 @@ import { getImageUrl } from '../../../lib/utils';
 import { ApiData } from '../types';
 
 export const getProfileFormHTML = (user: ApiData['currentUser']): string => {
-    const safeUser = user || {} as any;
     return `
       <div class="table-container" style="padding: 2rem; max-width: 600px;">
           <h3 style="margin-bottom: 2rem;">My Profile</h3>
@@ -10,9 +9,9 @@ export const getProfileFormHTML = (user: ApiData['currentUser']): string => {
           <form id="admin-profile-form">
               <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 2rem;">
                   <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: var(--primary-red); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; position: relative;">
-                      ${safeUser.image
-            ? `<img id="admin-profile-preview" src="${getImageUrl(safeUser.image)}" style="width:100%; height:100%; object-fit:cover;">`
-            : `<span id="admin-profile-initial">${(safeUser.username || 'A').charAt(0).toUpperCase()}</span>`
+                      ${user?.image
+            ? `<img id="admin-profile-preview" src="${getImageUrl(user.image)}" style="width:100%; height:100%; object-fit:cover;">`
+            : `<span id="admin-profile-initial">${(user?.username || 'A').charAt(0).toUpperCase()}</span>`
         }
                   </div>
                   <div style="flex:1;">
@@ -23,15 +22,15 @@ export const getProfileFormHTML = (user: ApiData['currentUser']): string => {
 
               <div class="form-group">
                   <label class="form-label">Username</label>
-                  <input type="text" class="form-control" name="username" value="${safeUser.username || ''}" required>
+                  <input type="text" class="form-control" name="username" value="${user?.username || ''}" required>
               </div>
               <div class="form-group">
                   <label class="form-label">Email</label>
-                  <input type="email" class="form-control" name="email" value="${safeUser.email || ''}" required>
+                  <input type="email" class="form-control" name="email" value="${user?.email || ''}" required>
               </div>
               <div class="form-group">
                   <label class="form-label">Phone</label>
-                  <input type="text" class="form-control" name="phone" value="${safeUser.phone || ''}">
+                  <input type="text" class="form-control" name="phone" value="${user?.phone || ''}">
               </div>
               
               <div class="form-group" style="margin-top:2rem;">
@@ -45,7 +44,7 @@ export const getProfileFormHTML = (user: ApiData['currentUser']): string => {
 
               <div class="form-group">
                    <label class="form-label">Role</label>
-                   <input type="text" class="form-control" value="${safeUser.level || 'ADMIN'}" disabled style="background:#eee;">
+                   <input type="text" class="form-control" value="${user?.level || 'ADMIN'}" disabled style="background:#eee;">
               </div>
 
               <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Update Profile</button>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Media' | 'My Profile';
+export type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Media' | 'My Profile' | 'Recycle Bin';
 
 export interface DashboardState {
     activeTab: ModuleName;
@@ -22,11 +22,23 @@ export interface ColumnConfig<T> {
 export interface ModuleConfig<T> {
     data: T[];
     columns: ColumnConfig<T>[];
-    filters: { key: keyof T; label: string; options: string[] }[];
+    filters: { key: string | number; label: string; options: string[] }[];
 }
 
+export interface CurrentUser {
+    id: string;
+    username: string;
+    email: string;
+    phone?: string;
+    level: 'ADMIN' | 'BUYER' | 'SELLER';
+    provider: 'GOOGLE' | 'CREDENTIALS';
+    profilePicture?: string;
+    image?: string;
+    createdAt: string;
+    updatedAt: string;
+}
 export interface ApiData {
-    users: any[];
+    users: CurrentUser[];
     sellers: any[];
     billboards: any[];
     transactions: any[];
@@ -37,5 +49,6 @@ export interface ApiData {
     media: any[];
     notifications: any[];
     unreadNotificationsCount: number;
-    currentUser: any | null;
+    currentUser: CurrentUser | null;
+    recycleBin: any[];
 }

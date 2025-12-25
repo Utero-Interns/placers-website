@@ -1,9 +1,18 @@
 import { getImageUrl } from '../../../lib/utils';
+import { CurrentUser } from '../../../admin/dashboard/types';
 
+interface SellerProfile {
+    fullname?: string;
+    companyName?: string;
+    ktp?: string;
+    npwp?: string;
+    ktpAddress?: string;
+    officeAddress?: string;
+}
 
 export const getProfileHTML = (
-    profile: any,
-    user: any
+    profile: SellerProfile,
+    user: CurrentUser
 ): string => {
     const p = profile || {};
     const c = user || {};
