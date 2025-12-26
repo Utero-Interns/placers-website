@@ -12,9 +12,9 @@ type AuthTitleProps = {
 export default function AuthTitle({ title, description, linkText, linkHref }: AuthTitleProps) {
   return (
     <div className="text-center">
-        <h1 className="font-extrabold text-[28px] md:text-[39px] leading-[100%] tracking-normal font-poppins text-red-600">
+        <a href='/' className="font-extrabold text-[28px] md:text-[39px] leading-[100%] tracking-normal font-poppins text-red-600">
             {title}
-        </h1>
+        </a>
         <p className="text-sm mt-2 text-gray-600">
             {description}{' '}
             <Link href={linkHref} className="text-red-600 font-semibold hover:underline">

@@ -1,19 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
 import BookmarkHeader from '@/components/bookmark/BookmarkHeader';
 import BookmarkList from '@/components/bookmark/BookmarkList';
+import React, { useEffect, useState } from 'react';
+import { fetchBookmarks, removeBookmark } from '../../services/bookmarkService';
 import type { Bookmark } from '../../types';
-import { MOCK_BOOKMARKS } from '../../services/bookmarkService';
 
 import NavBar from '@/components/NavBar';
 import FootBar from '@/components/footer/FootBar';
 
 
 const BookmarksPage: React.FC = () => {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(MOCK_BOOKMARKS);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    loadBookmarks();
+  }, []);
+
+  const loadBookmarks = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchBookmarks();
+      setBookmarks(data);
+    } catch (error) {
+      console.error("Failed to load bookmarks", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleToggleEdit = () => {
     setIsEditing(!isEditing);
@@ -44,11 +61,28 @@ const BookmarksPage: React.FC = () => {
     setSelectedIds(newSelectedIds);
   };
   
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
+    
+    // Optimistic update
+    const previousBookmarks = [...bookmarks];
     setBookmarks(bookmarks.filter(b => !selectedIds.has(b.id)));
-    setSelectedIds(new Set());
     setIsEditing(false);
+
+    try {
+        const deletePromises = Array.from(selectedIds).map(id => removeBookmark(id));
+        await Promise.all(deletePromises);
+        
+        // Refresh to ensure sync
+        await loadBookmarks();
+    } catch (error) {
+        console.error("Failed to delete bookmarks", error);
+        // Revert on error
+        setBookmarks(previousBookmarks);
+        alert("Gagal menghapus bookmark");
+    }
+    
+    setSelectedIds(new Set());
   };
 
   const allSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length;
@@ -78,12 +112,17 @@ const BookmarksPage: React.FC = () => {
                 </label>
             </div>
         )}
-        <BookmarkList
-          bookmarks={bookmarks}
-          isEditing={isEditing}
-          selectedIds={selectedIds}
-          onSelectOne={handleSelectOne}
-        />
+        
+        {loading ? (
+            <div className="py-8 text-center">Loading bookmarks...</div>
+        ) : (
+            <BookmarkList
+            bookmarks={bookmarks}
+            isEditing={isEditing}
+            selectedIds={selectedIds}
+            onSelectOne={handleSelectOne}
+            />
+        )}
       </div>
 
       <FootBar />
