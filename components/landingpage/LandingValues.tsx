@@ -15,9 +15,9 @@ export default function LandingValues() {
       id="values"
       className="flex flex-col items-center justify-center 
                  bg-[var(--color-primary)] w-full 
-                 px-6 md:px-12 2xl:px-20 
-                 mt-10 md:mt-14 lg:mt-16 2xl:mt-20 
-                 py-14 md:py-18 lg:py-20"
+                 px-4 md:px-8 2xl:px-16 
+                 mt-6 md:mt-8 lg:mt-10 2xl:mt-12 
+                 py-8 md:py-10 lg:py-12"
     >
       <div className="w-full max-w-7xl mx-auto">
         {/* Tag */}
@@ -29,10 +29,10 @@ export default function LandingValues() {
 
         {/* Heading & Description */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end 
-                        mt-8 lg:mt-10 space-y-4 lg:space-y-0">
+                        mt-6 lg:mt-8 space-y-3 lg:space-y-0">
           <h1
             className="text-white font-bold leading-tight lg:leading-snug
-                       text-4xl sm:text-4xl lg:text-5xl 2xl:text-6xl
+                       text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl
                        w-full lg:w-1/2 2xl:w-1/3"
           >
             Solusi Cerdas <br /> Placers
@@ -40,7 +40,7 @@ export default function LandingValues() {
 
           <p
             className="w-full lg:w-1/2 2xl:w-1/3 
-                       text-base text-white leading-relaxed"
+                       text-sm md:text-base text-white leading-relaxed"
           >
             Menghadirkan teknologi dan layanan inovatif untuk memudahkan dalam
             mencari, memesan, dan mengelola titik billboard di berbagai lokasi.
@@ -50,7 +50,7 @@ export default function LandingValues() {
         {/* Cards */}
         <div
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 
-                     gap-5 mt-10"
+                     gap-4 mt-6"
         >
           <ValuesCard
             icon={MapPinned}
