@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Media' | 'My Profile' | 'Recycle Bin';
+export type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Media' | 'My Profile' | 'Recycle Bin' | 'History';
 
 export interface DashboardState {
     activeTab: ModuleName;
@@ -47,6 +47,7 @@ export interface ApiData {
     addons: any[];
     provinces: any[];
     media: any[];
+    history: any[];
     notifications: any[];
     unreadNotificationsCount: number;
     currentUser: CurrentUser | null;

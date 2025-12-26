@@ -50,6 +50,11 @@ export const adminService = {
         return json.status && json.data ? json.data : [];
     },
 
+    async fetchHistory() {
+        const json = await apiFetch('/api/proxy/history');
+        return json.status && json.data ? json.data : [];
+    },
+
     async fetchCategories() {
         const json = await apiFetch('/api/proxy/category');
         return json.status && json.data ? json.data : [];
