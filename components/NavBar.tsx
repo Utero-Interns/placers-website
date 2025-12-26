@@ -1,7 +1,7 @@
 'use client';
 
 import { authService, User } from "@/app/lib/auth";
-import { Bookmark, ChevronDown, Globe, History, LogOut, Menu, Newspaper, TicketPercent, User as UserIcon, X } from 'lucide-react';
+import { Bookmark, ChevronDown, Globe, History, LayoutDashboard, LogOut, Menu, Newspaper, TicketPercent, User as UserIcon, X } from 'lucide-react';
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from 'next/navigation';
@@ -144,31 +144,42 @@ export default function NavBar() {
                         
                         {/* User Dropdown */}
                         <ul className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 transform -translate-y-2 invisible group-hover:visible z-10 p-2 border border-gray-100">
-                             <li className="px-4 py-2 border-b mb-1">
+                             <li className="px-4 py-2 border-b border-gray-100 mb-1">
                                 <p className="font-semibold text-gray-800 truncate">{user.username || 'User'}</p>
                                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
                              </li>
-                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
-                                    <History className="w-4 h-4" />
-                                    History
-                                </Link>
-                             </li>
-                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
-                                    <Bookmark className="w-4 h-4" />
-                                    Bookmark
-                                </Link>
-                             </li>
-                             <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
-                                    <UserIcon className="w-4 h-4" />
-                                    Profile
-                                </Link>
-                             </li>
-                             <li className="my-1 border-t"></li>
+                             {user.level === 'ADMIN' ? (
+                                <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                    <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <LayoutDashboard className="w-4 h-4" />
+                                        Dashboard
+                                    </Link>
+                                </li>
+                             ) : (
+                                <>
+                                    <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                        <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                            <History className="w-4 h-4" />
+                                            History
+                                        </Link>
+                                    </li>
+                                    <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                        <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                            <Bookmark className="w-4 h-4" />
+                                            Bookmark
+                                        </Link>
+                                    </li>
+                                    <li className="rounded-xl hover:bg-red-50 cursor-pointer">
+                                        <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                            <UserIcon className="w-4 h-4" />
+                                            Profile
+                                        </Link>
+                                    </li>
+                                </>
+                             )}
+                             <li className="my-1 border-t border-gray-100"></li>
                              <li className="rounded-xl hover:bg-red-50 cursor-pointer" onClick={handleLogout}>
-                                <button className="flex w-full items-center gap-2 px-3 py-2 text-red-600 font-medium">
+                                <button className="flex w-full items-center gap-2 px-3 py-2 text-red-600 font-medium cursor-pointer">
                                     <LogOut className="w-4 h-4" />
                                     Logout
                                 </button>
@@ -267,21 +278,31 @@ export default function NavBar() {
                                          </div>
                                     </div>
                                     <ul className="space-y-1">
-                                         <li>
-                                            <Link href="/order-history" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                <History className="w-5 h-5" /> History
-                                            </Link>
-                                         </li>
-                                         <li>
-                                            <Link href="/bookmark" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                <Bookmark className="w-5 h-5" /> Bookmark
-                                            </Link>
-                                         </li>
-                                         <li>
-                                            <Link href="/profile" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                <UserIcon className="w-5 h-5" /> Profile
-                                            </Link>
-                                         </li>
+                                         {user.level === 'ADMIN' ? (
+                                            <li>
+                                                <Link href="/admin/dashboard" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                    <LayoutDashboard className="w-5 h-5" /> Dashboard
+                                                </Link>
+                                            </li>
+                                         ) : (
+                                            <>
+                                                <li>
+                                                    <Link href="/order-history" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                        <History className="w-5 h-5" /> History
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link href="/bookmark" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                        <Bookmark className="w-5 h-5" /> Bookmark
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link href="/profile" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
+                                                        <UserIcon className="w-5 h-5" /> Profile
+                                                    </Link>
+                                                </li>
+                                            </>
+                                         )}
                                          <li>
                                             <button onClick={handleLogout} className="flex w-full items-center justify-center gap-2 p-2 text-red-600 hover:bg-red-50 rounded-lg">
                                                 <LogOut className="w-5 h-5" /> Logout
