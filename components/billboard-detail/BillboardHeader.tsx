@@ -1,13 +1,21 @@
-import { MapPinIcon, SendIcon, BookmarkIcon } from 'lucide-react';
+import { BookmarkIcon, MapPinIcon, SendIcon } from 'lucide-react';
 import React from 'react';
 
 interface BillboardHeaderProps {
   title: string;
   location: string;
   onShare: () => void;
+  isBookmarked: boolean;
+  onToggleBookmark: () => void;
 }
 
-const BillboardHeader: React.FC<BillboardHeaderProps> = ({ title, location, onShare }) => (
+const BillboardHeader: React.FC<BillboardHeaderProps> = ({ 
+  title, 
+  location, 
+  onShare, 
+  isBookmarked, 
+  onToggleBookmark 
+}) => (
   <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
     <div>
       <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight mb-4">{title}</h1>
@@ -25,10 +33,15 @@ const BillboardHeader: React.FC<BillboardHeaderProps> = ({ title, location, onSh
         <SendIcon className="w-5 h-5" />
       </button>
       <button
-        className="p-3 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-        aria-label="Bookmark"
+        onClick={onToggleBookmark}
+        className={`p-3 border rounded-full transition cursor-pointer ${
+          isBookmarked 
+            ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90' 
+            : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+        }`}
+        aria-label={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       >
-        <BookmarkIcon className="w-5 h-5" />
+        <BookmarkIcon className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
       </button>
     </div>
   </div>
