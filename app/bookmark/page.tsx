@@ -1,19 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
 import BookmarkHeader from '@/components/bookmark/BookmarkHeader';
 import BookmarkList from '@/components/bookmark/BookmarkList';
+import React, { useEffect, useState } from 'react';
+import { fetchBookmarks, removeBookmark } from '../../services/bookmarkService';
 import type { Bookmark } from '../../types';
-import { MOCK_BOOKMARKS } from '../../services/bookmarkService';
 
 import NavBar from '@/components/NavBar';
 import FootBar from '@/components/footer/FootBar';
 
 
 const BookmarksPage: React.FC = () => {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(MOCK_BOOKMARKS);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  // Filter State
+  const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    loadBookmarks();
+  }, []);
+
+  const loadBookmarks = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchBookmarks();
+      setBookmarks(data);
+    } catch (error) {
+      console.error("Failed to load bookmarks", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleToggleEdit = () => {
     setIsEditing(!isEditing);
@@ -27,7 +49,7 @@ const BookmarksPage: React.FC = () => {
 
   const handleSelectAll = (isChecked: boolean) => {
     if (isChecked) {
-      const allIds = new Set(bookmarks.map(b => b.id));
+      const allIds = new Set(filteredBookmarks.map(b => b.id)); // Select only visible
       setSelectedIds(allIds);
     } else {
       setSelectedIds(new Set());
@@ -44,14 +66,53 @@ const BookmarksPage: React.FC = () => {
     setSelectedIds(newSelectedIds);
   };
   
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
+    
+    const previousBookmarks = [...bookmarks];
     setBookmarks(bookmarks.filter(b => !selectedIds.has(b.id)));
-    setSelectedIds(new Set());
     setIsEditing(false);
+
+    try {
+        const deletePromises = Array.from(selectedIds).map(id => removeBookmark(id));
+        await Promise.all(deletePromises);
+        
+        await loadBookmarks();
+    } catch (error) {
+        console.error("Failed to delete bookmarks", error);
+        setBookmarks(previousBookmarks);
+        alert("Gagal menghapus bookmark");
+    }
+    
+    setSelectedIds(new Set());
   };
 
-  const allSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length;
+  // Filter Logic
+  const filteredBookmarks = bookmarks.filter(b => {
+    // Status Filter
+    if (filterStatus) {
+        if (filterStatus === 'Tersedia' && !b.statusAvailable) return false;
+        if (filterStatus === 'Tidak Tersedia' && b.statusAvailable) return false;
+    }
+    // Category Filter
+    if (filterCategory) {
+        if (b.type !== filterCategory) return false;
+    }
+    
+    // Search Query Filter
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchMerchant = b.merchant.toLowerCase().includes(query);
+        const matchType = b.type.toLowerCase().includes(query);
+        const matchLocation = b.location.toLowerCase().includes(query);
+        
+        if (!matchMerchant && !matchType && !matchLocation) return false;
+    }
+
+    return true;
+  });
+
+  const allSelected = filteredBookmarks.length > 0 && selectedIds.size === filteredBookmarks.length;
 
   return (
     <div className="bg-white min-h-screen">
@@ -63,6 +124,17 @@ const BookmarksPage: React.FC = () => {
             onToggleEdit={handleToggleEdit}
             onDone={handleDone}
             onDelete={handleDeleteSelected}
+            filterStatus={filterStatus}
+            filterCategory={filterCategory}
+            onFilterStatus={setFilterStatus}
+            onFilterCategory={setFilterCategory}
+            onResetFilters={() => {
+                setFilterStatus(null);
+                setFilterCategory(null);
+                setSearchQuery("");
+            }}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
         />
         {isEditing && (
             <div className="flex items-center mt-6 py-2">
@@ -78,12 +150,17 @@ const BookmarksPage: React.FC = () => {
                 </label>
             </div>
         )}
-        <BookmarkList
-          bookmarks={bookmarks}
-          isEditing={isEditing}
-          selectedIds={selectedIds}
-          onSelectOne={handleSelectOne}
-        />
+        
+        {loading ? (
+            <div className="py-8 text-center">Loading bookmarks...</div>
+        ) : (
+            <BookmarkList
+            bookmarks={filteredBookmarks}
+            isEditing={isEditing}
+            selectedIds={selectedIds}
+            onSelectOne={handleSelectOne}
+            />
+        )}
       </div>
 
       <FootBar />
