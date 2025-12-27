@@ -89,6 +89,13 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
     setListings(mapped);
   }, [billboards]);
 
+  // Check if Google Maps is already loaded (navigating back to page)
+  useEffect(() => {
+    if (window.google?.maps) {
+      setMapsReady(true);
+    }
+  }, []);
+
   /* Init Google Map - Run ONLY ONCE */
   useEffect(() => {
     if (!mapsReady || !mapRef.current || googleMapRef.current) return;

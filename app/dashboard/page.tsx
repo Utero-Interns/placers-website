@@ -101,7 +101,9 @@ export default function DashboardPage() {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-           <Image src="/placers-logo.png" alt="Placers" width={100} height={30} className="h-8 w-auto" />
+           <Link href="/">
+             <Image src="/placers-logo.png" alt="Placers" width={150} height={45} className="h-10 w-auto" />
+           </Link>
         </div>
         
         <div className="p-4 space-y-2">
