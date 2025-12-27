@@ -55,7 +55,6 @@ export class UserDashboard {
       if (this.currentModalAction) this.currentModalAction();
     });
 
-    const modalOverlay = this.root.querySelector('.modal-overlay');
     const closeBtns = this.root.querySelectorAll('.modal-close, .close-modal');
     closeBtns.forEach(btn => btn.addEventListener('click', () => this.closeModal()));
   }
@@ -123,7 +122,7 @@ export class UserDashboard {
   }
 
   private renderLayout() {
-    const profilePicture = (this.user as any).profilePicture;
+    const profilePicture = (this.user as User).profilePicture;
     const username = this.user.username || 'User';
 
     this.root.innerHTML = `
@@ -423,7 +422,7 @@ export class UserDashboard {
                     </ul>
                 </div>
             `;
-    } catch (error) {
+    } catch {
       container.innerHTML = `<div class="text-red-500">Error loading history</div>`;
     }
   }
@@ -599,7 +598,7 @@ export class UserDashboard {
         }
       });
 
-    } catch (error) {
+    } catch {
       container.innerHTML = `<div class="text-red-500">Error loading profile data</div>`;
     }
   }
