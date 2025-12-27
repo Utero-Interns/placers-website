@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",
+    "@hookform/resolvers": "^5.2.2",
+    "@react-google-maps/api": "^2.20.8",
     "iconsax-react": "^0.0.8",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
@@ -17,7 +19,10 @@
     "next": "15.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-leaflet": "^5.0.0"
+    "react-hook-form": "^7.68.0",
+    "react-leaflet": "^5.0.0",
+    "sonner": "^2.0.7",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

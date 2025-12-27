@@ -26,7 +26,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
           type="button"
           onClick={onBack}
           disabled={isSubmitting}
-          className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 transition-colors"
+          className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 transition-colors cursor-pointer"
         >
           Sebelumnya
         </button>
@@ -35,7 +35,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         type="button"
         onClick={onNext}
         disabled={isNextDisabled || isSubmitting}
-        className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] rounded-lg shadow-sm hover:bg-[var(--color-primary)]/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] rounded-lg shadow-sm hover:bg-[var(--color-primary)]/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
       >
         {isSubmitting ? 'Submitting...' : isLastStep ? 'Lanjut Pembayaran' : 'Selanjutnya'}
       </button>

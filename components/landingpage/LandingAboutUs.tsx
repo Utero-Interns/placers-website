@@ -4,15 +4,14 @@ export default function LandingAboutUs() {
     return (
         <section
             id="about-us"
-            className="flex items-center justify-center bg-white w-full px-4 mt-8 md:mt-12 lg:mt-16"
+            className="flex items-center justify-center bg-white w-full px-4 mt-4 md:mt-6 lg:mt-8"
         >
             <div
-                className="flex flex-col items-center border-4 rounded-2xl border-dashed border-[var(--color-primary)] w-11/12 space-y-4 
-                           py-8 px-4 
-                           md:py-10 md:px-8 
-                           lg:py-12 lg:px-16 
-                           xl:py-14 xl:px-24 
-                           2xl:py-16 2xl:px-40"
+                className="flex flex-col items-center border-2 md:border-4 rounded-2xl border-dashed border-[var(--color-primary)] w-full max-w-6xl space-y-3 
+                           py-6 px-4 
+                           md:py-8 md:px-12 
+                           lg:py-10 lg:px-24 
+                           xl:py-12 xl:px-32"
             >
                 <SectionTag
                     text="ABOUT US"
@@ -20,20 +19,23 @@ export default function LandingAboutUs() {
                     textColor="white"
                 />
                 <h1
-                    className="text-black font-bold text-center 
-                               text-2xl 
-                               lg:text-3xl 
-                               2xl:text-4xl"
+                    className="text-black font-bold text-center leading-tight
+                               text-lg
+                               md:text-xl
+                               lg:text-2xl
+                               xl:text-3xl"
                 >
                     Billboardmu, Kapanpun, Dimanapun
                 </h1>
                 <p
-                    className="text-black text-center text-lg"
+                    className="text-black text-center leading-relaxed max-w-4xl
+                               text-xs
+                               md:text-sm
+                               lg:text-base"
                 >
                     Placers adalah divisi dari PT Utero Kreatif Indonesia, perusahaan kreatif dengan pengalaman lebih dari 25 tahun. Hadir sebagai solusi masa depan periklanan luar ruang, Placers menyatukan teknologi, transparansi, dan kemudahan dalam satu platform.
                 </p>
             </div>
-
         </section>
     );
 }
