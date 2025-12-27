@@ -1,18 +1,18 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import { fetchBillboardById } from '@/services/billboardService';
-import type { BillboardDetailApiResponse } from '@/types';
-import type { Rating } from '@/types';
+import { addBookmark, fetchBookmarks, removeBookmark } from '@/services/bookmarkService';
+import type { BillboardDetailApiResponse, Rating } from '@/types';
+import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 import LoadingScreen from '@/components/LoadingScreen';
-import BillboardImage from '@/components/billboard-detail/BillboardImage';
+import NavBar from '@/components/NavBar';
 import BillboardHeader from '@/components/billboard-detail/BillboardHeader';
-import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
+import BillboardImage from '@/components/billboard-detail/BillboardImage';
 import BillboardPriceCTA from '@/components/billboard-detail/BillboardPriceCTA';
 import BillboardReviews from '@/components/billboard-detail/BillboardReview';
+import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
 import ShareModal from '@/components/billboard-detail/ShareModal';
-import NavBar from '@/components/NavBar';
 import FootBar from '@/components/footer/FootBar';
 
 const BillboardPage: React.FC = () => {
@@ -20,21 +20,47 @@ const BillboardPage: React.FC = () => {
   const [billboardData, setBillboardData] = useState<BillboardDetailApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       try {
-        const data = await fetchBillboardById(id);
+        const [data, bookmarks] = await Promise.all([
+            fetchBillboardById(id),
+            fetchBookmarks()
+        ]);
         setBillboardData(data);
+        
+        const isBm = bookmarks.some(b => b.id === id);
+        setIsBookmarked(isBm);
       } catch (err) {
-        console.error('Failed to fetch billboard:', err);
+        console.error('Failed to fetch billboard data:', err);
       } finally {
         setLoading(false);
       }
     };
     load();
   }, [id]);
+
+  const handleToggleBookmark = async () => {
+    if (!id) return;
+    
+    const previousState = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+
+    let success;
+    if (previousState) {
+        success = await removeBookmark(id);
+    } else {
+        success = await addBookmark(id);
+    }
+
+    if (!success) {
+        setIsBookmarked(previousState);
+        alert("Gagal mengubah status bookmark");
+    }
+  };
 
   if (loading) return <LoadingScreen />;
   if (!billboardData) return <div className="flex justify-center items-center min-h-screen">Billboard not found</div>;
@@ -73,7 +99,13 @@ const BillboardPage: React.FC = () => {
             />
 
             <div className="p-6 md:p-10 space-y-10">
-              <BillboardHeader title={billboard.category.name} location={fullLocation} onShare={() => setShareModalOpen(true)} />
+              <BillboardHeader 
+                title={billboard.category.name} 
+                location={fullLocation} 
+                onShare={() => setShareModalOpen(true)}
+                isBookmarked={isBookmarked}
+                onToggleBookmark={handleToggleBookmark} 
+               />
               <BillboardSpecs size={billboard.size} orientation={billboard.orientation} display={billboard.display} />
               <BillboardPriceCTA rating={averageRating} price={billboard.rentPrice} isAvailable={isAvailable} billboardId={billboard.id} />
 

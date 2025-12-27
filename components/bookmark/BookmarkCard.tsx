@@ -1,7 +1,9 @@
+import { Grid2X2, MapPin, PanelLeftOpen, Rotate3D, Star } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 import type { Bookmark } from '../../types';
-import { MapPin, Star, Grid2X2, Rotate3D, PanelLeftOpen } from 'lucide-react';
-import Image from 'next/image';
+
+import { useRouter } from 'next/navigation';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -12,6 +14,17 @@ interface BookmarkCardProps {
 
 const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSelected, onSelect }) => {
   const { id, merchant, type, location, size, orientation, sides, rating, price, imageUrl, avatarUrl } = bookmark;
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    if (!isEditing) {
+      router.push(`/billboard-detail/${id}`);
+    } else {
+        // Optional: Toggle selection on click even in edit mode? 
+        // For now, let's keep selection strict to the checkbox to avoid confusion
+        onSelect(id, !isSelected);
+    }
+  };
 
   return (
     <div className="flex items-center gap-4">
@@ -25,7 +38,13 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({ bookmark, isEditing, isSele
           />
         </div>
       )}
-      <div className={`flex-grow flex flex-col md:flex-row items-center bg-white rounded-2xl p-4 transition-all duration-300 border w-full ${isSelected && isEditing ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-gray-200'}`}>
+      <div 
+        onClick={handleCardClick}
+        className={`flex-grow flex flex-col md:flex-row items-center bg-white rounded-2xl p-4 transition-all duration-300 border w-full 
+        ${isSelected && isEditing ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-gray-200'}
+        ${!isEditing ? 'cursor-pointer hover:shadow-lg hover:border-[var(--color-primary)]' : 'cursor-pointer'}
+        `}
+      >
         
         <div className="flex-shrink-0 w-full md:w-56 relative">
         <Image

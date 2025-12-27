@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Search } from 'lucide-react';
+import React from 'react';
 import { Dropdown } from './Dropdown';
 
 interface BookmarkHeaderProps {
@@ -7,18 +7,36 @@ interface BookmarkHeaderProps {
     onToggleEdit: () => void;
     onDone: () => void;
     onDelete: () => void;
+    filterStatus: string | null;
+    filterCategory: string | null;
+    onFilterStatus: (value: string | null) => void;
+    onFilterCategory: (value: string | null) => void;
+    onResetFilters: () => void;
+    searchQuery: string;
+    onSearchChange: (value: string) => void;
 }
 
-const BookmarkHeader: React.FC<BookmarkHeaderProps> = ({ isEditing, onToggleEdit, onDone, onDelete }) => {
-
-    const [status, setStatus] = useState<string | null>(null);
-    const [kategori, setKategori] = useState<string | null>(null);
+const BookmarkHeader: React.FC<BookmarkHeaderProps> = ({ 
+    isEditing, 
+    onToggleEdit, 
+    onDone, 
+    onDelete,
+    filterStatus,
+    filterCategory,
+    onFilterStatus,
+    onFilterCategory,
+    onResetFilters,
+    searchQuery,
+    onSearchChange
+}) => {
 
     const statusOptions = ['Tersedia', 'Tidak Tersedia'];
     const kategoriOptions = [
     'Billboard', 'Baliho', 'Bando Jalan', 'Videotron', 
     'Roadsign', 'Kereta Api', 'Pelabuhan', 'Transportasi', 'Lainnya'
     ];
+
+    const hasActiveFilters = filterStatus !== null || filterCategory !== null;
 
     return (
         <header className="flex flex-col justify-between items-start sm:items-center gap-4">
@@ -28,20 +46,44 @@ const BookmarkHeader: React.FC<BookmarkHeaderProps> = ({ isEditing, onToggleEdit
                 ">Disimpan</h1>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full justify-between">
-                <div className="flex items-center gap-[50px] flex-wrap">
-                    <button className={`px-4 py-2 text-sm font-semibold rounded-[10px] transition-colors text-white bg-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-gray-200 cursor-pointer`}>Semua</button>
-                    <Dropdown
-                    label="Status"
-                    options={statusOptions}
-                    selectedValue={status}
-                    onSelect={setStatus} // Pass the state setter function directly
-                    />
-                    <Dropdown
-                    label="Kategori"
-                    options={kategoriOptions}
-                    selectedValue={kategori}
-                    onSelect={setKategori} // Pass the state setter function
-                    />
+                <div className="flex items-center gap-4 flex-wrap flex-grow">
+                    
+                    {/* Search Input */}
+                    <div className="relative w-full sm:w-64 md:w-80">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <input
+                            type="text"
+                            placeholder="Cari bookmark..."
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 text-sm text-black border border-gray-300 rounded-[10px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-[50px] flex-wrap">
+                        <button 
+                            onClick={onResetFilters}
+                            className={`px-4 py-2 text-sm font-semibold rounded-[10px] transition-colors cursor-pointer 
+                            ${!hasActiveFilters 
+                                ? 'text-white bg-[var(--color-primary)]' 
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                            Semua
+                        </button>
+                        <Dropdown
+                        label="Status"
+                        options={statusOptions}
+                        selectedValue={filterStatus}
+                        onSelect={(val) => onFilterStatus(val)} 
+                        />
+                        <Dropdown
+                        label="Kategori"
+                        options={kategoriOptions}
+                        selectedValue={filterCategory}
+                        onSelect={(val) => onFilterCategory(val)} 
+                        />
+                    </div>
                 </div>
                 
 
