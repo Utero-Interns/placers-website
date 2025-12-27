@@ -392,7 +392,8 @@ tr:hover {
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   transform: scale(0.95);
   transition: transform 0.2s;
 }
@@ -407,6 +408,7 @@ tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modal-title {
@@ -425,6 +427,8 @@ tr:hover {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
@@ -433,6 +437,7 @@ tr:hover {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 /* Forms */
@@ -716,4 +721,28 @@ tr:hover {
   background-color: #fef2f2;
   color: var(--primary-red);
   font-weight: 500;
+}
+
+/* Error Modal */
+.modal-header.error {
+  border-bottom: 2px solid var(--primary-red);
+}
+
+.modal-header.error .modal-title {
+  color: var(--primary-red);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-icon-lg {
+  color: var(--primary-red);
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+}
+
+.error-modal-content {
+  text-align: center;
+  padding: 1rem;
 }

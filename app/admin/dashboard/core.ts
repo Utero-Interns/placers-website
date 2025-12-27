@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { store } from '../../lib/store';
 import { getImageUrl } from '../../lib/utils';
 
-type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Categories' | 'Designs' | 'Add-ons' | 'Cities' | 'Media' | 'My Profile';
+type ModuleName = 'Dashboard' | 'Users' | 'Sellers' | 'Billboards' | 'Transactions' | 'Recycle Bin' | 'Categories' | 'Designs' | 'Add-ons' | 'Cities' | 'Media' | 'My Profile';
 
 interface DashboardState {
     activeTab: ModuleName;
@@ -43,6 +43,7 @@ export class AdminDashboard {
         cities: any[];
         provinces: any[];
         media: any[];
+        recycleBin: any[];
         notifications: any[];
         unreadNotificationsCount: number;
         currentUser: any | null;
@@ -67,6 +68,7 @@ export class AdminDashboard {
             cities: [],
             provinces: [],
             media: [],
+            recycleBin: [],
             notifications: [],
             unreadNotificationsCount: 0,
             currentUser: null,
@@ -102,10 +104,10 @@ export class AdminDashboard {
 
     private async fetchCurrentUser() {
         try {
-            const res = await fetch('/api/proxy/auth/me', { credentials: 'include' });
+            const res = await fetch('/api/proxy/user/profile/me', { credentials: 'include' });
             if (res.ok) {
-                const data = await res.json();
-                this.apiData.currentUser = data.user || data.data || data; // Handle various response structures
+                const json = await res.json();
+                this.apiData.currentUser = json.data;
             }
         } catch (e) {
             console.error('Failed to fetch current user', e);
@@ -231,6 +233,137 @@ export class AdminDashboard {
         }
     }
 
+    private async fetchRecycleBin() {
+        try {
+            // Endpoint: GET http://utero.viewdns.net:3100/billboard/recycle-bin
+            const res = await fetch('/api/proxy/billboard/recycle-bin', {
+                credentials: 'include'
+            });
+            const json = await res.json();
+            console.log('Recycle Bin API Response:', json);
+            if (json.status && json.data) {
+                this.apiData.recycleBin = json.data;
+            } else if (Array.isArray(json)) {
+                this.apiData.recycleBin = json;
+            } else if (json.data && Array.isArray(json.data)) {
+                // Fallback if status is missing but data is there
+                this.apiData.recycleBin = json.data;
+            }
+        } catch (e) {
+            console.error('Failed to fetch recycle bin', e);
+        }
+    }
+
+    private async handleRestoreBillboard(id: string) {
+        try {
+            const res = await fetch(`/api/proxy/billboard/${id}/restore`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            if (res.ok) {
+                this.showToast('Billboard restored successfully', 'success');
+                await this.fetchRecycleBin();
+                this.updateModuleData(this.root.querySelector('#content-area')!);
+            } else {
+                const json = await res.json();
+                this.showToast(json.message || 'Failed to restore billboard', 'error');
+            }
+        } catch (e) {
+            console.error('Failed to restore billboard', e);
+            this.showToast('Failed to restore billboard', 'error');
+        }
+    }
+
+    private async handlePurgeBillboard(id: string) {
+        this.openConfirmModal(
+            'Delete Permanently',
+            'Are you sure you want to delete this billboard permanently? This action CANNOT be undone.',
+            async () => {
+                try {
+                    const res = await fetch(`/api/proxy/billboard/${id}/purge?confirm=true`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        this.showToast('Billboard deleted permanently', 'success');
+                        this.closeModal();
+                        await this.fetchRecycleBin();
+                        this.updateModuleData(this.root.querySelector('#content-area')!);
+                    } else {
+                        const json = await res.json();
+                        this.showToast(json.message || 'Failed to delete billboard', 'error');
+                        this.closeModal();
+                    }
+                } catch (e) {
+                    console.error('Failed to purge billboard', e);
+                    this.showToast('Failed to delete billboard', 'error');
+                }
+            }
+        );
+    }
+
+    private handleBulkDeleteTransactionsPrompt() {
+        // Create modal content for status selection
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <div class="form-group">
+                <label class="form-label">Select Status to Delete</label>
+                <select id="bulk-delete-status" class="form-control">
+                    <option value="PENDING">Pending</option>
+                    <option value="PAID">Paid</option>
+                    <option value="EXPIRED">Expired</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="CANCELLED">Cancelled</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem; color: #666;">
+                    Warning: This will permanently delete all transactions with the selected status.
+                </p>
+            </div>
+        `;
+
+        this.openConfirmModal(
+            'Bulk Delete Transactions',
+            content.outerHTML, // Use the outerHTML as the message content
+            async () => {
+                const select = document.querySelector('#bulk-delete-status') as HTMLSelectElement;
+                if (select && select.value) {
+                    await this.handleBulkDeleteTransactions(select.value);
+                }
+            },
+            'warning'
+        );
+    }
+
+    private async handleBulkDeleteTransactions(status: string) {
+        try {
+            this.showToast(`Deleting all ${status} transactions...`, 'info');
+
+            const res = await fetch('/api/proxy/transaction', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status }),
+                credentials: 'include'
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.status) {
+                this.showToast(json.message || `Successfully deleted ${json.deleted?.transactions || 0} transactions`, 'success');
+                this.closeModal();
+                await this.fetchTransactions();
+                this.updateModuleData(this.root.querySelector('#content-area')!);
+            } else {
+                this.showToast(json.message || 'Failed to bulk delete transactions', 'error');
+            }
+        } catch (e) {
+            console.error('Failed to bulk delete transactions', e);
+            this.showToast('Failed to execute bulk delete', 'error');
+        }
+    }
+
     private attachGlobalListeners() {
         // Mobile toggle
         document.addEventListener('click', (e: Event) => {
@@ -256,6 +389,7 @@ export class AdminDashboard {
 
     private renderLayout() {
         const username = this.apiData.currentUser?.username || 'Admin';
+        const profilePicture = this.apiData.currentUser?.profilePicture;
 
         this.root.innerHTML = `
       <div class="admin-container">
@@ -268,8 +402,10 @@ export class AdminDashboard {
           </nav>
           <div class="sidebar-footer">
             <div class="user-profile-section">
-              <div class="user-avatar">
-                ${username.charAt(0).toUpperCase()}
+              <div class="user-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                ${profilePicture
+                ? `<img src="/api/proxy/${profilePicture}" style="width: 100%; height: 100%; object-fit: cover;">`
+                : username.charAt(0).toUpperCase()}
               </div>
               <div class="user-info">
                  <span class="user-name">${username}</span>
@@ -285,7 +421,7 @@ export class AdminDashboard {
         <main class="main-content">
           <header class="top-header">
             <div style="display:flex; align-items:center; gap:1rem;">
-              <button class="mobile-toggle">☰</button>
+              <button class="mobile-toggle">â˜°</button>
               <h1 class="page-title">Dashboard</h1>
             </div>
           </header>
@@ -355,7 +491,7 @@ export class AdminDashboard {
             }
 
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDxWBSy8zVl_yCPrgacO7C0uEeYV2Px7wA&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GMAP_API_KEY}&libraries=places`;
             script.async = true;
             script.defer = true;
             script.onload = () => resolve();
@@ -376,10 +512,10 @@ export class AdminDashboard {
             { name: 'Sellers', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 21 3"/><path d="M3 3l18 18"/></svg>' }, // Placeholder icon, will replace with shop icon
             { name: 'Billboards', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
             { name: 'Transactions', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
+            { name: 'Recycle Bin', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' },
             { name: 'Categories', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>' },
             { name: 'Designs', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
             { name: 'Add-ons', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' },
-            { name: 'Cities', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M8 9v2"/><path d="M8 13v2"/><path d="M8 17v2"/><path d="M16 9v2"/><path d="M16 13v2"/><path d="M16 17v2"/></svg>' },
             { name: 'Media', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' },
             { name: 'My Profile', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' }
         ];
@@ -431,6 +567,8 @@ export class AdminDashboard {
             await this.fetchMedia();
         } else if (tab === 'Add-ons' && this.apiData.addons.length === 0) {
             await this.fetchAddons();
+        } else if (tab === 'Recycle Bin') {
+            await this.fetchRecycleBin(); // Always fetch fresh data for Recycle Bin
         }
 
         this.renderContent();
@@ -465,8 +603,8 @@ export class AdminDashboard {
                 <form id="admin-profile-form">
                     <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 2rem;">
                         <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: var(--primary-red); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; position: relative;">
-                            ${user.image
-                ? `<img id="admin-profile-preview" src="${getImageUrl(user.image)}" style="width:100%; height:100%; object-fit:cover;">`
+                            ${user.profilePicture
+                ? `<img id="admin-profile-preview" src="/api/proxy/${user.profilePicture}" style="width:100%; height:100%; object-fit:cover;">`
                 : `<span id="admin-profile-initial">${(user.username || 'A').charAt(0).toUpperCase()}</span>`
             }
                         </div>
@@ -529,6 +667,19 @@ export class AdminDashboard {
             e.preventDefault();
             const formData = new FormData(e.target as HTMLFormElement);
 
+            // Handle password fields - remove if empty to avoid validation error
+            const password = formData.get('password') as string;
+            if (!password || password.trim() === '') {
+                formData.delete('password');
+                formData.delete('confirmPassword');
+            }
+
+            // Ensure level is included and matches enum
+            if (!formData.has('level')) {
+                // Default to ADMIN if not present, but should ideally come from user data
+                formData.append('level', this.apiData.currentUser?.level || 'ADMIN');
+            }
+
             this.showToast('Updating profile...', 'info');
 
             try {
@@ -541,14 +692,19 @@ export class AdminDashboard {
                 const json = await res.json();
 
                 if (res.ok) {
-                    this.showToast('Profile updated successfully', 'success');
-                    this.fetchCurrentUser();
+                    this.openConfirmModal('Success', 'Profile updated successfully', async () => {
+                        window.location.reload();
+                    }, 'success');
                 } else {
-                    this.showToast(json.message || 'Update failed', 'error');
+                    this.openConfirmModal('Error', json.message || 'Update failed', async () => {
+                        window.location.reload();
+                    }, 'error');
                 }
             } catch (err) {
                 console.error(err);
-                this.showToast('Error updating profile', 'error');
+                this.openConfirmModal('Error', 'Error updating profile', async () => {
+                    window.location.reload();
+                }, 'error');
             }
         });
     }
@@ -607,7 +763,13 @@ export class AdminDashboard {
               </select>
             `).join('')}
           </div>
-          ${!['Sellers', 'Billboards', 'Media', 'Transactions'].includes(this.state.activeTab) ? '<button class="btn btn-primary add-new-btn">Add New</button>' : ''}
+          ${!['Sellers', 'Billboards', 'Media', 'Transactions', 'Recycle Bin'].includes(this.state.activeTab) ? '<button class="btn btn-primary add-new-btn">Add New</button>' : ''}
+          ${this.state.activeTab === 'Transactions' ? `
+            <button class="btn btn-danger bulk-delete-btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                Bulk Delete
+            </button>
+          ` : ''}
         </div>
         ${this.generateTableHTML(paginatedData, config.columns)}
         <div class="pagination">
@@ -667,6 +829,10 @@ export class AdminDashboard {
             } else {
                 this.openModal('Add New ' + this.state.activeTab.slice(0, -1)); // Simple singularization
             }
+        });
+
+        container.querySelector('.bulk-delete-btn')?.addEventListener('click', () => {
+            this.handleBulkDeleteTransactionsPrompt();
         });
 
         this.attachTableListeners(container);
@@ -829,6 +995,81 @@ export class AdminDashboard {
                 }
             });
         });
+
+        // Restore listeners
+        container.querySelectorAll('.action-restore').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLElement).dataset.id;
+                if (id) {
+                    this.handleRestoreBillboard(id);
+                }
+            });
+        });
+
+        // Purge listeners
+        container.querySelectorAll('.action-purge').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLElement).dataset.id;
+                if (id) {
+                    this.handlePurgeBillboard(id);
+                }
+            });
+        });
+    }
+
+
+    private getFilteredAndSortedData(data: any[]) {
+        if (!data) return [];
+        let result = [...data];
+
+        // Search
+        if (this.state.searchQuery) {
+            const q = this.state.searchQuery.toLowerCase();
+            const deepSearch = (obj: any, depth = 0): boolean => {
+                if (depth > 3) return false;
+                if (obj === null || obj === undefined) return false;
+                if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
+                    return String(obj).toLowerCase().includes(q);
+                }
+                if (typeof obj === 'object') {
+                    return Object.values(obj).some(val => deepSearch(val, depth + 1));
+                }
+                return false;
+            };
+            result = result.filter(item => deepSearch(item));
+        }
+
+        // Filters
+        if (this.state.filters) {
+            Object.keys(this.state.filters).forEach(key => {
+                const val = this.state.filters[key];
+                if (val && val !== '') {
+                    result = result.filter(item => String((item as any)[key]) === val);
+                }
+            });
+        }
+
+        // Sort
+        if (this.state.sortColumn) {
+            result.sort((a, b) => {
+                let valA = a[this.state.sortColumn!];
+                let valB = b[this.state.sortColumn!];
+
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (valA < valB) return this.state.sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return this.state.sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        return result;
+    }
+
+    private getPaginatedData(data: any[]) {
+        const start = (this.state.currentPage - 1) * this.state.itemsPerPage;
+        return data.slice(start, start + this.state.itemsPerPage);
     }
 
     private getModuleConfig() {
@@ -909,10 +1150,6 @@ export class AdminDashboard {
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
-                                <button class="action-btn delete action-delete" data-id="${row.id}" title="Delete Billboard"
-                                    style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fee2e2; color: #b91c1c; cursor: pointer; transition: all 0.2s;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                </button>
                             </div>
                         ` }
                     ],
@@ -943,16 +1180,35 @@ export class AdminDashboard {
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fef3c7; color: #b45309; cursor: pointer; transition: all 0.2s;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
                                 </button>
-                                <button class="action-btn delete action-delete" data-id="${row.id}" title="Delete Transaction"
-                                    style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fee2e2; color: #b91c1c; cursor: pointer; transition: all 0.2s;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                </button>
                             </div>
                         ` }
                     ],
                     filters: [
                         { key: 'status', label: 'Status', options: ['PENDING', 'PAID', 'COMPLETED', 'CANCELLED', 'REJECTED'] }
                     ]
+                };
+            case 'Recycle Bin':
+                return {
+                    data: this.apiData.recycleBin,
+                    columns: [
+                        { key: 'location', label: 'Location' },
+                        { key: 'cityName', label: 'City', render: (v: string, row: any) => v || row.city?.name || '-' },
+                        { key: 'deletedAt', label: 'Deleted At', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
+                        {
+                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                <button class="action-btn view action-restore" data-id="${row.id}" title="Restore" 
+                                    style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #dcfce7; color: #166534; cursor: pointer; transition: all 0.2s;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"/><path d="M3 3v9h9"/></svg>
+                                </button>
+                                <button class="action-btn delete action-purge" data-id="${row.id}" title="Delete Permanently"
+                                    style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fee2e2; color: #b91c1c; cursor: pointer; transition: all 0.2s;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                </button>
+                            </div>
+                        ` }
+                    ],
+                    filters: []
                 };
             case 'Categories':
                 return {
@@ -1419,68 +1675,12 @@ export class AdminDashboard {
                         }
                     );
                 }
+
             });
         });
     }
 
-    private getFilteredAndSortedData<T>(data: T[]) {
-        let result = [...data];
 
-        // Search
-        if (this.state.searchQuery) {
-            const q = this.state.searchQuery.toLowerCase();
-
-            // Helper for deep search
-            const deepSearch = (obj: any, depth = 0): boolean => {
-                if (depth > 3) return false; // Guard against too deep
-                if (obj === null || obj === undefined) return false;
-
-                if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
-                    return String(obj).toLowerCase().includes(q);
-                }
-
-                if (typeof obj === 'object') {
-                    return Object.values(obj).some(val => deepSearch(val, depth + 1));
-                }
-
-                return false;
-            };
-
-            result = result.filter(item => deepSearch(item));
-        }
-
-        // Filters
-        Object.keys(this.state.filters).forEach(key => {
-            const val = this.state.filters[key];
-            if (val) {
-                result = result.filter(item => String((item as any)[key]) === val);
-            }
-        });
-
-        // Sort
-        if (this.state.sortColumn) {
-            result.sort((a, b) => {
-                let valA = (a as any)[this.state.sortColumn!];
-                let valB = (b as any)[this.state.sortColumn!];
-
-                // Handle nested sort keys if needed, though current columns are mostly flat or handled by render.
-                // Simple sorting for now.
-                if (typeof valA === 'string') valA = valA.toLowerCase();
-                if (typeof valB === 'string') valB = valB.toLowerCase();
-
-                if (valA < valB) return this.state.sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return this.state.sortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-
-        return result;
-    }
-
-    private getPaginatedData<T>(data: T[]) {
-        const start = (this.state.currentPage - 1) * this.state.itemsPerPage;
-        return data.slice(start, start + this.state.itemsPerPage);
-    }
 
     private generateTableHTML<T>(data: T[], columns: ColumnConfig<T>[]) {
         if (data.length === 0) return '<div class="data-table-wrapper" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No data found</div>';
@@ -1493,7 +1693,7 @@ export class AdminDashboard {
               ${columns.map(col => `
                 <th data-col="${String(col.key)}">
                   ${col.label}
-                  ${this.state.sortColumn === String(col.key) ? (this.state.sortDirection === 'asc' ? '↑' : '↓') : ''}
+                  ${this.state.sortColumn === String(col.key) ? (this.state.sortDirection === 'asc' ? 'â†‘' : 'â†“') : ''}
                 </th>
               `).join('')}
             </tr>
@@ -1532,6 +1732,42 @@ export class AdminDashboard {
             case 'PENDING': return 'badge-warning';
             case 'CANCELLED': case 'REJECTED': return 'badge-danger';
             default: return 'badge-neutral';
+        }
+    }
+
+
+    // Error Modal
+    private openErrorModal(title: string, message: string) {
+        this.openModal(title);
+
+        const header = this.root.querySelector('.modal-header');
+        if (header) {
+            header.classList.add('error');
+            const titleEl = header.querySelector('.modal-title');
+            if (titleEl) {
+                // Add icon
+                titleEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem; color: var(--primary-red);"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg> ${title}`;
+            }
+        }
+
+        const body = this.root.querySelector('.modal-body');
+        if (body) {
+            body.innerHTML = `
+                <div class="error-modal-content">
+                    <div class="error-message" style="font-size: 1.1rem; color: var(--slate-dark); margin-bottom: 1.5rem;">
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+
+        const footer = this.root.querySelector('.modal-footer');
+        if (footer) {
+            footer.innerHTML = `
+                <button class="btn btn-primary" id="error-dismiss-btn" style="background-color: var(--primary-red); border-color: var(--primary-red);">Dismiss</button>
+            `;
+            const dismissBtn = footer.querySelector('#error-dismiss-btn');
+            if (dismissBtn) dismissBtn.addEventListener('click', () => this.closeModal());
         }
     }
 
@@ -1626,7 +1862,7 @@ export class AdminDashboard {
         }, 3000);
     }
 
-    private openConfirmModal(title: string, message: string, onConfirm: () => Promise<void> | void) {
+    private openConfirmModal(title: string, message: string, onConfirm: () => Promise<void> | void, type: 'success' | 'error' | 'warning' = 'warning') {
         const overlay = this.root.querySelector('.modal-overlay');
         const titleEl = this.root.querySelector('.modal-title');
         const body = this.root.querySelector('.modal-body');
@@ -1634,17 +1870,44 @@ export class AdminDashboard {
 
         if (overlay && titleEl && body && confirmBtn) {
             titleEl.textContent = title;
+
+            let iconColor = '#dc2626';
+            let iconBg = '#fee2e2';
+            let iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+            if (type === 'success') {
+                iconColor = '#16a34a'; // Green
+                iconBg = '#dcfce7';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            } else if (type === 'error') {
+                iconColor = '#dc2626'; // Red
+                iconBg = '#fee2e2';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            }
+
             body.innerHTML = `
-                <div class="modal-confirm-icon" style="background-color: #fee2e2; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #dc2626;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="modal-confirm-icon" style="background-color: ${iconBg}; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: ${iconColor};">
+                    ${iconSvg}
                 </div>
                 <div class="modal-confirm-title" style="text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">${title}</div>
                 <div class="modal-confirm-text" style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">${message}</div>
             `;
 
-            // Update confirm button style for destructive action
+            // Update confirm button style
             confirmBtn.className = 'btn btn-primary confirm-modal'; // Reset
             confirmBtn.textContent = 'Confirm';
+            confirmBtn.style.backgroundColor = '';
+            confirmBtn.style.borderColor = '';
+
+            if (type === 'error') {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.className = 'btn btn-danger confirm-modal';
+            } else if (type === 'success') {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.className = 'btn btn-success confirm-modal';
+                confirmBtn.style.backgroundColor = '#16a34a';
+                confirmBtn.style.borderColor = '#16a34a';
+            }
 
             this.currentModalAction = async () => {
                 await onConfirm();
@@ -1754,13 +2017,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to create user', 'error');
+                if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error creating user:', e);
-            this.showToast('An error occurred while creating the user', 'error');
+            this.openErrorModal('Error', 'An error occurred while creating the user');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -1791,9 +2055,22 @@ export class AdminDashboard {
             confirmBtn.style.display = 'none';
         }
 
-        // Re-enable save button helper when closing is handled by openModal default but we should check closeModal
-        // We need to ensure we reset the button display when opening other modals.
-        // I will add a reset in openModal.
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete User';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteUser(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
     }
 
     private renderViewUserDetails(user: any) {
@@ -1955,13 +2232,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update user', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error updating user:', e);
-            this.showToast('An error occurred while updating the user', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the user');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -1998,10 +2276,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete user', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting user:', e);
-                    this.showToast('An error occurred while deleting the user', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the user');
                 }
             }
         );
@@ -2014,7 +2293,24 @@ export class AdminDashboard {
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none';
 
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Seller';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteSeller(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
         fetch(`/api/proxy/seller/detail/${id}`)
+
             .then(res => res.json())
             .then(json => {
                 if (json.status && json.data) {
@@ -2108,10 +2404,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete seller', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting seller:', e);
-                    this.showToast('An error occurred while deleting the seller', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the seller');
                 }
             }
         );
@@ -2140,10 +2437,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete design', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting design:', e);
-                    this.showToast('An error occurred while deleting the design', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the design');
                 }
             }
         );
@@ -2160,7 +2458,24 @@ export class AdminDashboard {
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none';
 
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Design';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteDesign(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
         fetch(`/api/proxy/design/${id}`)
+
             .then(res => res.json())
             .then(json => {
                 if (json.status && json.data) {
@@ -2508,6 +2823,23 @@ export class AdminDashboard {
         this.openModal('Edit Design');
         const body = this.root.querySelector('.modal-body');
 
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Design';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteDesign(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
+
         if (body) {
             body.innerHTML = this.renderEditDesignForm(design);
             // Pass initial images (normalize array)
@@ -2698,10 +3030,11 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update design', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
         } catch (e) {
             console.error('Error updating design:', e);
-            this.showToast('An error occurred while updating the design', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the design');
         } finally {
             if (btn) {
                 btn.textContent = originalText;
@@ -2723,6 +3056,22 @@ export class AdminDashboard {
 
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none'; // View only
+
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Transaction';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteTransaction(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
 
         // Endpoint: GET http://utero.viewdns.net:3100/transaction/detail/{id} -> /api/proxy/transaction/detail/{id}
         fetch(`/api/proxy/transaction/detail/${id}`)
@@ -3015,13 +3364,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update status', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
             btn.textContent = originalText;
             btn.disabled = false;
 
         } catch (e) {
             console.error('Error updating transaction:', e);
-            this.showToast('An error occurred while updating status', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating status');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -3053,10 +3403,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete transaction', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting transaction:', e);
-                    this.showToast('An error occurred while deleting the transaction', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the transaction');
                 }
             }
         );
@@ -3075,6 +3426,11 @@ export class AdminDashboard {
                         method: 'DELETE'
                     });
 
+                    if (res.status === 409) {
+                        this.openErrorModal('Delete Failed', 'Cannot delete: Billboard has active transactions or dependencies.');
+                        return;
+                    }
+
                     const json = await res.json();
 
                     if (json.status) {
@@ -3087,10 +3443,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete billboard', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting billboard:', e);
-                    this.showToast('An error occurred while deleting the billboard', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the billboard');
                 }
             }
         );
@@ -3109,8 +3466,12 @@ export class AdminDashboard {
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none';
 
+
+
+
         // Endpoint: GET http://utero.viewdns.net:3100/billboard/detail/{id} -> /api/proxy/billboard/detail/{id}
         fetch(`/api/proxy/billboard/detail/${id}`)
+
             .then(res => res.json())
             .then(json => {
                 if (json.status && json.data) {
@@ -3378,8 +3739,11 @@ export class AdminDashboard {
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none';
 
+
+
         try {
             // Fetch required data in parallel
+
             const [detailsRes, _provRes, _cityRes] = await Promise.all([
                 fetch(`/api/proxy/billboard/detail/${id}`),
                 this.apiData.provinces.length === 0 ? this.fetchProvinces() : Promise.resolve(),
@@ -3923,13 +4287,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update billboard', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error updating billboard:', e);
-            this.showToast('Error updating billboard', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the billboard');
         }
     }
 
@@ -3994,13 +4359,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to create category', 'error');
+                if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error creating category:', e);
-            this.showToast('An error occurred while creating the category', 'error');
+            this.openErrorModal('Error', 'An error occurred while creating the category');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4018,6 +4384,23 @@ export class AdminDashboard {
 
         this.openModal('Edit Category');
         const body = this.root.querySelector('.modal-body');
+
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Category';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteCategory(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
         if (body) {
             body.innerHTML = this.renderEditCategoryForm(category);
         }
@@ -4075,13 +4458,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update category', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error updating category:', e);
-            this.showToast('An error occurred while updating the category', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the category');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4113,10 +4497,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete category', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting category:', e);
-                    this.showToast('An error occurred while deleting the category', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the category');
                 }
             }
         );
@@ -4185,13 +4570,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to create add-on', 'error');
+                if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error creating add-on:', e);
-            this.showToast('An error occurred while creating the add-on', 'error');
+            this.openErrorModal('Error', 'An error occurred while creating the add-on');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4207,6 +4593,23 @@ export class AdminDashboard {
 
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
         if (confirmBtn) confirmBtn.style.display = 'none';
+
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Add-on';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteAddon(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
 
         fetch(`/api/proxy/add-on/${id}`)
             .then(res => res.json())
@@ -4262,6 +4665,23 @@ export class AdminDashboard {
 
         this.openModal('Edit Add-on');
         const body = this.root.querySelector('.modal-body');
+
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete Add-on';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteAddon(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
 
         if (body) {
             body.innerHTML = this.renderEditAddonForm(addon);
@@ -4331,13 +4751,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update add-on', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error updating add-on:', e);
-            this.showToast('An error occurred while updating the add-on', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the add-on');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4368,10 +4789,11 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete add-on', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting add-on:', e);
-                    this.showToast('An error occurred while deleting the add-on', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the add-on');
                 }
             }
         );
@@ -4441,13 +4863,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to create city', 'error');
+                if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error creating city:', e);
-            this.showToast('An error occurred while creating the city', 'error');
+            this.openErrorModal('Error', 'An error occurred while creating the city');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4465,6 +4888,23 @@ export class AdminDashboard {
 
         this.openModal('Edit City');
         const body = this.root.querySelector('.modal-body');
+
+        // Add Delete Button functionality
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete City';
+        deleteBtn.style.marginRight = 'auto'; // Push to left
+        deleteBtn.onclick = () => this.handleDeleteCity(id);
+
+        const footer = this.root.querySelector('.modal-footer');
+        // Remove existing delete/extra buttons if any
+        const existingDelete = footer?.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (footer) {
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+
 
         if (body) {
             body.innerHTML = this.renderEditCityForm(city);
@@ -4526,13 +4966,14 @@ export class AdminDashboard {
                 }
             } else {
                 this.showToast(json.message || 'Failed to update city', 'error');
+                if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
             btn.textContent = originalText;
             btn.disabled = false;
         } catch (e) {
             console.error('Error updating city:', e);
-            this.showToast('An error occurred while updating the city', 'error');
+            this.openErrorModal('Error', 'An error occurred while updating the city');
             const btn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
             if (btn) {
                 btn.textContent = 'Save';
@@ -4563,12 +5004,14 @@ export class AdminDashboard {
                         }
                     } else {
                         this.showToast(json.message || 'Failed to delete city', 'error');
+                        if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
                     console.error('Error deleting city:', e);
-                    this.showToast('An error occurred while deleting the city', 'error');
+                    this.openErrorModal('Error', 'An error occurred while deleting the city');
                 }
             }
         );
     }
+
 }
