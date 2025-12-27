@@ -45,7 +45,6 @@ const mapStyle: google.maps.MapTypeStyle[] = [
   },
 ];
 
-/* 🔧 Fix LatLng vs LatLngLiteral */
 function toLatLngLiteral(
   pos: google.maps.LatLng | google.maps.LatLngLiteral
 ): google.maps.LatLngLiteral {
@@ -59,7 +58,13 @@ function toLatLngLiteral(
 export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsReady, setMapsReady] = useState(false);
+  const [isMapInitialized, setIsMapInitialized] = useState(false); 
   const [listings, setListings] = useState<Listing[]>([]);
+  
+  // Keep track of the map instance and clusterer
+  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const clustererRef = useRef<MarkerClusterer | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   /* Convert billboards → listings */
   useEffect(() => {
@@ -84,12 +89,12 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
     setListings(mapped);
   }, [billboards]);
 
-  /* Init Google Map */
+  /* Init Google Map - Run ONLY ONCE */
   useEffect(() => {
-    if (!mapsReady || !mapRef.current || listings.length === 0) return;
+    if (!mapsReady || !mapRef.current || googleMapRef.current) return;
 
     async function initMap() {
-      const { Map, InfoWindow } =
+      const { Map } =
         (await google.maps.importLibrary("maps")) as google.maps.MapsLibrary;
 
       const map = new Map(mapRef.current!, {
@@ -98,64 +103,117 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
         streetViewControl: false,
         fullscreenControl: false,
         clickableIcons: false,
+        center: { lat: -2.5489, lng: 118.0149 }, // Default center (Indonesia roughly)
+        zoom: 5,
       });
 
-      const infoWindow = new InfoWindow({ disableAutoPan: false });
-
-      const markers = listings.map((listing) => {
-        const marker = new google.maps.Marker({
-          position: { lat: listing.lat, lng: listing.lng },
-          icon: {
-            url: "/artboard.png",
-            scaledSize: new google.maps.Size(40, 40),
-          },
-        });
-
-        marker.addListener("click", () => {
-          infoWindow.setContent(popupContent(listing));
-          infoWindow.open(map, marker);
-        });
-
-        return marker;
-      });
-
-      const bounds = new google.maps.LatLngBounds();
-      markers.forEach((m) => bounds.extend(m.getPosition()!));
-      map.fitBounds(bounds);
-
-      new MarkerClusterer({
-        map,
-        markers,
-        renderer: {
-          render: (cluster: Cluster) => {
-            const position = toLatLngLiteral(cluster.position);
-
-            return new google.maps.Marker({
-              position,
-              icon: {
-                url:
-                  "data:image/svg+xml;charset=UTF-8," +
-                  encodeURIComponent(`
-                    <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
-                      <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
-                        ${cluster.count}
-                      </text>
-                    </svg>
-                  `),
-                scaledSize: new google.maps.Size(44, 44),
-              },
-              zIndex: Number(google.maps.Marker.MAX_ZINDEX) + cluster.count,
-            });
-          },
-        },
-      });
-
-      map.addListener("click", () => infoWindow.close());
+      googleMapRef.current = map;
+      setIsMapInitialized(true); // Signal that map is ready
     }
 
     initMap();
-  }, [mapsReady, listings]);
+  }, [mapsReady]);
+
+  /* Update Markers - Run when listings change OR map initializes */
+  useEffect(() => {
+    // Only proceed if map is initialized and we have listings (or empty listings to clear)
+    if (!googleMapRef.current) return;
+
+    async function updateMarkers() {
+        const { InfoWindow } = (await google.maps.importLibrary("maps")) as google.maps.MapsLibrary;
+        const map = googleMapRef.current!;
+
+        // 1. Clear existing markers and clusterer
+        if (clustererRef.current) {
+            clustererRef.current.clearMarkers();
+        }
+        markersRef.current.forEach(m => m.setMap(null));
+        markersRef.current = [];
+
+        // 2. Create new markers
+        const infoWindow = new InfoWindow({ disableAutoPan: false });
+
+        const newMarkers = listings.map((listing) => {
+            const marker = new google.maps.Marker({
+            position: { lat: listing.lat, lng: listing.lng },
+            icon: {
+                url: "/artboard.png",
+                scaledSize: new google.maps.Size(40, 40),
+            },
+            });
+
+            marker.addListener("click", () => {
+            infoWindow.setContent(popupContent(listing));
+            infoWindow.open(map, marker);
+            });
+
+            return marker;
+        });
+
+        markersRef.current = newMarkers;
+
+        // 3. Re-initialize Clusterer or Add markers to existing one
+        if (!clustererRef.current) {
+            clustererRef.current = new MarkerClusterer({
+                map,
+                markers: newMarkers,
+                renderer: {
+                    render: (cluster: Cluster) => {
+                        const position = toLatLngLiteral(cluster.position);
+
+                        return new google.maps.Marker({
+                            position,
+                            icon: {
+                                url:
+                                "data:image/svg+xml;charset=UTF-8," +
+                                encodeURIComponent(`
+                                    <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
+                                    <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
+                                        ${cluster.count}
+                                    </text>
+                                    </svg>
+                                `),
+                                scaledSize: new google.maps.Size(44, 44),
+                            },
+                            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + cluster.count,
+                        });
+                    },
+                },
+            });
+        } else {
+            clustererRef.current.addMarkers(newMarkers);
+        }
+
+        // 4. Fit bounds if we have listings
+        if (listings.length > 0) {
+            const bounds = new google.maps.LatLngBounds();
+            newMarkers.forEach((m) => bounds.extend(m.getPosition()!));
+
+            if (listings.length === 1) {
+                // If only one marker, center and zoom to a reasonable level
+                map.setCenter(newMarkers[0].getPosition()!);
+                map.setZoom(15);
+            } else {
+                // Determine bounds but check if points are too close
+                map.fitBounds(bounds);
+                
+                // Optional: Prevent zooming in too deep if points are very close
+                const listener = google.maps.event.addListener(map, "idle", () => { 
+                    if (map.getZoom()! > 15) {
+                         map.setZoom(15); 
+                    }
+                    google.maps.event.removeListener(listener); 
+                });
+            }
+        }
+        
+        // Close info window on map click
+        const listener = map.addListener("click", () => infoWindow.close());
+    }
+    
+    updateMarkers();
+  }, [listings, isMapInitialized]); // 🔥 Add isMapInitialized dependency
 
   return (
     <>
@@ -170,7 +228,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
   );
 }
 
-/* 🔥 ORIGINAL POPUP CONTENT — RESTORED */
+/* Pop up content */
 function popupContent(listing: Listing) {
   return `
     <a
