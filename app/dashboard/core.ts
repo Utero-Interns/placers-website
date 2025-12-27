@@ -1,5 +1,6 @@
 
 import { authService, User } from '../lib/auth';
+import { AddOn, Billboard, Seller, User as StoreUser, Transaction } from '../lib/store';
 
 // Use strict proxy path for all business logic
 const API_PREFIX = '/api/proxy';
@@ -20,6 +21,19 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'settings', label: 'Profile', icon: '⚙️', roles: ['SELLER'] }, // Mapped to /seller/me
   { id: 'upgrade', label: 'Upgrade to Seller', icon: '🚀', roles: ['BUYER'] },
 ];
+
+// Dashboard-specific DTO for Transaction Sales
+interface DashboardTransactionDTO extends Omit<Transaction, 'totalPrice' | 'billboardId' | 'buyerId' | 'sellerId'> {
+  totalPrice: string;
+  billboard: Billboard;
+  buyer: StoreUser;
+  addons: { addOn: AddOn }[];
+}
+
+interface HistoryActivity {
+  action: string;
+  createdAt: string;
+}
 
 export class UserDashboard {
   private root: HTMLElement;
@@ -184,7 +198,10 @@ export class UserDashboard {
     if (!navContainer) return;
 
     const role = this.user.level;
-    const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(role as any));
+    // Strict guard: ADMIN should not see this, only BUYER | SELLER logic applies
+    if (role === 'ADMIN') return;
+
+    const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(role));
 
     navContainer.innerHTML = visibleItems.map(item => `
         <div class="nav-item ${this.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}">
@@ -262,11 +279,11 @@ export class UserDashboard {
         const [billboards, sales] = await Promise.all([
           this.fetchApi('/billboard/myBillboards'),
           this.fetchApi('/transaction/mySales')
-        ]);
+        ]) as [Billboard[], DashboardTransactionDTO[]];
 
         const activeBillboards = Array.isArray(billboards) ? billboards.length : 0;
         const totalSales = Array.isArray(sales) ? sales.length : 0;
-        const revenue = Array.isArray(sales) ? sales.reduce((acc: any, t: any) => acc + (t.status === 'PAID' ? t.totalPrice : 0), 0) : 0;
+        const revenue = Array.isArray(sales) ? sales.reduce((acc: number, t: DashboardTransactionDTO) => acc + (t.status === 'PAID' ? (parseFloat(t.totalPrice) || 0) : 0), 0) : 0;
 
         statsHtml = `
                     <div class="stats-grid animate-fade-in">
@@ -311,7 +328,7 @@ export class UserDashboard {
 
   private async renderMyBillboards(container: Element) {
     try {
-      const billboards = await this.fetchApi('/billboard/myBillboards');
+      const billboards = await this.fetchApi('/billboard/myBillboards') as Billboard[];
 
       if (!Array.isArray(billboards)) throw new Error("Invalid format");
 
@@ -336,13 +353,13 @@ export class UserDashboard {
                             </tr>
                         </thead>
                         <tbody>
-                            ${billboards.length > 0 ? billboards.map((b: any) => `
+                            ${billboards.length > 0 ? billboards.map((b: Billboard) => `
                                 <tr>
                                     <td class="font-medium">${b.location}</td>
-                                    <td>${b.city || '-'}</td>
-                                    <td>${b.type || 'Standard'}</td>
-                                    <td>Rp ${b.price?.toLocaleString() || 0}</td>
-                                    <td><span class="badge ${b.status === 'Active' ? 'badge-success' : 'badge-neutral'}">${b.status}</span></td>
+                                    <td>${b.cityName || '-'}</td>
+                                    <td>${b.mode || 'Standard'}</td>
+                                    <td>Rp ${(b.rentPrice || b.sellPrice || 0).toLocaleString()}</td>
+                                    <td><span class="badge ${b.status === 'Available' ? 'badge-success' : 'badge-neutral'}">${b.status}</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline">Edit</button>
                                     </td>
@@ -365,7 +382,7 @@ export class UserDashboard {
 
   private async renderMySales(container: Element) {
     try {
-      const sales = await this.fetchApi('/transaction/mySales');
+      const sales = await this.fetchApi('/transaction/mySales') as DashboardTransactionDTO[];
 
       if (!Array.isArray(sales)) throw new Error("Invalid format");
 
@@ -382,11 +399,11 @@ export class UserDashboard {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sales.length > 0 ? sales.map((t: any) => `
+                            ${sales.length > 0 ? sales.map((t: DashboardTransactionDTO) => `
                                 <tr>
                                     <td class="font-mono text-sm">${t.id.substring(0, 8)}...</td>
                                     <td>${t.billboard?.location || 'Billboard Item'}</td>
-                                    <td>Rp ${t.totalPrice?.toLocaleString()}</td>
+                                    <td>Rp ${parseFloat(t.totalPrice || '0').toLocaleString()}</td>
                                     <td>${new Date(t.createdAt).toLocaleDateString()}</td>
                                     <td><span class="badge ${t.status === 'PAID' ? 'badge-success' : 'badge-warning'}">${t.status}</span></td>
                                 </tr>
@@ -402,7 +419,7 @@ export class UserDashboard {
 
   private async renderHistory(container: Element) {
     try {
-      const history = await this.fetchApi('/history/mine');
+      const history = await this.fetchApi('/history/mine') as HistoryActivity[];
 
       if (!Array.isArray(history)) throw new Error("Invalid format");
 
@@ -410,7 +427,7 @@ export class UserDashboard {
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
                     <h3 class="font-bold mb-4">Activity Log</h3>
                     <ul class="space-y-4">
-                        ${history.length > 0 ? history.map((h: any) => `
+                        ${history.length > 0 ? history.map((h: HistoryActivity) => `
                             <li class="flex items-start gap-4 pb-4 border-b border-slate-100 last:border-0">
                                 <div class="w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
                                 <div>
@@ -499,19 +516,19 @@ export class UserDashboard {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-75">
                              <div class="form-group">
                                 <label class="form-label">Company Name</label>
-                                <input type="text" class="form-control bg-slate-50" value="${(seller as any).companyName || ''}" readonly>
+                                <input type="text" class="form-control bg-slate-50" value="${(seller as Seller).companyName || ''}" readonly>
                             </div>
                              <div class="form-group">
                                 <label class="form-label">Full Name</label>
-                                <input type="text" class="form-control bg-slate-50" value="${(seller as any).fullname || ''}" readonly>
+                                <input type="text" class="form-control bg-slate-50" value="${(seller as Seller).fullname || ''}" readonly>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">KTP</label>
-                                <input type="text" class="form-control bg-slate-50" value="${(seller as any).ktp || ''}" readonly>
+                                <input type="text" class="form-control bg-slate-50" value="${(seller as Seller).ktp || ''}" readonly>
                             </div>
                             <div class="form-group col-span-2">
                                  <label class="form-label">Office Address</label>
-                                <input type="text" class="form-control bg-slate-50" value="${(seller as any).officeAddress || ''}" readonly>
+                                <input type="text" class="form-control bg-slate-50" value="${(seller as Seller).officeAddress || ''}" readonly>
                             </div>
                         </div>
                         <div class="mt-4 text-sm text-slate-500 text-right">
