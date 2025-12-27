@@ -472,7 +472,7 @@ export class AdminDashboard {
         this.renderSidebarNav();
 
         // Modal listeners
-        const modalOverlay = this.root.querySelector('.modal-overlay');
+        // const modalOverlay = this.root.querySelector('.modal-overlay');
         const closeBtns = this.root.querySelectorAll('.modal-close, .close-modal');
         closeBtns.forEach(btn => btn.addEventListener('click', () => this.closeModal()));
 
@@ -2572,7 +2572,7 @@ export class AdminDashboard {
 
                     if (body) {
                         body.innerHTML = this.renderViewDesignDetails(json.data);
-                        this.setupDesignCarousel(body, json.data);
+                        this.setupDesignCarousel(body);
                     }
                 } else {
                     this.showToast('Failed to load design details', 'error');
@@ -2657,7 +2657,7 @@ export class AdminDashboard {
         `;
     }
 
-    private setupDesignCarousel(container: Element, design: any) {
+    private setupDesignCarousel(container: Element) {
         const thumbnails = container.querySelectorAll('.carousel-thumbnail');
         const mainImage = container.querySelector('#carousel-main-image') as HTMLImageElement;
 
@@ -2766,20 +2766,20 @@ export class AdminDashboard {
 
     private handleFilesSelection(fileList: FileList, previewElement: Element) {
         const newFiles = Array.from(fileList);
-        let hasError = false;
+        // let hasError = false;
 
         for (const file of newFiles) {
             // Validate Max 10 Files Total
             if (this.selectedDesignFiles.length >= 10) {
                 this.showToast('Maximum 10 images allowed', 'error');
-                hasError = true;
+                // hasError = true;
                 break;
             }
 
             // Validate Size (5MB = 5 * 1024 * 1024 bytes)
             if (file.size > 5 * 1024 * 1024) {
                 this.showToast(`File ${file.name} is too large (Max 5MB)`, 'error');
-                hasError = true;
+                // hasError = true;
                 continue;
             }
 
@@ -3570,7 +3570,7 @@ export class AdminDashboard {
                         body.innerHTML = this.renderBillboardDetailView(json.data);
                         // Initialize map after render
                         setTimeout(() => this.initViewOnlyMap(json.data), 100);
-                        this.setupBillboardCarousel(body, json.data);
+                        this.setupBillboardCarousel(body);
                     }
                 } else {
                     this.showToast('Failed to load billboard details', 'error');
@@ -3753,7 +3753,7 @@ export class AdminDashboard {
         `;
     }
 
-    private setupBillboardCarousel(container: Element, billboard: any) {
+    private setupBillboardCarousel(container: Element) {
         const thumbnails = container.querySelectorAll('.carousel-thumbnail');
         const mainImage = container.querySelector('#billboard-main-image') as HTMLImageElement;
 
@@ -3832,7 +3832,7 @@ export class AdminDashboard {
         try {
             // Fetch required data in parallel
 
-            const [detailsRes, _provRes, _cityRes] = await Promise.all([
+            const [detailsRes] = await Promise.all([
                 fetch(`/api/proxy/billboard/detail/${id}`),
                 this.apiData.provinces.length === 0 ? this.fetchProvinces() : Promise.resolve(),
                 this.apiData.cities.length === 0 ? this.fetchCities() : Promise.resolve()
@@ -3847,7 +3847,7 @@ export class AdminDashboard {
                 if (body) {
                     body.innerHTML = this.renderEditBillboardForm(detailsJson.data);
                     this.initMapForBillboard(detailsJson.data);
-                    this.attachEditBillboardListeners(detailsJson.data);
+                    this.attachEditBillboardListeners();
                 }
 
                 if (confirmBtn) {
@@ -3967,7 +3967,7 @@ export class AdminDashboard {
         `;
     }
 
-    private attachEditBillboardListeners(billboard: any) {
+    private attachEditBillboardListeners() {
         const form = this.root.querySelector('#edit-billboard-form') as HTMLFormElement;
         if (!form) return;
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { store } from '../../lib/store';
+// import { store } from '../../lib/store';
 import { authService } from '../../lib/auth';
 
 function getImageUrl(path: string | null): string {
@@ -571,7 +571,7 @@ export class SellerDashboard {
             authService.logout().then(() => window.location.href = '/login');
         });
 
-        const modalOverlay = this.root.querySelector('.modal-overlay');
+        // const modalOverlay = this.root.querySelector('.modal-overlay');
         this.root.querySelectorAll('.modal-close, .close-modal').forEach(btn =>
             btn.addEventListener('click', () => this.closeModal())
         );
@@ -1010,7 +1010,7 @@ export class SellerDashboard {
                         try {
                             const json = await res.json();
                             if (json.message) msg = typeof json.message === 'string' ? json.message : JSON.stringify(json.message);
-                        } catch (e) { }
+                        } catch { }
                         this.showToast(msg, 'error');
                     }
                 } catch (error) {
@@ -1284,8 +1284,7 @@ export class SellerDashboard {
 
         try {
             // Fetch necessary data
-            const [billboardRes, provincesRes] = await Promise.all([
-                fetch(`/api/proxy/billboard/detail/${id}`),
+            const [billboardRes] = await Promise.all([
                 fetch(`/api/proxy/billboard/detail/${id}`),
                 this.apiData.provinces.length === 0 ? this.fetchProvinces().then(() => ({ ok: true })) : Promise.resolve({ ok: true }),
                 this.apiData.categories.length === 0 ? this.fetchCategories().then(() => ({ ok: true })) : Promise.resolve({ ok: true })
@@ -1320,9 +1319,9 @@ export class SellerDashboard {
 
     private renderBillboardForm(prefix: string, billboard: any = {}) {
         // Prepare image previews
-        let images: string[] = [];
-        if (Array.isArray(billboard.image)) images = billboard.image.map((img: any) => img.url || img);
-        else if (billboard.image) images = [billboard.image];
+        // let images: string[] = [];
+        // if (Array.isArray(billboard.image)) images = billboard.image.map((img: any) => img.url || img);
+        // else if (billboard.image) images = [billboard.image];
 
         return `
             <form id="${prefix}-billboard-form">
@@ -1907,12 +1906,12 @@ export class SellerDashboard {
         if (!form) return;
 
         const formData = new FormData(form);
-        const data: any = Object.fromEntries(formData.entries());
+        // const data: any = Object.fromEntries(formData.entries());
 
         // Process images
         const currentImages: (string | File)[] = (form as any).__currentImages || [];
-        const filesToUpload: File[] = [];
-        const existingImageUrls: string[] = [];  // Not really standard here, backend usually deletes all and replaces if we send list, OR we send diff.
+        // const filesToUpload: File[] = [];
+        // const existingImageUrls: string[] = [];  // Not really standard here, backend usually deletes all and replaces if we send list, OR we send diff.
         // Assuming backend handles "files" for new images. But what about existing?
         // Admin code re-hydrates existing images to Files if possible, effectively re-uploading everything or handling it.
         // Step 100 code: "Convert all images to Files... It's a URL... Fetch it and convert to Blob -> File"
@@ -2007,7 +2006,7 @@ export class SellerDashboard {
             } else {
                 this.showToast(json.message || 'Update failed', 'error');
             }
-        } catch (e) {
+        } catch {
             this.showToast('Error updating', 'error');
         }
     }
@@ -2024,7 +2023,7 @@ export class SellerDashboard {
                 } else {
                     this.showToast('Failed to delete', 'error');
                 }
-            } catch (e) { this.showToast('Error', 'error'); }
+            } catch { this.showToast('Error', 'error'); }
         });
     }
 
@@ -2050,7 +2049,7 @@ export class SellerDashboard {
                         body.innerHTML = this.renderBillboardDetailView(json.data);
                         // Initialize map after render
                         setTimeout(() => this.initViewOnlyMap(json.data), 100);
-                        this.setupBillboardCarousel(body, json.data);
+                        this.setupBillboardCarousel(body);
                     }
                 } else {
                     this.showToast('Failed to load billboard data', 'error');
@@ -2233,7 +2232,7 @@ export class SellerDashboard {
         `;
     }
 
-    private setupBillboardCarousel(container: Element, billboard: any) {
+    private setupBillboardCarousel(container: Element) {
         const thumbnails = container.querySelectorAll('.carousel-thumbnail');
         const mainImage = container.querySelector('#billboard-main-image') as HTMLImageElement;
 
@@ -2324,7 +2323,7 @@ export class SellerDashboard {
                     body.innerHTML = '<p class="text-red-500">Failed to load details.</p>';
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 this.root.querySelector('.modal-body')!.innerHTML = '<p>Error loading details.</p>';
             });
     }
@@ -2332,7 +2331,7 @@ export class SellerDashboard {
     private renderViewTransactionDetails(t: any) {
         if (!t) return 'No details available.';
         const formatRp = (v: any) => 'Rp ' + (Number(v) || 0).toLocaleString();
-        const formatDate = (v: any) => v ? new Date(v).toLocaleDateString() : '-';
+        // const formatDate = (v: any) => v ? new Date(v).toLocaleDateString() : '-';
 
         const buyer = t.buyer || t.user || {};
         const billboard = t.billboard || {};

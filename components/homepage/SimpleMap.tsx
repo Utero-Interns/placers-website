@@ -209,7 +209,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
         }
         
         // Close info window on map click
-        const listener = map.addListener("click", () => infoWindow.close());
+        map.addListener("click", () => infoWindow.close());
     }
     
     updateMarkers();
