@@ -1,9 +1,12 @@
 'use client';
 
+import { getImageUrl } from '@/app/lib/utils';
 import { ArrowLeft, Award, Calendar, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
+import { authService, User } from '@/app/lib/auth';
+import Image from 'next/image';
 
 interface UserDetail {
     id: string;
@@ -27,7 +30,7 @@ const SIDEBAR_ITEMS = [
 export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const [user, setUser] = useState<UserDetail | null>(null);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -55,7 +58,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                 } else {
                     setError(json.message || 'Failed to fetch user');
                 }
-            } catch (err) {
+            } catch {
                 setError('Network error or invalid response');
             } finally {
                 setLoading(false);
@@ -144,7 +147,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                         <div className="h-32 bg-gradient-to-r from-red-500 to-red-700 relative">
                             <div className="absolute -bottom-12 left-8">
                                 <div className="w-24 h-24 rounded-full border-4 border-white shadow-md bg-gray-200 overflow-hidden">
-                                    <img
+                                    <Image
                                         src={getImageUrl(user.profilePicture)}
                                         alt={user.username}
                                         className="w-full h-full object-cover"
