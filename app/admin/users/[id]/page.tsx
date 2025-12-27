@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { authService, User } from '@/app/lib/auth';
 import Image from 'next/image';
+import { Seller } from '@/app/lib/store';
 
 interface UserDetail {
     id: string;
@@ -18,7 +19,7 @@ interface UserDetail {
     profilePicture: string;
     createdAt: string;
     updatedAt: string;
-    seller: any;
+    seller: Seller;
 }
 
 const SIDEBAR_ITEMS = [
