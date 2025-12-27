@@ -3,37 +3,66 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { store } from '../lib/store';
+import { authService } from '@/app/lib/auth';
 import { UserDashboard } from './core';
 import './styles.css';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
+  // 1. Check Authentication
   useEffect(() => {
-    const user = store.getCurrentUser();
-    
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        // Fetch profile from API
+        const res = await authService.getProfile();
 
-    if (user.level === 'ADMIN') {
-      router.push('/admin/dashboard');
-      return;
-    }
+        if (res.error || (!res.user && !res.data)) {
+          // Not logged in or error
+          console.log("Auth failed or no user data", res);
+          router.push('/login');
+          return;
+        }
 
-    setIsAuthorized(true);
-    
-    // Initialize dashboard logic after render
-    setTimeout(() => {
-      new UserDashboard('user-dashboard-root', user);
-    }, 0);
+        const userData = res.user || res.data;
+
+        if (userData?.level === 'ADMIN') {
+          router.push('/admin/dashboard');
+          return;
+        }
+
+        // Valid BUYER or SELLER
+        setUser(userData);
+        setIsAuthorized(true);
+      } catch (err) {
+        console.error("Auth check failed", err);
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
+  // 2. Initialize Dashboard (Runs only after isAuthorized is true and DOM is rendered)
+  useEffect(() => {
+    if (isAuthorized && user) {
+      // Use a small timeout to ensure DOM is fully ready, although useEffect usually runs after render
+      const timer = setTimeout(() => {
+        // Prevent double initialization if possible or just init
+        // For Vanilla JS classes that attach to DOM, simple init is usually fine if idempotent or single run
+        if (document.getElementById('user-dashboard-root')) {
+          new UserDashboard('user-dashboard-root', user);
+        }
+      }, 50);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthorized, user]);
+
   if (!isAuthorized) {
-    return null; // Or a loading spinner
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>; // Simple loading state
   }
 
   return (

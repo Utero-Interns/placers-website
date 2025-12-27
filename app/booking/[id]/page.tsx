@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import NavBar from '@/components/NavBar';
+import { NavigationButtons } from '@/components/booking/NavigationButtons';
 import { Stepper } from '@/components/booking/Stepper';
-import { DataPemesananStep } from '@/components/booking/steps/DataPemesananStep';
 import { AddOnStep } from '@/components/booking/steps/AddOnStep';
+import { DataPemesananStep } from '@/components/booking/steps/DataPemesananStep';
 import { IncludeStep } from '@/components/booking/steps/IncludeStep';
 import { ReviewSubmitStep } from '@/components/booking/steps/ReviewSubmitStep';
-import { NavigationButtons } from '@/components/booking/NavigationButtons';
+import FootBar from '@/components/footer/FootBar';
 import { submitBooking } from '@/services/bookingService';
 import type { BookingFormData, Step } from '@/types';
-import { UserIcon, PuzzleIcon, PackageCheckIcon, SendIcon } from 'lucide-react';
-import NavBar from '@/components/NavBar';
-import FootBar from '@/components/footer/FootBar';
+import { PackageCheckIcon, PuzzleIcon, SendIcon, UserIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
 
 const steps: Step[] = [
   { name: 'Data Pemesanan', icon: UserIcon },
@@ -41,6 +42,7 @@ const initialFormData: BookingFormData = {
 };
 
 function Booking() {
+  const params = useParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +59,8 @@ function Booking() {
       setIsSubmitting(true);
       setSubmissionResult(null);
       try {
-        const result = await submitBooking(formData);
+        const billboardId = params?.id as string;
+        const result = await submitBooking(formData, billboardId);
         setSubmissionResult(result);
       } catch {
         setSubmissionResult({ success: false, message: 'An error occurred during submission.' });
@@ -75,7 +78,7 @@ function Booking() {
 
   const isNextDisabled = useMemo(() => {
     if (currentStep === 0) {
-      return !formData.nama || !formData.noTelepon || !formData.alamat;
+      return !formData.periodeAwal || !formData.periodeAkhir;
     }
     return false;
   }, [currentStep, formData]);
@@ -132,7 +135,7 @@ function Booking() {
         <header className="text-center mb-12 md:mb-16">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2">Lengkapi Form dibawah ini</h1>
           <p className="text-base sm:text-lg text-gray-500 max-w-3xl mx-auto">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ikuti langkah-langkah berikut untuk menyelesaikan proses pemesanan titik iklan Anda.
           </p>
         </header>
 
