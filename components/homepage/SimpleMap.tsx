@@ -2,6 +2,7 @@
 
 import { Billboard } from "@/types";
 import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
+import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
 declare global {
@@ -20,16 +21,8 @@ type Listing = {
 };
 
 const mapStyle: google.maps.MapTypeStyle[] = [
-  {
-    featureType: "poi",
-    elementType: "all",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "transit",
-    elementType: "all",
-    stylers: [{ visibility: "off" }],
-  },
+  { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
   {
     featureType: "road",
     elementType: "labels.text.stroke",
@@ -52,41 +45,52 @@ const mapStyle: google.maps.MapTypeStyle[] = [
   },
 ];
 
-export default function GoogleMap({ billboards }: { billboards: Billboard[] }) {
+/* 🔧 Fix LatLng vs LatLngLiteral */
+function toLatLngLiteral(
+  pos: google.maps.LatLng | google.maps.LatLngLiteral
+): google.maps.LatLngLiteral {
+  if (typeof (pos as google.maps.LatLng).lat === "function") {
+    const p = pos as google.maps.LatLng;
+    return { lat: p.lat(), lng: p.lng() };
+  }
+  return pos as google.maps.LatLngLiteral;
+}
+
+export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [mapsReady, setMapsReady] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
 
+  /* Convert billboards → listings */
   useEffect(() => {
-    if (billboards) {
-      const mappedListings: Listing[] = billboards
-        .map((b: Billboard) => {
-          const billboardImageUrl =
-            b.image?.length > 0
-              ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
-              : "/billboard-placeholder.png";
+    const mapped = billboards
+      .map((b) => {
+        const image =
+          b.image?.length > 0
+            ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
+            : "/billboard-placeholder.png";
 
-          return {
-            id: b.id,
-            type: b.category?.name || "Undefined",
-            address: b.location,
-            image: billboardImageUrl,
-            lat: Number(b.latitude),
-            lng: Number(b.longitude),
-          };
-        })
-        .filter((l) => !isNaN(l.lat) && !isNaN(l.lng));
+        return {
+          id: b.id,
+          type: b.category?.name || "Undefined",
+          address: b.location,
+          image,
+          lat: Number(b.latitude),
+          lng: Number(b.longitude),
+        };
+      })
+      .filter((l) => !isNaN(l.lat) && !isNaN(l.lng));
 
-      setListings(mappedListings);
-    }
+    setListings(mapped);
   }, [billboards]);
 
+  /* Init Google Map */
   useEffect(() => {
-    if (!mapRef.current || !window.google || listings.length === 0) return;
+    if (!mapsReady || !mapRef.current || listings.length === 0) return;
 
     async function initMap() {
-      const { Map, InfoWindow } = (await google.maps.importLibrary(
-        "maps"
-      )) as google.maps.MapsLibrary;
+      const { Map, InfoWindow } =
+        (await google.maps.importLibrary("maps")) as google.maps.MapsLibrary;
 
       const map = new Map(mapRef.current!, {
         styles: mapStyle,
@@ -98,7 +102,7 @@ export default function GoogleMap({ billboards }: { billboards: Billboard[] }) {
 
       const infoWindow = new InfoWindow({ disableAutoPan: false });
 
-      const markers: google.maps.Marker[] = listings.map((listing) => {
+      const markers = listings.map((listing) => {
         const marker = new google.maps.Marker({
           position: { lat: listing.lat, lng: listing.lng },
           icon: {
@@ -116,55 +120,57 @@ export default function GoogleMap({ billboards }: { billboards: Billboard[] }) {
       });
 
       const bounds = new google.maps.LatLngBounds();
-      markers.forEach((marker) => bounds.extend(marker.getPosition()!));
+      markers.forEach((m) => bounds.extend(m.getPosition()!));
       map.fitBounds(bounds);
-
-      // Create the cluster renderer
-      const clusterRenderer = {
-        render: (cluster: Cluster) => {
-          const count = cluster.count;
-          const position = cluster.position;
-          
-          const positionLiteral: google.maps.LatLngLiteral = {
-            lat: (typeof position.lat === 'function' ? position.lat() : position.lat) as number,
-            lng: (typeof position.lng === 'function' ? position.lng() : position.lng) as number,
-          };
-
-          return new google.maps.Marker({
-            position: positionLiteral,
-            icon: {
-              url:
-                "data:image/svg+xml;charset=UTF-8," +
-                encodeURIComponent(`
-                  <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
-                    <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
-                      ${count}
-                    </text>
-                  </svg>
-                `),
-              scaledSize: new google.maps.Size(44, 44),
-            },
-            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-          });
-        },
-      };
 
       new MarkerClusterer({
         map,
         markers,
-        renderer: clusterRenderer,
+        renderer: {
+          render: (cluster: Cluster) => {
+            const position = toLatLngLiteral(cluster.position);
+
+            return new google.maps.Marker({
+              position,
+              icon: {
+                url:
+                  "data:image/svg+xml;charset=UTF-8," +
+                  encodeURIComponent(`
+                    <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="22" cy="22" r="18" fill="#CE181E" stroke="white" stroke-width="3" />
+                      <text x="22" y="27" text-anchor="middle" font-size="14" font-weight="600" fill="white" font-family="Inter, Arial, sans-serif">
+                        ${cluster.count}
+                      </text>
+                    </svg>
+                  `),
+                scaledSize: new google.maps.Size(44, 44),
+              },
+              zIndex: Number(google.maps.Marker.MAX_ZINDEX) + cluster.count,
+            });
+          },
+        },
       });
 
       map.addListener("click", () => infoWindow.close());
     }
 
     initMap();
-  }, [listings]);
+  }, [mapsReady, listings]);
 
-  return <div ref={mapRef} className="w-full h-[500px] rounded-xl" />;
+  return (
+    <>
+      <div ref={mapRef} className="w-full h-[500px] rounded-xl" />
+
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+        strategy="afterInteractive"
+        onLoad={() => setMapsReady(true)}
+      />
+    </>
+  );
 }
 
+/* 🔥 ORIGINAL POPUP CONTENT — RESTORED */
 function popupContent(listing: Listing) {
   return `
     <a
