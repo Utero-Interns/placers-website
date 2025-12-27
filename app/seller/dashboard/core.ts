@@ -7,7 +7,7 @@ function getImageUrl(path: string | null): string {
     if (!path) return 'https://placehold.co/600x400?text=No+Image';
     if (path.startsWith('http')) return path;
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-    return `http://utero.viewdns.net:3100/${cleanPath}`;
+    return `/api/proxy/${cleanPath}`;
 }
 
 
@@ -50,6 +50,8 @@ export class SellerDashboard {
         history: any[];
         allCities: any[]; // Cache for all cities
         unseenNotifications: number;
+        notifications: any[];
+        stats: any | null;
     };
     private currentModalAction: (() => Promise<void>) | null = null;
 
@@ -67,7 +69,9 @@ export class SellerDashboard {
             categories: [],
             history: [],
             allCities: [], // Cache for all cities
-            unseenNotifications: 0
+            unseenNotifications: 0,
+            notifications: [],
+            stats: null
         };
         this.state = {
             activeTab: 'Dashboard',
@@ -80,6 +84,14 @@ export class SellerDashboard {
             isSidebarOpen: false
         };
 
+        // Check for stored active tab (e.g. after reload)
+        const storedTab = localStorage.getItem('seller_dashboard_active_tab') as ModuleName | null;
+        if (storedTab) {
+            this.state.activeTab = storedTab;
+            // Clear it so it doesn't persist on subsequent normal reloads
+            localStorage.removeItem('seller_dashboard_active_tab');
+        }
+
         this.init();
     }
 
@@ -91,6 +103,7 @@ export class SellerDashboard {
 
         // Fetch initial data
         await Promise.all([
+            this.fetchDashboardStats(),
             this.fetchMyBillboards(),
             this.fetchMyTransactions(),
             this.fetchMyProfile(),
@@ -98,23 +111,123 @@ export class SellerDashboard {
             this.fetchCategories()
         ]);
 
+        this.fetchUnreadCount();
+        this.attachFloatingNotificationListener();
+
         this.renderContent();
     }
 
+    private clearFieldErrors(form: HTMLElement) {
+        form.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+        form.querySelectorAll('.form-control').forEach(el => {
+            (el as HTMLElement).style.borderColor = '';
+        });
+    }
+
+    private displayFieldErrors(form: HTMLElement, errors: Record<string, string>) {
+        this.clearFieldErrors(form); // Clear old errors first
+        Object.entries(errors).forEach(([field, message]) => {
+            const input = form.querySelector(`[name="${field}"]`) as HTMLElement;
+            if (input) {
+                input.style.borderColor = '#dc2626';
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'field-error-msg';
+                errorDiv.textContent = message;
+                errorDiv.style.color = '#dc2626';
+                errorDiv.style.fontSize = '0.875rem';
+                errorDiv.style.marginTop = '0.25rem';
+
+                // Insert after the input
+                input.insertAdjacentElement('afterend', errorDiv);
+            }
+        });
+    }
+
     // Helper for confirmation modals
-    private openConfirmModal(title: string, message: string, onConfirm: () => Promise<void>) {
-        this.openModal(title, `<p>${message}</p>`, onConfirm);
+    private openConfirmModal(title: string, message: string, onConfirm: () => Promise<void>, type: 'success' | 'error' | 'warning' = 'warning') {
+        const overlay = this.root.querySelector('.modal-overlay');
+        const titleEl = this.root.querySelector('.modal-title');
+        const body = this.root.querySelector('.modal-body');
+        const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
+
+        if (overlay && titleEl && body && confirmBtn) {
+            titleEl.textContent = title;
+
+            let iconColor = '#dc2626';
+            let iconBg = '#fee2e2';
+            let iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+            if (type === 'success') {
+                iconColor = '#16a34a'; // Green
+                iconBg = '#dcfce7';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            } else if (type === 'error') {
+                iconColor = '#dc2626'; // Red
+                iconBg = '#fee2e2';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            }
+
+            body.innerHTML = `
+                <div class="modal-confirm-icon" style="background-color: ${iconBg}; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: ${iconColor};">
+                    ${iconSvg}
+                </div>
+                <div class="modal-confirm-title" style="text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">${title}</div>
+                <div class="modal-confirm-text" style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem;">${message}</div>
+            `;
+
+            // Update confirm button style
+            confirmBtn.className = 'btn btn-primary confirm-modal'; // Reset
+            confirmBtn.textContent = 'Confirm';
+            confirmBtn.style.backgroundColor = '';
+            confirmBtn.style.borderColor = '';
+
+            if (type === 'error') {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.className = 'btn btn-danger confirm-modal';
+            } else if (type === 'success') {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.className = 'btn btn-success confirm-modal';
+                confirmBtn.style.backgroundColor = '#16a34a';
+                confirmBtn.style.borderColor = '#16a34a';
+            } else if (type === 'warning') {
+                confirmBtn.textContent = 'Delete';
+                confirmBtn.className = 'btn btn-danger confirm-modal';
+                confirmBtn.style.backgroundColor = '#dc2626';
+                confirmBtn.style.borderColor = '#dc2626';
+            }
+
+            this.currentModalAction = async () => {
+                await onConfirm();
+            };
+
+            overlay.classList.add('open');
+        }
     }
 
     private async fetchCurrentUser() {
         try {
-            const res = await fetch('/api/proxy/auth/me', { credentials: 'include' });
+            const res = await fetch('/api/proxy/user/profile/me', { credentials: 'include' });
             if (res.ok) {
-                const data = await res.json();
-                this.apiData.currentUser = data.user || data.data || data;
+                const json = await res.json();
+                this.apiData.currentUser = json.data;
             }
         } catch (e) {
             console.error('Failed to fetch current user', e);
+        }
+    }
+
+    private async fetchDashboardStats() {
+        try {
+            const res = await fetch('/api/proxy/dashboard/stats', {
+                credentials: 'include'
+            });
+            const json = await res.json();
+            if (json && json.stats) {
+                this.apiData.stats = json.stats;
+            }
+        } catch (e) {
+            console.error('Failed to fetch dashboard stats', e);
         }
     }
 
@@ -124,6 +237,10 @@ export class SellerDashboard {
             const json = await res.json();
             if (json.status && json.data) {
                 this.apiData.billboards = json.data;
+            } else if (json.data) {
+                this.apiData.billboards = json.data;
+            } else if (Array.isArray(json)) {
+                this.apiData.billboards = json;
             }
         } catch (e) {
             console.error('Failed to fetch billboards', e);
@@ -136,6 +253,10 @@ export class SellerDashboard {
             const json = await res.json();
             if (json.status && json.data) {
                 this.apiData.transactions = json.data;
+            } else if (json.data) {
+                this.apiData.transactions = json.data;
+            } else if (Array.isArray(json)) {
+                this.apiData.transactions = json;
             }
         } catch (e) {
             console.error('Failed to fetch transactions', e);
@@ -219,10 +340,142 @@ export class SellerDashboard {
             const json = await res.json();
             if (json.status && json.data) {
                 this.apiData.history = json.data;
+            } else if (json.data) {
+                this.apiData.history = json.data;
+            } else if (Array.isArray(json)) {
+                this.apiData.history = json;
             }
         } catch (e) {
             console.error('Failed to fetch history', e);
         }
+    }
+
+    private async fetchUnreadCount() {
+        try {
+            const res = await fetch('/api/proxy/notification/seller/unread-count', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                this.apiData.unseenNotifications = data.count || data.data || 0;
+                this.updateNotificationBadge();
+            }
+        } catch (e) {
+            console.error('Failed to fetch unread count', e);
+        }
+    }
+
+    private updateNotificationBadge() {
+        const badge = this.root.querySelector('.notif-badge') as HTMLElement;
+        const btn = this.root.querySelector('.floating-notif-btn') as HTMLElement;
+
+        if (badge && btn) {
+            const count = this.apiData.unseenNotifications;
+            badge.textContent = count.toString();
+            badge.style.display = count > 0 ? 'flex' : 'none';
+
+            if (count > 0) {
+                btn.classList.add('ringing');
+            } else {
+                btn.classList.remove('ringing');
+            }
+        }
+    }
+
+    private async fetchNotifications() {
+        try {
+            const res = await fetch('/api/proxy/notification/seller', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                this.apiData.notifications = Array.isArray(data) ? data : (data.data || []);
+            }
+        } catch (e) {
+            console.error('Failed to fetch notifications', e);
+            this.showToast('Failed to load notifications', 'error');
+        }
+    }
+
+    private async markAllNotificationsRead() {
+        try {
+            const res = await fetch('/api/proxy/notification/seller/read-all', {
+                method: 'PATCH',
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('Failed to mark all read');
+        } catch (e) {
+            console.error('Failed to mark all notifications read', e);
+            this.showToast('Failed to mark all as read', 'error');
+        }
+    }
+
+    private async markNotificationRead(id: string) {
+        try {
+            const res = await fetch(`/api/proxy/notification/seller/${id}/read`, {
+                method: 'PATCH',
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('Failed to mark read');
+        } catch (e) {
+            console.error('Failed to mark notification read', e);
+        }
+    }
+
+    private attachFloatingNotificationListener() {
+        const notifBtn = this.root.querySelector('.floating-notif-btn');
+        notifBtn?.addEventListener('click', async () => {
+            this.openModal('Notifications', '<div class="loading-spinner">Loading...</div>');
+            const modalBody = this.root.querySelector('.modal-body');
+
+            if (modalBody) {
+                await this.fetchNotifications();
+                const notifications = this.apiData.notifications;
+
+                if (notifications.length === 0) {
+                    modalBody.innerHTML = '<div style="text-align:center; padding: 2rem; color: #64748b;">No notifications</div>';
+                } else {
+                    modalBody.innerHTML = `
+                        <div style="display: flex; justify-content: flex-end; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                                <button id="mark-all-read" style="background: none; border: none; color: var(--primary-red); font-weight: 500; cursor: pointer; font-size: 0.875rem;">Mark All as Read</button>
+                        </div>
+                        <div class="notifications-list">
+                            ${notifications.map((n: any) => `
+                                <div class="notification-item" data-id="${n.id}" style="padding: 1rem; border-bottom: 1px solid #e2e8f0; ${n.status === 'UNREAD' ? 'background: #f0f9ff;' : 'background: transparent;'}; cursor: pointer;">
+                                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${n.title}</div>
+                                    <div style="font-size: 0.875rem; color: #475569; margin-bottom: 0.5rem;">${n.message}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">${new Date(n.createdAt).toLocaleString()}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        `;
+
+                    // Attach Mark All Read listener
+                    modalBody.querySelector('#mark-all-read')?.addEventListener('click', async () => {
+                        await this.markAllNotificationsRead();
+                        // Update UI
+                        modalBody.querySelectorAll('.notification-item').forEach(item => {
+                            (item as HTMLElement).style.background = 'transparent';
+                        });
+                        this.fetchUnreadCount();
+                        this.showToast('All notifications marked as read', 'success');
+                    });
+
+                    // Attach click listeners to mark as read
+                    modalBody.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', async (e) => {
+                            const target = e.currentTarget as HTMLElement;
+                            const id = target.dataset.id;
+                            if (id) {
+                                await this.markNotificationRead(id);
+                                // Update UI to show read
+                                if (target) target.style.background = 'transparent';
+                                this.fetchUnreadCount(); // Update badge
+                            }
+                        });
+                    });
+                }
+                // Hide confirm button in modal for this view
+                const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLElement;
+                if (confirmBtn) confirmBtn.style.display = 'none';
+            }
+        });
     }
 
     private attachGlobalListeners() {
@@ -248,6 +501,7 @@ export class SellerDashboard {
 
     private renderLayout() {
         const username = this.apiData.currentUser?.username || 'Seller';
+        const profilePicture = this.apiData.currentUser?.profilePicture;
 
         this.root.innerHTML = `
             <div class="admin-container">
@@ -260,8 +514,10 @@ export class SellerDashboard {
                     </nav>
                     <div class="sidebar-footer">
                         <div class="user-profile-section">
-                            <div class="user-avatar">
-                                ${username.charAt(0).toUpperCase()}
+                            <div class="user-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                ${profilePicture
+                ? `<img src="/api/proxy/${profilePicture}" style="width: 100%; height: 100%; object-fit: cover;">`
+                : username.charAt(0).toUpperCase()}
                             </div>
                             <div class="user-info">
                                 <span class="user-name">${username}</span>
@@ -284,6 +540,12 @@ export class SellerDashboard {
                     <div id="content-area">
                         <div class="loading-spinner">Loading...</div>
                     </div>
+
+                    <!-- Floating Notification Button -->
+                    <button class="floating-notif-btn" title="Notifications">
+                        <div class="notif-badge" style="display: none;">0</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    </button>
                 </main>
             </div>
             <div class="toast-container"></div>
@@ -373,7 +635,8 @@ export class SellerDashboard {
         this.renderSidebarNav();
         this.root.querySelector('.page-title')!.textContent = tab;
 
-        if (tab === 'My Billboards') await this.fetchMyBillboards();
+        if (tab === 'Dashboard') await this.fetchDashboardStats();
+        else if (tab === 'My Billboards') await this.fetchMyBillboards();
         else if (tab === 'My Transactions') await this.fetchMyTransactions();
         else if (tab === 'My Profile') await this.fetchMyProfile();
         else if (tab === 'History') await this.fetchHistory();
@@ -399,14 +662,21 @@ export class SellerDashboard {
     }
 
     private renderDashboardOverview(container: Element) {
-        const stats = [
-            { label: 'My Billboards', value: this.apiData.billboards.length },
-            { label: 'My Sales', value: this.apiData.transactions.length },
+        const stats = this.apiData.stats || {};
+
+        const displayStats = [
+            { label: 'My Billboards', value: stats.myBillboards ?? (this.apiData.billboards.length || 0) },
+            { label: 'Active Listings', value: stats.activeListings ?? 0 },
+            { label: 'Rented / Sold', value: stats.rentedOrSold ?? 0 },
+            {
+                label: 'My Revenue',
+                value: stats.myRevenue ? `Rp ${Number(stats.myRevenue).toLocaleString()}` : 'Rp 0'
+            }
         ];
 
         container.innerHTML = `
             <div class="stats-grid">
-                ${stats.map(stat => `
+                ${displayStats.map(stat => `
                     <div class="stat-card">
                         <div class="stat-label">${stat.label}</div>
                         <div class="stat-value">${stat.value}</div>
@@ -421,7 +691,14 @@ export class SellerDashboard {
                 ${this.generateTableHTML(this.apiData.billboards.slice(0, 5), [
             { key: 'location', label: 'Location' },
             { key: 'status', label: 'Status' },
-            { key: 'rentPrice', label: 'Price', render: (v: any) => `Rp ${v.toLocaleString()}` }
+            {
+                key: 'rentPrice',
+                label: 'Price',
+                render: (_v: any, row: any) => {
+                    const price = row.rentPrice || row.sellPrice;
+                    return price ? `Rp ${Number(price).toLocaleString()}` : '-';
+                }
+            }
         ])}
             </div>
         `;
@@ -497,7 +774,7 @@ export class SellerDashboard {
                          <form id="user-profile-form">
                             <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 1.5rem; text-align:center;">
                                 <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: #f8fafc; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); margin-bottom: 1rem; position: relative;">
-                                    <img id="profile-preview-img" src="${c.image ? getImageUrl(c.image) : `https://ui-avatars.com/api/?name=${c.username || 'User'}&background=random`}" style="width:100%; height:100%; object-fit:cover;">
+                                    <img id="profile-preview-img" src="${c.profilePicture ? `/api/proxy/${c.profilePicture}` : `https://ui-avatars.com/api/?name=${c.username || 'User'}&background=random`}" style="width:100%; height:100%; object-fit:cover;">
                                 </div>
                                 <label for="profile-image-input" style="cursor:pointer; font-size:0.875rem; color:var(--primary-color); font-weight:500;">Change Picture</label>
                                 <input type="file" name="file" id="profile-image-input" style="display:none;">
@@ -519,11 +796,21 @@ export class SellerDashboard {
                             <div style="border-top: 1px dashed #e2e8f0; margin: 1.5rem 0; padding-top: 1.5rem;">
                                 <div class="form-group">
                                     <label class="form-label">New Password</label>
-                                    <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current">
+                                    <div style="position: relative;">
+                                        <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current" style="padding-right: 2.5rem;">
+                                        <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0.25rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Confirm Password</label>
-                                    <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm new password">
+                                    <div style="position: relative;">
+                                        <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm new password" style="padding-right: 2.5rem;">
+                                        <button type="button" class="toggle-password" data-target="confirmPassword" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0.25rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -547,10 +834,29 @@ export class SellerDashboard {
             }
         });
 
+        // Toggle Password Visibility
+        container.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetName = btn.getAttribute('data-target');
+                const input = container.querySelector(`input[name="${targetName}"]`) as HTMLInputElement;
+                if (input) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
+                    } else {
+                        input.type = 'password';
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+                    }
+                }
+            });
+        });
+
         userForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            const rawFormData = new FormData(e.target as HTMLFormElement);
+            const form = e.target as HTMLFormElement;
+            this.clearFieldErrors(form);
+
+            const rawFormData = new FormData(form);
 
             // Validation
             const p1 = rawFormData.get('password') as string;
@@ -593,16 +899,29 @@ export class SellerDashboard {
                 });
                 const json = await res.json();
                 if (res.ok) {
-                    this.showToast('User account updated!', 'success');
-                    this.fetchCurrentUser(); // Refresh
+                    this.openConfirmModal('Success', 'User account updated!', async () => {
+                        localStorage.setItem('seller_dashboard_active_tab', 'My Profile');
+                        window.location.reload();
+                    }, 'success');
                 } else {
-                    let msg = json.message || 'Update failed';
-                    if (Array.isArray(msg)) msg = msg.join(', ');
-                    this.showToast(msg, 'error');
+                    // Check if message is an object (field-specific errors)
+                    if (json.message && typeof json.message === 'object' && !Array.isArray(json.message)) {
+                        this.displayFieldErrors(form, json.message);
+                        this.showToast('Please check the form for errors', 'error');
+                    } else {
+                        // Fallback generic error
+                        let msg = json.message || 'Update failed';
+                        if (Array.isArray(msg)) msg = msg.join(', ');
+                        this.openConfirmModal('Error', msg, async () => {
+                            this.closeModal();
+                        }, 'error');
+                    }
                 }
             } catch (err) {
                 console.error(err);
-                this.showToast('Error updating user account', 'error');
+                this.openConfirmModal('Error', 'Error updating user account', async () => {
+                    this.closeModal();
+                }, 'error');
             }
         });
 
@@ -611,7 +930,10 @@ export class SellerDashboard {
         const sellerForm = container.querySelector('#seller-business-form');
         sellerForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
+            const form = e.target as HTMLFormElement;
+            this.clearFieldErrors(form);
+
+            const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
             this.showToast('Updating business details...', 'info');
@@ -627,47 +949,77 @@ export class SellerDashboard {
                 const json = await res.json();
 
                 if (res.ok) {
-                    this.showToast('Business details updated!', 'success');
-                    this.fetchMyProfile();
+                    this.openConfirmModal('Success', 'Business details updated!', async () => {
+                        localStorage.setItem('seller_dashboard_active_tab', 'My Profile');
+                        window.location.reload();
+                    }, 'success');
                 } else {
-                    let msg = 'Failed to update profile';
-                    if (json.message) {
-                        if (typeof json.message === 'string') {
-                            msg = json.message;
-                        } else if (typeof json.message === 'object') {
-                            msg = Object.values(json.message).join(', ');
+                    // Check if message is an object (field-specific errors)
+                    if (json.message && typeof json.message === 'object' && !Array.isArray(json.message)) {
+                        this.displayFieldErrors(form, json.message);
+                        this.showToast('Please check the form for errors', 'error');
+                    } else {
+                        // Generic fallback
+                        let msg = 'Failed to update profile';
+                        if (json.message) {
+                            if (typeof json.message === 'string') {
+                                msg = json.message;
+                            } else if (Array.isArray(json.message)) {
+                                msg = json.message.join(', ');
+                            }
                         }
+                        this.openConfirmModal('Error', msg, async () => {
+                            this.closeModal();
+                        }, 'error');
                     }
-                    this.showToast(msg, 'error');
                 }
             } catch (err) {
                 console.error(err);
-                this.showToast('Error updating business details', 'error');
+                this.openConfirmModal('Error', 'Error updating business details', async () => {
+                    this.closeModal();
+                }, 'error');
             }
         });
 
         container.querySelector('#delete-profile-btn')?.addEventListener('click', () => {
-            this.openConfirmModal('Delete Seller Profile', 'Are you sure you want to delete your seller profile? You will be reverted to a BUYER account and logged out.', async () => {
-                if (this.apiData.profile && this.apiData.profile.id) {
-                    try {
-                        const res = await fetch(`/api/proxy/seller/${this.apiData.profile.id}`, {
-                            method: 'DELETE',
-                            credentials: 'include'
-                        });
-                        if (res.ok) {
-                            await authService.logout();
-                            window.location.href = '/login';
-                        } else {
-                            this.showToast('Failed to delete profile', 'error');
-                        }
-                    } catch (err) {
-                        this.showToast('Error deleting profile', 'error');
-                    }
-                } else {
-                    this.showToast('Profile ID not found', 'error');
-                }
-            });
+            this.handleDeleteProfile();
         });
+    }
+
+    private async handleDeleteProfile() {
+        if (!this.apiData.profile?.id) {
+            this.showToast('Seller profile not found', 'error');
+            return;
+        }
+
+        this.openConfirmModal(
+            'Delete Profile',
+            'Are you sure you want to delete your seller profile? You will be reverted to a buyer account and logged out.',
+            async () => {
+                try {
+                    // Using the requested absolute URL
+                    const res = await fetch(`http://utero.viewdns.net:3100/seller/${this.apiData.profile.id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (res.ok) {
+                        await authService.logout();
+                        window.location.href = '/login';
+                    } else {
+                        let msg = 'Failed to delete profile';
+                        try {
+                            const json = await res.json();
+                            if (json.message) msg = typeof json.message === 'string' ? json.message : JSON.stringify(json.message);
+                        } catch (e) { }
+                        this.showToast(msg, 'error');
+                    }
+                } catch (error) {
+                    console.error('Delete profile error:', error);
+                    this.showToast('An error occurred while deleting profile', 'error');
+                }
+            },
+            'warning'
+        );
     }
 
     private renderModule(container: Element) {
@@ -678,14 +1030,24 @@ export class SellerDashboard {
                 columns: [
                     { key: 'location', label: 'Location' },
                     { key: 'status', label: 'Status' },
-                    { key: 'rentPrice', label: 'Rent Price', render: (v) => `Rp ${v.toLocaleString()}` },
-                    { key: 'sellPrice', label: 'Sell Price', render: (v) => `Rp ${v.toLocaleString()}` },
+                    { key: 'rentPrice', label: 'Rent Price', render: (v) => v ? `Rp ${Number(v).toLocaleString()}` : '-' },
+                    { key: 'sellPrice', label: 'Sell Price', render: (v) => v ? `Rp ${Number(v).toLocaleString()}` : '-' },
                     {
                         key: 'actions', label: 'Actions', render: (v, row) => `
-                        <div style="display:flex; gap:0.5rem;">
-                            <button class="btn btn-sm btn-outline action-view-billboard" data-id="${row.id}">View</button>
-                            ${row.status === 'Available' ? `<button class="btn btn-sm btn-primary action-edit" data-id="${row.id}">Edit</button>` : ''}
-                            <button class="btn btn-sm btn-outline action-delete" style="color:red; border-color:red;" data-id="${row.id}">Delete</button>
+                        <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                            <button class="action-view-billboard" data-id="${row.id}" title="View Details"
+                                style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            ${row.status === 'Available' ? `
+                            <button class="action-edit" data-id="${row.id}" title="Edit Billboard"
+                                style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fef3c7; color: #b45309; cursor: pointer; transition: all 0.2s;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                            </button>` : ''}
+                            <button class="action-delete" data-id="${row.id}" title="Delete Billboard"
+                                style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fee2e2; color: #b91c1c; cursor: pointer; transition: all 0.2s;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                            </button>
                         </div>
                      `}
                 ],
@@ -696,7 +1058,7 @@ export class SellerDashboard {
                 data: this.apiData.transactions, // assuming transactions are sales
                 columns: [
                     { key: 'id', label: 'ID' },
-                    { key: 'totalPrice', label: 'Total', render: (v) => `Rp ${v.toLocaleString()}` },
+                    { key: 'totalPrice', label: 'Total', render: (v) => `Rp ${Number(v).toLocaleString()}` },
                     { key: 'status', label: 'Status' },
                     { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() },
                     {
@@ -721,7 +1083,7 @@ export class SellerDashboard {
                     {
                         key: 'pricing', label: 'Amount', render: (v, row) => {
                             const amt = row.pricing?.prices?.total || 0;
-                            return `Rp ${amt.toLocaleString()}`;
+                            return `Rp ${Number(amt).toLocaleString()}`;
                         }
                     },
                     {
@@ -989,14 +1351,14 @@ export class SellerDashboard {
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label">Orientation</label>
-                        <select id="${prefix}-orientation" name="orientation" class="form-control">
+                        <select id="${prefix}-orientation" name="orientation" class="form-control" required>
                             <option value="Vertical" ${billboard.orientation === 'Vertical' ? 'selected' : ''}>Vertical</option>
                             <option value="Horizontal" ${billboard.orientation === 'Horizontal' ? 'selected' : ''}>Horizontal</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Display Type</label>
-                         <select id="${prefix}-display" name="display" class="form-control">
+                         <select id="${prefix}-display" name="display" class="form-control" required>
                             <option value="OneSide" ${billboard.display === 'OneSide' ? 'selected' : ''}>One Side</option>
                             <option value="TwoSides" ${billboard.display === 'TwoSides' ? 'selected' : ''}>Two Sides</option>
                             <option value="ThreeSides" ${billboard.display === 'ThreeSides' ? 'selected' : ''}>Three Sides</option>
@@ -1008,7 +1370,7 @@ export class SellerDashboard {
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label">Lighting</label>
-                        <select id="${prefix}-lighting" name="lighting" class="form-control">
+                        <select id="${prefix}-lighting" name="lighting" class="form-control" required>
                             <option value="Frontlite" ${billboard.lighting === 'Frontlite' ? 'selected' : ''}>Frontlite</option>
                             <option value="Backlite" ${billboard.lighting === 'Backlite' ? 'selected' : ''}>Backlite</option>
                             <option value="None" ${billboard.lighting === 'None' ? 'selected' : ''}>None</option>
@@ -1016,7 +1378,7 @@ export class SellerDashboard {
                     </div>
                      <div class="form-group">
                         <label class="form-label">Land Ownership</label>
-                        <select id="${prefix}-landOwnership" name="landOwnership" class="form-control">
+                        <select id="${prefix}-landOwnership" name="landOwnership" class="form-control" required>
                             <option value="State" ${billboard.landOwnership === 'State' ? 'selected' : ''}>State</option>
                             <option value="Private" ${billboard.landOwnership === 'Private' ? 'selected' : ''}>Private</option>
                         </select>
@@ -1026,7 +1388,7 @@ export class SellerDashboard {
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label">Tax</label>
-                         <select id="${prefix}-tax" name="tax" class="form-control">
+                         <select id="${prefix}-tax" name="tax" class="form-control" required>
                             <option value="PPN" ${billboard.tax === 'PPN' ? 'selected' : ''}>PPN</option>
                             <option value="PPH" ${billboard.tax === 'PPH' ? 'selected' : ''}>PPH</option>
                             <option value="NoPPN" ${billboard.tax === 'NoPPN' ? 'selected' : ''}>No PPN</option>
@@ -1037,14 +1399,14 @@ export class SellerDashboard {
                     </div>
                     <div class="form-group">
                          <label class="form-label">Service Price</label>
-                         <input type="number" id="${prefix}-servicePrice" name="servicePrice" class="form-control" value="${billboard.servicePrice || 0}" />
+                         <input type="number" id="${prefix}-servicePrice" name="servicePrice" class="form-control" value="${billboard.servicePrice || 0}" required />
                     </div>
                 </div>
 
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                          <label class="form-label">Mode</label>
-                        <select id="${prefix}-mode" name="mode" class="form-control">
+                        <select id="${prefix}-mode" name="mode" class="form-control" required>
                             <option value="" ${!billboard.mode ? 'selected' : ''} disabled>Select Mode</option>
                             <option value="Rent" ${billboard.mode === 'Rent' ? 'selected' : ''}>Rent</option>
                             <option value="Buy" ${billboard.mode === 'Buy' ? 'selected' : ''}>Buy</option>
@@ -1052,7 +1414,7 @@ export class SellerDashboard {
                     </div>
                      <div class="form-group">
                         <label class="form-label">Status</label>
-                        <select id="${prefix}-status" name="status" class="form-control">
+                        <select id="${prefix}-status" name="status" class="form-control" required>
                             <option value="Available" ${billboard.status === 'Available' ? 'selected' : ''}>Available</option>
                             <option value="NotAvailable" ${billboard.status === 'NotAvailable' ? 'selected' : ''}>Not Available</option>
                         </select>
@@ -1062,11 +1424,11 @@ export class SellerDashboard {
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                          <label class="form-label">Rent Price</label>
-                         <input type="number" id="${prefix}-rentPrice" name="rentPrice" class="form-control" value="${billboard.rentPrice || 0}" />
+                         <input type="number" id="${prefix}-rentPrice" name="rentPrice" class="form-control" value="${billboard.rentPrice || 0}" required />
                     </div>
                     <div class="form-group">
                          <label class="form-label">Sell Price</label>
-                         <input type="number" id="${prefix}-sellPrice" name="sellPrice" class="form-control" value="${billboard.sellPrice || 0}" />
+                         <input type="number" id="${prefix}-sellPrice" name="sellPrice" class="form-control" value="${billboard.sellPrice || 0}" required />
                     </div>
                 </div>
 
@@ -1102,11 +1464,11 @@ export class SellerDashboard {
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label">Location Name</label>
-                        <input type="text" id="${prefix}-location" name="location" class="form-control" value="${billboard.location || ''}" />
+                        <input type="text" id="${prefix}-location" name="location" class="form-control" value="${billboard.location || ''}" required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Size</label>
-                        <select id="${prefix}-size-select" class="form-control" style="margin-bottom: 0.5rem;">
+                        <select id="${prefix}-size-select" class="form-control" style="margin-bottom: 0.5rem;" required>
                             <option value="">Select Size</option>
                             <option value="4x6m">4x6m</option>
                             <option value="4x8m">4x8m</option>
@@ -1117,13 +1479,13 @@ export class SellerDashboard {
                             <option value="20x10m">20x10m</option>
                             <option value="Custom">Custom</option>
                         </select>
-                        <input type="text" id="${prefix}-size" name="size" class="form-control" value="${billboard.size || ''}" placeholder="Enter custom size (e.g. 3x3m)" style="display: none;" />
+                        <input type="text" id="${prefix}-size" name="size" class="form-control" value="${billboard.size || ''}" placeholder="Enter custom size (e.g. 3x3m)" style="display: none;" required />
                     </div>
                 </div>
 
                  <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea id="${prefix}-description" name="description" class="form-control" rows="2">${billboard.description || ''}</textarea>
+                    <textarea id="${prefix}-description" name="description" class="form-control" rows="2" required>${billboard.description || ''}</textarea>
                 </div>
 
                 <!-- Image Management -->
@@ -1143,6 +1505,9 @@ export class SellerDashboard {
                 <input type="hidden" id="${prefix}-formattedAddress" name="formattedAddress" value="${billboard.formattedAddress || ''}" />
                 <input type="hidden" id="${prefix}-latitude" name="latitude" value="${billboard.latitude || ''}" />
                 <input type="hidden" id="${prefix}-longitude" name="longitude" value="${billboard.longitude || ''}" />
+                <input type="hidden" id="${prefix}-gPlaceId" name="gPlaceId" value="${billboard.gPlaceId || ''}" />
+                <textarea id="${prefix}-addressComponents" name="addressComponents" style="display:none;">${JSON.stringify(billboard.addressComponents || [])}</textarea>
+                <textarea id="${prefix}-mapViewport" name="mapViewport" style="display:none;">${JSON.stringify(billboard.mapViewport || {})}</textarea>
 
                 <div class="form-group">
                     <label class="form-label">Map Location</label>
@@ -1366,7 +1731,7 @@ export class SellerDashboard {
             map.setCenter(place.geometry.location);
             map.setZoom(17);
             marker.setPosition(place.geometry.location);
-            this.updateBillboardMapInputs(prefix, place.geometry.location, place.formatted_address);
+            this.updateBillboardMapInputs(prefix, place.geometry.location, place.formatted_address, place);
 
             // Attempt Autofill for Create
             if (place.address_components && prefix === 'create') {
@@ -1390,11 +1755,16 @@ export class SellerDashboard {
         }
     }
 
-    private updateBillboardMapInputs(prefix: string, latLng: any, address?: string) {
+    private updateBillboardMapInputs(prefix: string, latLng: any, address?: string, placeData?: any) {
         const form = document.getElementById(`${prefix}-billboard-form`);
         if (!form) return;
-        (form.querySelector(`#${prefix}-latitude`) as HTMLInputElement).value = String(typeof latLng.lat === 'function' ? latLng.lat() : latLng.lat);
-        (form.querySelector(`#${prefix}-longitude`) as HTMLInputElement).value = String(typeof latLng.lng === 'function' ? latLng.lng() : latLng.lng);
+
+        // Truncate to 7 decimal places to match backend DTO validation
+        const lat = typeof latLng.lat === 'function' ? latLng.lat() : Number(latLng.lat);
+        const lng = typeof latLng.lng === 'function' ? latLng.lng() : Number(latLng.lng);
+
+        (form.querySelector(`#${prefix}-latitude`) as HTMLInputElement).value = lat.toFixed(7);
+        (form.querySelector(`#${prefix}-longitude`) as HTMLInputElement).value = lng.toFixed(7);
 
         if (address) {
             (form.querySelector(`#${prefix}-formattedAddress`) as HTMLInputElement).value = address;
@@ -1405,8 +1775,18 @@ export class SellerDashboard {
                 if (status === 'OK' && results[0]) {
                     (form.querySelector(`#${prefix}-formattedAddress`) as HTMLInputElement).value = results[0].formatted_address;
                     (form.querySelector(`#${prefix}-gmap-search`) as HTMLInputElement).value = results[0].formatted_address;
+                    // Note: Reverse geocoding result doesn't give same 'place' object structure with 'address_components' in exact same way always,
+                    // but we can try to populate if needed. For now relying on SearchBox for full data.
                 }
             });
+        }
+
+        if (placeData) {
+            (form.querySelector(`#${prefix}-gPlaceId`) as HTMLInputElement).value = placeData.place_id || '';
+            const comps = placeData.address_components || [];
+            (form.querySelector(`#${prefix}-addressComponents`) as HTMLInputElement).value = JSON.stringify(comps);
+            const viewp = placeData.geometry?.viewport ? placeData.geometry.viewport.toJSON() : {};
+            (form.querySelector(`#${prefix}-mapViewport`) as HTMLInputElement).value = JSON.stringify(viewp);
         }
     }
 
@@ -1502,6 +1882,9 @@ export class SellerDashboard {
                 this.showToast('Billboard created successfully', 'success');
                 this.closeModal();
                 this.fetchMyBillboards();
+                // Store active tab and reload to refresh fully
+                localStorage.setItem('seller_dashboard_active_tab', 'My Billboards');
+                window.location.reload();
             } else {
                 console.error('API Error Response:', json);
                 if (Array.isArray(json.message)) {
@@ -1554,13 +1937,61 @@ export class SellerDashboard {
         // Re-construct formData
         // Note: DELETE requests to remove files? Or just PUT/PATCH with new list?
         // Admin uses PATCH with FormData containing 'images' field with Files.
+        // Re-construct formData
+        // Note: DELETE requests to remove files? Or just PUT/PATCH with new list?
+        // Admin uses PATCH with FormData containing 'images' field with Files.
         const newFormData = new FormData();
-        // Append fields
+
+        // Validate IDs
+        const categoryId = formData.get('categoryId') as string;
+        const cityId = formData.get('cityId') as string;
+        const provinceId = formData.get('provinceId') as string;
+
+        if (!categoryId) { this.showToast('Category is required', 'error'); return; }
+        if (!cityId) { this.showToast('City is required', 'error'); return; }
+        if (!provinceId) { this.showToast('Province is required', 'error'); return; }
+
+        // Ensure optional numeric fields are present
+        if (!formData.has('rentPrice')) newFormData.append('rentPrice', '0');
+        if (!formData.has('sellPrice')) newFormData.append('sellPrice', '0');
+        if (!formData.has('servicePrice')) newFormData.append('servicePrice', '0');
+
+        // Append fields with cleaning
         for (const [k, v] of formData.entries()) {
-            if (k !== 'images') newFormData.append(k, v);
+            if (k === 'images') continue;
+
+            // Handle optional numeric fields - avoid sending empty strings
+            // Also if we already appended them above as '0' because they were missing, 
+            // this loop handles the case where they ARE present but empty/undefined.
+            if ((k === 'rentPrice' || k === 'sellPrice' || k === 'servicePrice') && (v === '' || v === 'undefined')) {
+                // If it was present but empty, we append '0' here. 
+                // Note: newFormData.append adds a NEW entry, doesn't overwrite if one exists with same key (FormData allows duplicates).
+                // However, backend usually takes the last one or first one. 
+                // To be safe, we should essentially skip appending if we are going to rely on the "if missing" check, 
+                // BUT "if missing" check only runs if it's NOT in formData.
+                // So if it IS in formData but empty, we need to append '0'.
+                // To avoid duplicates if we want to be super clean, we could use set, but `append` is safer for everything else.
+                // Actually, if we use `set` for prices it might be better? No, `append` is standard here.
+                // Let's just append '0' and skip the original 'v'.
+                newFormData.append(k, '0');
+                continue;
+            }
+            if ((k === 'latitude' || k === 'longitude') && (v === '' || v === 'undefined' || v === 'NaN')) {
+                // Don't append invalid lat/lng
+                continue;
+            }
+
+            newFormData.append(k, v);
         }
         // Append images
         allFiles.forEach(f => newFormData.append('images', f)); // Uses 'images' to match backend expectation
+
+        // Debug Payload
+        console.group('Edit Billboard Submission Payload');
+        const debugObj: any = {};
+        newFormData.forEach((v, k) => debugObj[k] = v);
+        console.table(debugObj);
+        console.groupEnd();
 
         try {
             const res = await fetch(`/api/proxy/billboard/${id}`, {

@@ -349,6 +349,15 @@ tr:hover {
   background-color: var(--dark-red);
 }
 
+.btn-danger {
+  background-color: var(--primary-red);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background-color: var(--dark-red);
+}
+
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -563,6 +572,41 @@ tr:hover {
 
 .floating-notif-btn:active {
   transform: translateY(0) scale(0.95);
+}
+
+@keyframes ring {
+  0% {
+    transform: rotate(0);
+  }
+
+  10% {
+    transform: rotate(30deg);
+  }
+
+  30% {
+    transform: rotate(-28deg);
+  }
+
+  50% {
+    transform: rotate(34deg);
+  }
+
+  70% {
+    transform: rotate(-32deg);
+  }
+
+  90% {
+    transform: rotate(30deg);
+  }
+
+  100% {
+    transform: rotate(0);
+  }
+}
+
+.floating-notif-btn.ringing svg {
+  animation: ring 4s 1s ease-in-out infinite;
+  transform-origin: 50% 4px;
 }
 
 .notif-badge {

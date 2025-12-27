@@ -47,6 +47,7 @@ export class AdminDashboard {
         notifications: any[];
         unreadNotificationsCount: number;
         currentUser: any | null;
+        stats: any | null;
     };
     private currentModalAction: (() => Promise<void>) | null = null;
     private selectedDesignFiles: File[] = [];
@@ -72,6 +73,7 @@ export class AdminDashboard {
             notifications: [],
             unreadNotificationsCount: 0,
             currentUser: null,
+            stats: null
         };
         this.selectedDesignFiles = [];
         this.state = {
@@ -97,6 +99,7 @@ export class AdminDashboard {
 
         // Initial fetch for users if that's the active tab or just pre-fetch
         await this.fetchUsers();
+        await this.fetchDashboardStats();
         this.fetchUnreadCount();
 
         this.renderContent();
@@ -126,6 +129,20 @@ export class AdminDashboard {
             }
         } catch (e) {
             console.error('Failed to fetch users', e);
+        }
+    }
+
+    private async fetchDashboardStats() {
+        try {
+            const res = await fetch('/api/proxy/dashboard/stats', {
+                credentials: 'include'
+            });
+            const json = await res.json();
+            if (json && json.stats) {
+                this.apiData.stats = json.stats;
+            }
+        } catch (e) {
+            console.error('Failed to fetch dashboard stats', e);
         }
     }
 
@@ -549,7 +566,9 @@ export class AdminDashboard {
         this.renderSidebarNav();
         this.root.querySelector('.page-title')!.textContent = tab;
 
-        if (tab === 'Users' && this.apiData.users.length === 0) {
+        if (tab === 'Dashboard') {
+            await this.fetchDashboardStats();
+        } else if (tab === 'Users' && this.apiData.users.length === 0) {
             await this.fetchUsers();
         } else if (tab === 'Sellers' && this.apiData.sellers.length === 0) {
             await this.fetchSellers();
@@ -628,26 +647,53 @@ export class AdminDashboard {
                     </div>
                     
                     <div class="form-group" style="margin-top:2rem;">
-                        <label class="form-label">Change Password <span style="font-weight:normal; color:#666;">(Leave blank to keep current)</span></label>
-                        <input type="password" class="form-control" name="password" placeholder="New Password">
+                    <label class="form-label">Change Password <span style="font-weight:normal; color:#666;">(Leave blank to keep current)</span></label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" name="password" placeholder="New Password" style="padding-right: 40px;">
+                        <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm New Password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm New Password" style="padding-right: 40px;">
+                        <button type="button" class="toggle-password" data-target="confirmPassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                         <label class="form-label">Role</label>
-                         <input type="text" class="form-control" value="${user.level || 'ADMIN'}" disabled style="background:#eee;">
-                    </div>
+                <div class="form-group">
+                     <label class="form-label">Role</label>
+                     <input type="text" class="form-control" value="${user.level || 'ADMIN'}" disabled style="background:#eee;">
+                </div>
 
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Update Profile</button>
-                </form>
-            </div>
-        `;
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Update Profile</button>
+            </form>
+        </div>
+    `;
 
         const form = container.querySelector('#admin-profile-form');
         const imgInput = container.querySelector('#admin-profile-input') as HTMLInputElement;
+
+        // Password visibility toggle logic
+        container.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const button = e.currentTarget as HTMLButtonElement;
+                const targetName = button.getAttribute('data-target');
+                const input = container.querySelector(`input[name="${targetName}"]`) as HTMLInputElement;
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`;
+                } else {
+                    input.type = 'password';
+                    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>`;
+                }
+            });
+        });
 
         // Preview handling
         imgInput?.addEventListener('change', () => {
@@ -710,16 +756,17 @@ export class AdminDashboard {
     }
 
     private renderDashboardOverview(container: Element) {
-        const stats = [
-            { label: 'Total Users', value: this.apiData.users.length || this.data.users.length, change: '+12%' },
-            { label: 'Active Sellers', value: this.apiData.sellers.length || this.data.sellers.length, change: '+5%' },
-            { label: 'Total Billboards', value: this.apiData.billboards.length || this.data.billboards.length, change: '+8%' },
-            { label: 'Total Revenue', value: 'Rp 2.5B', change: '+25%' },
+        const stats = this.apiData.stats || {};
+        const displayStats = [
+            { label: 'Total Users', value: stats.totalUsers ?? (this.apiData.users.length || 0), change: '+12%' },
+            { label: 'Total Billboards', value: stats.totalBillboards ?? (this.apiData.billboards.length || 0), change: '+8%' },
+            { label: 'Active Billboards', value: stats.activeBillboards ?? 0, change: '+5%' },
+            { label: 'Total Transactions', value: stats.totalTransactions ?? (this.apiData.transactions.length || 0), change: '+25%' },
         ];
 
         container.innerHTML = `
       <div class="stats-grid">
-        ${stats.map(stat => `
+        ${displayStats.map(stat => `
           <div class="stat-card">
             <div class="stat-label">${stat.label}</div>
             <div class="stat-value">${stat.value}</div>
@@ -1192,7 +1239,10 @@ export class AdminDashboard {
                     data: this.apiData.recycleBin,
                     columns: [
                         { key: 'location', label: 'Location' },
-                        { key: 'cityName', label: 'City', render: (v: string, row: any) => v || row.city?.name || '-' },
+                        { key: 'owner', label: 'Owner', render: (v: any, row: any) => row.owner?.fullname || row.owner?.companyName || '-' },
+                        { key: 'deletedBy', label: 'Deleted By', render: (v: any, row: any) => row.deletedBy?.username || '-' },
+                        { key: 'mode', label: 'Mode' },
+                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${v === 'Available' ? 'badge-success' : 'badge-danger'}">${v}</span>` },
                         { key: 'deletedAt', label: 'Deleted At', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
                         {
                             key: 'actions', label: 'Actions', render: (v: any, row: any) => `
@@ -1446,10 +1496,18 @@ export class AdminDashboard {
 
     private updateNotificationBadge() {
         const badge = this.root.querySelector('.notif-badge') as HTMLElement;
-        if (badge) {
+        const btn = this.root.querySelector('.floating-notif-btn') as HTMLElement;
+
+        if (badge && btn) {
             const count = this.apiData.unreadNotificationsCount;
             badge.textContent = count.toString();
             badge.style.display = count > 0 ? 'flex' : 'none';
+
+            if (count > 0) {
+                btn.classList.add('ringing');
+            } else {
+                btn.classList.remove('ringing');
+            }
         }
     }
 
@@ -1772,7 +1830,28 @@ export class AdminDashboard {
     }
 
     // Modal
+    private ensureModalFooter() {
+        const footer = this.root.querySelector('.modal-footer');
+        if (!footer) return;
+
+        // If confirm button is missing (e.g. replaced by error modal), restore standard footer
+        if (!footer.querySelector('.confirm-modal')) {
+            footer.innerHTML = `
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary confirm-modal">Save</button>
+            `;
+
+            // Re-attach listeners since we replaced innerHTML
+            footer.querySelector('.close-modal')?.addEventListener('click', () => this.closeModal());
+            footer.querySelector('.confirm-modal')?.addEventListener('click', () => {
+                if (this.currentModalAction) this.currentModalAction();
+            });
+        }
+    }
+
     private openModal(title: string) {
+        this.ensureModalFooter();
+
         const overlay = this.root.querySelector('.modal-overlay');
         const modal = this.root.querySelector('.modal') as HTMLElement;
         const titleEl = this.root.querySelector('.modal-title');
@@ -1863,10 +1942,19 @@ export class AdminDashboard {
     }
 
     private openConfirmModal(title: string, message: string, onConfirm: () => Promise<void> | void, type: 'success' | 'error' | 'warning' = 'warning') {
+        this.ensureModalFooter();
+
         const overlay = this.root.querySelector('.modal-overlay');
         const titleEl = this.root.querySelector('.modal-title');
         const body = this.root.querySelector('.modal-body');
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
+        const footer = this.root.querySelector('.modal-footer');
+
+        if (footer) {
+            // Clean up any extra buttons (like custom delete buttons added by other modals)
+            const extraButtons = footer.querySelectorAll('button:not(.confirm-modal):not(.close-modal)');
+            extraButtons.forEach(btn => btn.remove());
+        }
 
         if (overlay && titleEl && body && confirmBtn) {
             titleEl.textContent = title;
@@ -4788,8 +4876,12 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete add-on', 'error');
-                        if (json.message) this.openErrorModal('Delete Failed', json.message);
+                        let errorMessage = json.message || 'Failed to delete add-on';
+                        if (typeof json.message === 'object' && json.message !== null && json.message.error) {
+                            errorMessage = json.message.error;
+                        }
+                        this.showToast(errorMessage, 'error');
+                        this.openErrorModal('Delete Failed', errorMessage);
                     }
                 } catch (e) {
                     console.error('Error deleting add-on:', e);
