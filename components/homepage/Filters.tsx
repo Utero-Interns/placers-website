@@ -1,5 +1,4 @@
-
-import { ChevronDownIcon, ChevronUpIcon, FilterIcon, GridIcon, MapPin, Move3DIcon, SearchIcon, ViewIcon } from 'lucide-react';
+import { Check, ChevronDownIcon, ChevronUpIcon, FilterIcon, GridIcon, MapPin, Move3DIcon, SearchIcon, ViewIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import FilterPopover from './FilterPopover';
 
@@ -56,42 +55,42 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ selected, onSelect }) =
   return (
     <div className="relative inline-block text-left">
       <div>
-        <button
-          type="button"
-          className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none cursor-pointer h-[42px]"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {selected === 'Semua' ? 'Status' : selected}
-          {isOpen ? <ChevronUpIcon className="ml-2 -mr-1 h-5 w-5" /> : <ChevronDownIcon className="ml-2 -mr-1 h-5 w-5" />}
-        </button>
+      <button
+        type="button"
+        className="inline-flex justify-between items-center w-48 rounded-lg border border-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.02)] px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{selected || 'Status'}</span>
+        {isOpen ? <ChevronUpIcon className="ml-2 h-4 w-4 text-gray-400" /> : <ChevronDownIcon className="ml-2 h-4 w-4 text-gray-400" />}
+      </button>
       </div>
 
       {isOpen && (
-        <div className="origin-top-left absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-          <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-            <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Semua' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Semua')}
-            >
-              Semua Status
-              {selected === 'Semua' && <span className="text-[var(--color-primary)]">✓</span>}
-            </button>
-            <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Tersedia' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Tersedia')}
-            >
-              Tersedia
-              {selected === 'Tersedia' && <span className="text-[var(--color-primary)]">✓</span>}
-            </button>
-            <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Tidak Tersedia' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Tidak Tersedia')}
-            >
-              Tidak Tersedia
-              {selected === 'Tidak Tersedia' && <span className="text-[var(--color-primary)]">✓</span>}
-            </button>
-          </div>
+      <div className="origin-top-left absolute left-0 mt-2 w-48 rounded-xl shadow-xl bg-white border border-gray-100 focus:outline-none z-50 p-1.5">
+        <div className="space-y-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+        <button
+          className={`w-full flex justify-between items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${selected === 'Semua' ? 'bg-red-50 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}
+          onClick={() => handleSelect('Semua')}
+        >
+          <span>Semua</span>
+          {selected === 'Semua' && <Check className="w-4 h-4 text-red-500" strokeWidth={3} />}
+        </button>
+        <button
+          className={`w-full flex justify-between items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${selected === 'Tersedia' ? 'bg-red-50 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}
+          onClick={() => handleSelect('Tersedia')}
+        >
+          <span>Tersedia</span>
+          {selected === 'Tersedia' && <Check className="w-4 h-4 text-red-500" strokeWidth={3} />}
+        </button>
+        <button
+          className={`w-full flex justify-between items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${selected === 'Tidak Tersedia' ? 'bg-red-50 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}
+          onClick={() => handleSelect('Tidak Tersedia')}
+        >
+          <span>Tidak Tersedia</span>
+          {selected === 'Tidak Tersedia' && <Check className="w-4 h-4 text-red-500" strokeWidth={3} />}
+        </button>
         </div>
+      </div>
       )}
     </div>
   );
