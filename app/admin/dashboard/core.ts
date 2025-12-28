@@ -2349,7 +2349,8 @@ export class AdminDashboard {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net:3100/user/{id} -> /api/proxy/user/{id}
                     const res = await fetch(`/api/proxy/user/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -2421,50 +2422,85 @@ export class AdminDashboard {
     }
 
     private renderViewSellerDetails(seller: any) {
+        const user = seller.user || {};
+        const profilePic = user.profilePicture ? getImageUrl(user.profilePicture) : null;
+        const initial = user.username ? user.username.charAt(0).toUpperCase() : (seller.fullname ? seller.fullname.charAt(0).toUpperCase() : '?');
+
         return `
             <div class="user-details-card" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Header with Profile, Name, Role -->
                 <div style="display: flex; align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-                     <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        ${seller.photo
-                ? `<img src="${getImageUrl(seller.photo)}" alt="${seller.fullname}" style="width: 100%; height: 100%; object-fit: cover;" />`
-                : `<span style="font-size: 1.5rem; font-weight: 600; color: var(--text-secondary);">${seller.fullname ? seller.fullname.charAt(0).toUpperCase() : '?'}</span>`
+                     <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        ${profilePic
+                ? `<img src="${profilePic}" alt="${seller.fullname}" style="width: 100%; height: 100%; object-fit: cover;" />`
+                : `<span style="font-size: 1.5rem; font-weight: 600; color: var(--text-secondary);">${initial}</span>`
             }
                     </div>
                     <div>
-                        <h4 style="margin: 0; font-size: 1.25rem;">${seller.fullname}</h4>
-                        <span class="badge badge-info" style="margin-top: 0.25rem;">SELLER</span>
+                        <h4 style="margin: 0; font-size: 1.25rem;">${seller.fullname || user.username || 'Unknown Name'}</h4>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                             <span class="badge badge-info">SELLER</span>
+                             ${seller.companyName ? `<span class="badge badge-neutral" style="font-weight: 500;">${seller.companyName}</span>` : ''}
+                        </div>
                     </div>
                 </div>
                 
-                <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">NIK</label>
-                        <div style="font-weight: 500;">${seller.nik || '-'}</div>
+                <!-- Personal & Account Info -->
+                <div class="details-section">
+                    <h5 style="margin: 0 0 1rem; font-size: 0.95rem; color: var(--slate-dark); border-left: 3px solid var(--primary-color); padding-left: 0.5rem;">Account Information</h5>
+                    <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Username</label>
+                            <div style="font-weight: 500;">${user.username || '-'}</div>
+                        </div>
+                         <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Email</label>
+                            <div style="font-weight: 500;">${user.email || '-'}</div>
+                        </div>
+                         <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Phone</label>
+                            <div style="font-weight: 500;">${user.phone || '-'}</div>
+                        </div>
+                         <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Joined Date</label>
+                            <div style="font-weight: 500;">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</div>
+                        </div>
                     </div>
-                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">KTP</label>
-                        <div style="font-weight: 500;">${seller.ktp || '-'}</div>
+                </div>
+
+                <!-- Business Info -->
+                <div class="details-section">
+                    <h5 style="margin: 0 0 1rem; font-size: 0.95rem; color: var(--slate-dark); border-left: 3px solid #f59e0b; padding-left: 0.5rem;">Business Details</h5>
+                    <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Company Name</label>
+                            <div style="font-weight: 500;">${seller.companyName || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">NPWP</label>
+                            <div style="font-weight: 500;">${seller.npwp || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">KTP Number</label>
+                            <div style="font-weight: 500;">${seller.ktp || '-'}</div>
+                        </div>
+                         <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Last Details Update</label>
+                            <div style="font-weight: 500;">${seller.updatedAt ? new Date(seller.updatedAt).toLocaleDateString() : '-'}</div>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Office Address</label>
+                            <div style="font-weight: 500; line-height: 1.4;">${seller.officeAddress || '-'}</div>
+                        </div>
+                         <div class="detail-item" style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">KTP Address</label>
+                            <div style="font-weight: 500; line-height: 1.4;">${seller.ktpAddress || '-'}</div>
+                        </div>
                     </div>
-                    <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Company Name</label>
-                        <div style="font-weight: 500;">${seller.companyName || '-'}</div>
-                    </div>
-                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Company Email</label>
-                        <div style="font-weight: 500;">${seller.companyEmail || '-'}</div>
-                    </div>
-                    <div class="detail-item" style="grid-column: span 2;">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Office Address</label>
-                        <div style="font-weight: 500;">${seller.officeAddress || '-'}</div>
-                    </div>
-                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">User ID</label>
-                        <div style="font-weight: 500;">${seller.userId || '-'}</div>
-                    </div>
-                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Created At</label>
-                        <div style="font-weight: 500;">${seller.createdAt ? new Date(seller.createdAt).toLocaleDateString() : '-'}</div>
-                    </div>
+                </div>
+
+                <div style="font-size: 0.7rem; color: var(--text-light); text-align: right; margin-top: 0.5rem;">
+                    User ID: ${user.id || seller.userId || '-'} | Seller ID: ${seller.id}
                 </div>
             </div>
         `;
@@ -2477,7 +2513,8 @@ export class AdminDashboard {
             async () => {
                 try {
                     const res = await fetch(`/api/proxy/seller/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -2510,7 +2547,8 @@ export class AdminDashboard {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net:3100/design/{id} -> /api/proxy/design/{id}
                     const res = await fetch(`/api/proxy/design/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -3103,7 +3141,8 @@ export class AdminDashboard {
 
             const res = await fetch(`/api/proxy/design/${id}`, {
                 method: 'PATCH',
-                body: formData
+                body: formData,
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -3437,7 +3476,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify({ status: newStatus }),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -3476,7 +3516,8 @@ export class AdminDashboard {
                 try {
                     // Endpoint: DELETE http://utero.viewdns:3100/transaction/{id} -> /api/proxy/transaction/{id}
                     const res = await fetch(`/api/proxy/transaction/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -3511,7 +3552,8 @@ export class AdminDashboard {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net/billboard/{id} -> /api/proxy/billboard/{id}
                     const res = await fetch(`/api/proxy/billboard/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     if (res.status === 409) {
@@ -3558,7 +3600,7 @@ export class AdminDashboard {
 
 
         // Endpoint: GET http://utero.viewdns.net:3100/billboard/detail/{id} -> /api/proxy/billboard/detail/{id}
-        fetch(`/api/proxy/billboard/detail/${id}`)
+        fetch(`/api/proxy/billboard/detail/${id}`, { credentials: 'include' })
 
             .then(res => res.json())
             .then(json => {
@@ -3833,7 +3875,7 @@ export class AdminDashboard {
             // Fetch required data in parallel
 
             const [detailsRes] = await Promise.all([
-                fetch(`/api/proxy/billboard/detail/${id}`),
+                fetch(`/api/proxy/billboard/detail/${id}`, { credentials: 'include' }),
                 this.apiData.provinces.length === 0 ? this.fetchProvinces() : Promise.resolve(),
                 this.apiData.cities.length === 0 ? this.fetchCities() : Promise.resolve()
             ]);
@@ -4360,7 +4402,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -4432,7 +4475,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -4531,7 +4575,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -4570,7 +4615,8 @@ export class AdminDashboard {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net:3100/category/{id} -> /api/proxy/category/{id}
                     const res = await fetch(`/api/proxy/category/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -4643,7 +4689,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -4699,7 +4746,7 @@ export class AdminDashboard {
         }
 
 
-        fetch(`/api/proxy/add-on/${id}`)
+        fetch(`/api/proxy/add-on/${id}`, { credentials: 'include' })
             .then(res => res.json())
             .then(json => {
                 if (json.status && json.data) {
@@ -4824,7 +4871,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -4862,7 +4910,8 @@ export class AdminDashboard {
             async () => {
                 try {
                     const res = await fetch(`/api/proxy/add-on/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();
@@ -4940,7 +4989,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -5043,7 +5093,8 @@ export class AdminDashboard {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             const json = await res.json();
@@ -5081,7 +5132,8 @@ export class AdminDashboard {
             async () => {
                 try {
                     const res = await fetch(`/api/proxy/city/${id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include'
                     });
 
                     const json = await res.json();

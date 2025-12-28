@@ -82,6 +82,11 @@ export const authService = {
             console.log('Profile response status:', response.status);
 
             if (!response.ok) {
+                // Silently handle 401 (Unauthorized) as it just means not logged in
+                if (response.status === 401) {
+                    return { user: undefined };
+                }
+
                 console.error('Profile fetch failed:', response.statusText);
                 return { error: 'Failed to fetch profile: ' + response.statusText };
             }
