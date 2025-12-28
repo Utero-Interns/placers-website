@@ -5,7 +5,7 @@ import Link from "next/link"
 
 export default function SellerPage() {
     return (
-        <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex flex-col min-h-screen bg-[#FCFCFC]">
             <Navbar />
             <main className="container mx-auto px-4 py-12 text-black">
 
@@ -19,7 +19,7 @@ export default function SellerPage() {
                             Gabung bersama ratusan Merchant dan kelola bisnis lebih mudah dengan Placers.
                         </p>
                         <Link href="/seller/register">
-                            <button className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[12px] text-sm py-3 px-4 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-95 shadow-md">
+                            <button className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[12px] text-sm py-3 px-4 animate-pulse-glow">
                                 Daftar jadi Seller Sekarang
                             </button>
                         </Link>

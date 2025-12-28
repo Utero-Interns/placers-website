@@ -35,7 +35,7 @@ export default function LandingValues() {
                        text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl
                        w-full lg:w-1/2 2xl:w-1/3"
           >
-            Solusi Cerdas <br /> Placers
+            Solusi Cerdas <br /> mencari Billboard
           </h1>
 
           <p

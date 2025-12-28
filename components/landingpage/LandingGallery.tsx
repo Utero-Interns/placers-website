@@ -21,7 +21,7 @@ export default function LandingGallery() {
     <section
       id="gallery"
       className="flex flex-col items-center justify-center 
-             bg-white w-full 
+             bg-[#FCFCFC] w-full 
              px-4 md:px-6
              py-8 md:py-10 lg:py-12"
     >
@@ -64,10 +64,10 @@ export default function LandingGallery() {
                 b.image?.length > 0
                   ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
                   : "/billboard-placeholder.png";
-              
+
               const sellerImageUrl = b.owner.user.profilePicture
-                  ? `/api/uploads/${b.owner.user.profilePicture.replace(/^uploads\//, "")}`
-                  : '/seller-placeholder.png';
+                ? `/api/uploads/${b.owner.user.profilePicture.replace(/^uploads\//, "")}`
+                : '/seller-placeholder.png';
 
               return (
                 <BillboardCard

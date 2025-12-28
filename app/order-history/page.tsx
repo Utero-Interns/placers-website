@@ -22,7 +22,7 @@ const OrderHistory: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
+    <div className="bg-[#FCFCFC] min-h-screen font-sans">
       <NavBar />
       <main>
         {view === 'list' && <OrderHistoryPage onShowInvoice={handleShowInvoice} />}

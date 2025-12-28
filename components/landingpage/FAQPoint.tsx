@@ -12,7 +12,7 @@ export default function FAQPoint({ question, answer, expanded, onClick }: FAQPoi
     <div
       className={`flex flex-col transition-all duration-300 ${expanded
           ? "bg-gradient-to-r from-[#680C0F] to-[var(--color-primary)]"
-          : "bg-white"
+          : "bg-[#FCFCFC]"
         } border border-gray-300 rounded-[15px] py-3 px-4 md:py-4 md:px-6`}
     >
       {/* Header */}

@@ -44,7 +44,7 @@ export default function LandingFAQ() {
     <section
       id="faq"
       className="
-        bg-white w-full
+        bg-[#FCFCFC] w-full
         px-4 md:px-8 2xl:px-16
         mt-8 md:mt-12 lg:mt-16
         pb-12 md:pb-16 lg:pb-20

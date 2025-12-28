@@ -9,7 +9,7 @@ import LandingValues from "@/components/landingpage/LandingValues";
 
 export default function Home() {
   return (
-    <div className="bg-white">
+    <div className="bg-[#FCFCFC]">
       <NavBar />
       <main>
         <LandingHero />

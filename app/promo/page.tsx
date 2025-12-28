@@ -51,7 +51,7 @@ export default function PromoPage() {
   const visiblePromos = showAll ? promos : promos.slice(0, 6);
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <div className="bg-[#FCFCFC] min-h-screen flex flex-col">
       <NavBar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">

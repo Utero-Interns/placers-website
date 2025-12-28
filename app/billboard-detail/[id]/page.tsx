@@ -79,7 +79,7 @@ const BillboardPage: React.FC = () => {
     .filter((r): r is Rating => !!r);
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="bg-[#FCFCFC] min-h-screen flex flex-col">
       <NavBar />
 
       {/* ⬇️ SAMA PERSIS DENGAN HOMEPAGE */}
