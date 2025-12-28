@@ -7,19 +7,19 @@ export default function SellerPage() {
     return (
         <div className="flex flex-col min-h-screen bg-white">
             <Navbar />
-            <main className="px-6 md:px-16 lg:px-24 py-12 text-black">
+            <main className="container mx-auto px-4 py-12 text-black">
 
                 {/* Hero Section */}
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold mb-3">
+                        <p className="text-2xl md:text-3xl font-bold mb-3">
                             Kembangkan Bisnis Anda <br /> Bersama Kami
-                        </h1>
-                        <p className="text-gray-600 mb-6">
+                        </p>
+                        <p className="text-gray-600 mb-6 text-base">
                             Gabung bersama ratusan Merchant dan kelola bisnis lebih mudah dengan Placers.
                         </p>
                         <Link href="/seller/register">
-                            <button className="bg-[var(--color-primary)] hover:bg-red-700 text-white rounded-md px-5 py-2 text-base">
+                            <button className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[12px] text-sm py-3 px-4 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-95 shadow-md">
                                 Daftar jadi Seller Sekarang
                             </button>
                         </Link>
