@@ -16,14 +16,14 @@ const BillboardSpecs: React.FC<Specs> = ({ size, orientation, display }) => {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-4">Spesifikasi</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-8">
+      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Spesifikasi</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {specifications.map((spec) => (
-          <div key={spec.label} className="flex items-center space-x-3">
-            <spec.icon className="w-10 h-10 text-[var(--color-primary)] flex-shrink-0" />
+          <div key={spec.label} className="flex items-center space-x-2">
+            <spec.icon className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
             <div>
-              <p className="font-semibold text-gray-800 text-lg">{spec.label}</p>
-              <p className="text-gray-500 text-lg">{spec.value}</p>
+              <p className="text-sm text-gray-400">{spec.label}</p>
+              <p className="font-medium text-gray-800 text-sm">{spec.value}</p>
             </div>
           </div>
         ))}

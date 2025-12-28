@@ -10,12 +10,15 @@ interface BillboardReviewsProps {
   ratings: Rating[];
 }
 
-const BillboardReviews: React.FC<BillboardReviewsProps> = ({ averageRating, ratings }) => {
+const BillboardReviews: React.FC<BillboardReviewsProps> = ({
+  averageRating,
+  ratings,
+}) => {
   const reviewsContainerRef = useRef<HTMLDivElement>(null);
 
   const handleScrollReviews = (direction: 'left' | 'right') => {
     if (reviewsContainerRef.current) {
-      const scrollAmount = reviewsContainerRef.current.clientWidth * 0.8;
+      const scrollAmount = reviewsContainerRef.current.clientWidth * 0.85;
       reviewsContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
@@ -24,47 +27,59 @@ const BillboardReviews: React.FC<BillboardReviewsProps> = ({ averageRating, rati
   };
 
   return (
-    <div className="pt-6 border-t border-gray-200">
-      <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Ulasan</h2>
-          <div className="flex items-center space-x-2 text-gray-600">
-            <StarIcon className="w-5 h-5 text-[var(--color-star)] fill-[var(--color-star)]" />
+    <div className="pt-4 border-t border-gray-100">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold text-gray-800">Ulasan</h2>
+          <div className="flex items-center gap-1 text-xs font-medium bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-100">
+            <StarIcon className="w-4 h-4 text-[var(--color-star)] fill-[var(--color-star)]" />
             <span className="font-bold">{averageRating.toFixed(1)}/5.0</span>
-            <span>({ratings.length} ulasan)</span>
+            <span>({ratings.length})</span>
           </div>
         </div>
-        {ratings.length > 3 && (
-          <div className="flex items-center space-x-3 self-end md:self-center">
+
+        {ratings.length > 2 && (
+          <div className="flex gap-1.5">
             <button
               onClick={() => handleScrollReviews('left')}
-              className="p-2 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100 transition"
-              aria-label="Previous reviews"
+              className="p-1.5 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition"
             >
-              <ChevronLeftIcon className="w-5 h-5" />
+              <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleScrollReviews('right')}
-              className="p-2 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100 transition"
-              aria-label="Next reviews"
+              className="p-1.5 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition"
             >
-              <ChevronRightIcon className="w-5 h-5" />
+              <ChevronRightIcon className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
 
+      {/* Reviews */}
       {ratings.length > 0 ? (
         <div
           ref={reviewsContainerRef}
-          className="flex overflow-x-auto space-x-4 pb-4 -mb-4 scrollbar-hide"
+          className="
+            -mx-2 px-2
+            flex overflow-x-auto gap-3 pb-2
+            scrollbar-hide
+          "
         >
           {ratings.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <div
+              key={review.id}
+              className="flex-none w-[240px] md:w-[280px]"
+            >
+              <ReviewCard review={review} />
+            </div>
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 italic">Belum ada ulasan.</p>
+        <p className="text-sm text-gray-400 italic">
+          Belum ada ulasan.
+        </p>
       )}
     </div>
   );
