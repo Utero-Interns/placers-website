@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { signIn } from 'next-auth/react';
 import { authService } from '@/app/lib/auth';
 
 
@@ -24,8 +25,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const googleLogin = () => {
-    console.log('Google Login');
-    toast.info('Fitur ini belum tersedia');
+    signIn('google', { callbackUrl: '/dashboard' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

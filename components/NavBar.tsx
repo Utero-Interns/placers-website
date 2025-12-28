@@ -7,8 +7,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export default function NavBar() {
+    const { t, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isPopulerOpen, setIsPopulerOpen] = useState(false);
 
@@ -33,7 +35,7 @@ export default function NavBar() {
     const handleLogout = async () => {
         await authService.logout();
         setUser(null);
-        toast.success("Berhasil logout");
+        toast.success(t('nav.logout_success'));
         router.push('/login');
         router.refresh();
     };
@@ -89,7 +91,7 @@ export default function NavBar() {
                     </li>
                     <li className="relative group">
                         <button className={`flex items-center gap-1 ${baseNoColor} ${isPopulerActive ? activeClass : 'text-gray-700'} group-hover:text-[var(--color-primary)]`}>
-                            Populer
+                            {t('nav.popular')}
                             <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" />
                         </button>
                         {/* Dropdown */}
@@ -97,18 +99,18 @@ export default function NavBar() {
                             {/* Item Promo */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
                                 <TicketPercent className="w-5 h-5 text-gray-700" />
-                                <Link href="/promo" className={`font-medium ${isActive('/promo') ? activeClass : 'text-gray-800'}`}>Promo</Link>
+                                <Link href="/promo" className={`font-medium ${isActive('/promo') ? activeClass : 'text-gray-800'}`}>{t('nav.promo')}</Link>
                             </li>
 
                             {/* Item Blog */}
                             <li className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 cursor-pointer">
                                 <Newspaper className="w-5 h-5 text-gray-700" />
-                                <Link href="/blog" className={`font-medium ${isActive('/blog') ? activeClass : 'text-gray-800'}`}>Blog</Link>
+                                <Link href="/blog" className={`font-medium ${isActive('/blog') ? activeClass : 'text-gray-800'}`}>{t('nav.blog')}</Link>
                             </li>
                         </ul>
                     </li>
                     <li>
-                        <Link href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</Link>
+                        <Link href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
                     </li>
                 </ul>
             </div>
@@ -143,7 +145,7 @@ export default function NavBar() {
                                 <li className="rounded-xl hover:bg-red-50 cursor-pointer">
                                     <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                         <LayoutDashboard className="w-4 h-4" />
-                                        Dashboard
+                                        {t('nav.dashboard')}
                                     </Link>
                                 </li>
                              ) : (
@@ -151,19 +153,19 @@ export default function NavBar() {
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
                                         <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <History className="w-4 h-4" />
-                                            History
+                                            {t('nav.history')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
                                         <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <Bookmark className="w-4 h-4" />
-                                            Bookmark
+                                            {t('nav.bookmark')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
                                         <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <UserIcon className="w-4 h-4" />
-                                            Profile
+                                            {t('nav.profile')}
                                         </Link>
                                     </li>
                                 </>
@@ -173,7 +175,7 @@ export default function NavBar() {
                              <li className="rounded-xl hover:bg-red-50 cursor-pointer" onClick={handleLogout}>
                                 <button className="flex w-full items-center gap-2 px-3 py-2 text-red-600 font-medium cursor-pointer">
                                     <LogOut className="w-4 h-4" />
-                                    Logout
+                                    {t('nav.logout')}
                                 </button>
                              </li>
                         </ul>
@@ -183,7 +185,7 @@ export default function NavBar() {
                         href="/register"
                         className="bg-[var(--color-primary)] lg:text-sm xl:text-base 2xl:text-2xl text-white lg:px-1 xl:px-2 2xl:px-4 lg:py-0.5 xl:py-1 2xl:py-2 lg:rounded-sm xl:rounded-xl 2xl:rounded-2xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition lg:w-16 xl:w-28 2xl:w-40 lg:h-6 xl:h-10 2xl:h-16 flex items-center justify-center"
                     >
-                        Daftar
+                        {t('nav.register')}
                     </a>
                 )}
             </div>
@@ -211,22 +213,22 @@ export default function NavBar() {
                                 onClick={() => setIsPopulerOpen(!isPopulerOpen)}
                                 className={`flex items-center justify-center w-full p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isPopulerActive ? activeClass : 'text-gray-700'}`}
                             >
-                                Populer
+                                {t('nav.popular')}
                                 <ChevronDown className={`w-5 h-5 ml-1 transition-transform duration-200 ${isPopulerOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {isPopulerOpen && (
                                 <ul className="mt-2 w-full bg-gray-50 border rounded shadow-inner">
                                     <li>
-                                        <Link href="/promo" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/promo') ? activeClass : 'text-gray-700'}`}>Promo</Link>
+                                        <Link href="/promo" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/promo') ? activeClass : 'text-gray-700'}`}>{t('nav.promo')}</Link>
                                     </li>
                                     <li>
-                                        <Link href="/blog" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/blog') ? activeClass : 'text-gray-700'}`}>Blog</Link>
+                                        <Link href="/blog" className={`block px-4 py-2 hover:bg-red-100 ${isActive('/blog') ? activeClass : 'text-gray-700'}`}>{t('nav.blog')}</Link>
                                     </li>
                                 </ul>
                             )}
                         </li>
                         <li className="w-full">
-                            <Link href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>Upgrade ke Seller</Link>
+                            <Link href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
                         </li>
 
                         <li className="w-full border-t pt-4 mt-2 flex flex-col items-center space-y-4">
@@ -252,31 +254,31 @@ export default function NavBar() {
                                          {user.level === 'ADMIN' ? (
                                             <li>
                                                 <Link href="/admin/dashboard" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                    <LayoutDashboard className="w-5 h-5" /> Dashboard
+                                                    <LayoutDashboard className="w-5 h-5" /> {t('nav.dashboard')}
                                                 </Link>
                                             </li>
                                          ) : (
                                             <>
                                                 <li>
                                                     <Link href="/order-history" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                        <History className="w-5 h-5" /> History
+                                                        <History className="w-5 h-5" /> {t('nav.history')}
                                                     </Link>
                                                 </li>
                                                 <li>
                                                     <Link href="/bookmark" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                        <Bookmark className="w-5 h-5" /> Bookmark
+                                                        <Bookmark className="w-5 h-5" /> {t('nav.bookmark')}
                                                     </Link>
                                                 </li>
                                                 <li>
                                                     <Link href="/profile" className="flex items-center justify-center gap-2 p-2 text-gray-700 hover:bg-red-50 rounded-lg">
-                                                        <UserIcon className="w-5 h-5" /> Profile
+                                                        <UserIcon className="w-5 h-5" /> {t('nav.profile')}
                                                     </Link>
                                                 </li>
                                             </>
                                          )}
                                          <li>
                                             <button onClick={handleLogout} className="flex w-full items-center justify-center gap-2 p-2 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer">
-                                                <LogOut className="w-5 h-5" /> Logout
+                                                <LogOut className="w-5 h-5" /> {t('nav.logout')}
                                             </button>
                                          </li>
                                     </ul>
@@ -286,7 +288,7 @@ export default function NavBar() {
                                     href="/register"
                                     className="bg-[var(--color-primary)] text-lg text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-200 hover:text-[var(--color-primary)] transition w-full h-12 flex items-center justify-center"
                                 >
-                                    Daftar
+                                    {t('nav.register')}
                                 </a>
                             )}
                         </li>

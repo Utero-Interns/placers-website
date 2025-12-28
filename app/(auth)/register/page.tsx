@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 // Components
 import { toast } from 'sonner';
@@ -30,8 +31,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const googleRegister = () => {
-    console.log('Google Register');
-    toast.info('Fitur ini belum tersedia');
+    signIn('google', { callbackUrl: '/dashboard' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +95,11 @@ export default function RegisterPage() {
         <hr className="flex-1 border-gray-300" />
       </div>
 
-      <AuthEmailInput value={email} onChange={e => setEmail(e.target.value)} />
+      <AuthEmailInput 
+        value={email} 
+        onChange={e => setEmail(e.target.value)} 
+        placeholder="Email"
+      />
       <AuthPhoneInput value={phone} onChange={e => setPhone(e.target.value)} />
       <AuthUsernameInput value={username} onChange={e => setUsername(e.target.value)} />
       <AuthPasswordInput

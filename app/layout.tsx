@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import { Providers } from "./providers";
 
 export default function RootLayout({
   children,
@@ -41,8 +42,10 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster />
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );
