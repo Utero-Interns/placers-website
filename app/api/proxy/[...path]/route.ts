@@ -47,7 +47,7 @@ async function handleProxy(request: NextRequest, params: { path: string[] }) {
             // crucial: do not let the backend follow redirects automatically if we want to pass them back?
             // usually fine to default.
             redirect: 'manual',
-            // @ts-ignore - duplex is required for streaming bodies in some environments (Node 18+)
+            // @ts-expect-error - duplex is required for streaming bodies in some environments (Node 18+)
             duplex: 'half'
         });
 

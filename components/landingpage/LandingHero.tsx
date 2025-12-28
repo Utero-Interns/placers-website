@@ -17,7 +17,7 @@ const LandingHero: React.FC = () => {
 
         <a
           href="/homepage"
-          className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[12px] text-sm py-3 px-4 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-95 shadow-md"
+          className="font-semibold text-center text-white bg-[var(--color-primary)] rounded-[15px] text-base py-3 px-6 animate-pulse-glow"
         >
           Jelajahi Titik Iklan Sekarang
         </a>

@@ -19,6 +19,14 @@ export interface AuthResponse {
 // using local proxy to handle cookies correctly (Solution for localhost)
 const API_BASE_URL = '/api/proxy/auth';
 
+export interface RegisterData {
+    username: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword?: string;
+}
+
 export const authService = {
     async login(identifier: string, password: string): Promise<AuthResponse> {
         try {
@@ -42,7 +50,7 @@ export const authService = {
         }
     },
 
-    async register(data: any): Promise<AuthResponse> {
+    async register(data: RegisterData): Promise<AuthResponse> {
         try {
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
@@ -74,6 +82,11 @@ export const authService = {
             console.log('Profile response status:', response.status);
 
             if (!response.ok) {
+                // Silently handle 401 (Unauthorized) as it just means not logged in
+                if (response.status === 401) {
+                    return { user: undefined };
+                }
+
                 console.error('Profile fetch failed:', response.statusText);
                 return { error: 'Failed to fetch profile: ' + response.statusText };
             }

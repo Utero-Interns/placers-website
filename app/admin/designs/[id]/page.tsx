@@ -4,9 +4,10 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Tag, AlignLeft, Calendar, DollarSign, Image as ImageIcon } from 'lucide-react';
-import { authService } from '@/app/lib/auth';
+import { authService, User } from '@/app/lib/auth';
 import { getImageUrl } from '@/app/lib/utils';
 import '@/app/admin/dashboard/styles.css';
+import Image from 'next/image';
 
 interface DesignDetail {
     id: string;
@@ -27,7 +28,7 @@ const SIDEBAR_ITEMS = [
 export default function DesignDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const [design, setDesign] = useState<DesignDetail | null>(null);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function DesignDetailPage({ params }: { params: Promise<{ id: str
                 } else {
                     setError(json.message || 'Failed to fetch design');
                 }
-            } catch (err) {
+            } catch {
                 setError('Network error or invalid response');
             } finally {
                 setLoading(false);
@@ -164,7 +165,7 @@ export default function DesignDetailPage({ params }: { params: Promise<{ id: str
                         {/* Cover / Top Section */}
                         <div className="h-48 bg-gray-100 relative overflow-hidden">
                             {Array.isArray(design.images) && design.images.length > 0 ? (
-                                <img
+                                <Image
                                     src={getImageUrl(design.images[0])}
                                     alt={design.name}
                                     className="w-full h-full object-cover"
@@ -235,7 +236,7 @@ export default function DesignDetailPage({ params }: { params: Promise<{ id: str
                                             <div className="flex gap-2 overflow-x-auto pb-2">
                                                 {design.images.map((img, idx) => (
                                                     <div key={idx} className="w-20 h-20 rounded-lg border border-slate-200 overflow-hidden flex-shrink-0">
-                                                        <img
+                                                        <Image
                                                             src={getImageUrl(img)}
                                                             alt=""
                                                             className="w-full h-full object-cover"

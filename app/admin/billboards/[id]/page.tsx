@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, MapPin, DollarSign, Monitor, Move, Layers, Calendar, Info, Image as ImageIcon } from 'lucide-react';
-import { authService } from '@/app/lib/auth';
-import { getImageUrl } from '@/app/lib/utils';
 import '@/app/admin/dashboard/styles.css';
+import { authService, User } from '@/app/lib/auth';
+import { getImageUrl } from '@/app/lib/utils';
+import { ArrowLeft, DollarSign, Image as ImageIcon, Info, Layers, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
 
 interface BillboardDetail {
     id: string;
@@ -45,7 +46,7 @@ const SIDEBAR_ITEMS = [
 export default function BillboardDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const [billboard, setBillboard] = useState<BillboardDetail | null>(null);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -73,7 +74,7 @@ export default function BillboardDetailPage({ params }: { params: Promise<{ id: 
                 } else {
                     setError(json.message || 'Failed to fetch billboard');
                 }
-            } catch (err) {
+            } catch {
                 setError('Network error or invalid response');
             } finally {
                 setLoading(false);
@@ -161,7 +162,7 @@ export default function BillboardDetailPage({ params }: { params: Promise<{ id: 
                         {/* Cover Image */}
                         <div className="h-[400px] w-full relative">
                             {billboard.image && billboard.image.length > 0 ? (
-                                <img
+                                <Image
                                     src={getImageUrl(billboard.image[0].url)}
                                     alt={billboard.location}
                                     className="w-full h-full object-cover"
@@ -208,7 +209,7 @@ export default function BillboardDetailPage({ params }: { params: Promise<{ id: 
                                         <div className="grid grid-cols-4 gap-2">
                                             {billboard.image && billboard.image.map((imgObj, idx) => (
                                                 <div key={idx} className="aspect-square rounded-lg border border-slate-200 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity">
-                                                    <img
+                                                    <Image
                                                         src={getImageUrl(imgObj.url)}
                                                         alt={`Gallery ${idx + 1}`}
                                                         className="w-full h-full object-cover"
