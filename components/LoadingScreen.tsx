@@ -7,9 +7,9 @@ export default function LoadingScreen() {
         <Image
           src="/logo-placers-red.png"
           alt="App Logo"
-          width={800}
-          height={800}
-          className="w-40 h-40 animate-bounce mb-6"
+          width={400}
+          height={400}
+          className="w-24 h-24 animate-bounce mb-6"
         />
       </div>
     </div>
