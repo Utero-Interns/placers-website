@@ -22,10 +22,10 @@ export default function LandingGallery() {
       id="gallery"
       className="flex flex-col items-center justify-center 
              bg-white w-full 
-             px-4 md:px-8 2xl:px-16 
+             px-4 md:px-6
              py-8 md:py-10 lg:py-12"
     >
-      <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto flex flex-col items-center">
         {/* Tag */}
         <SectionTag
           text="OUR GALLERY"
@@ -51,8 +51,8 @@ export default function LandingGallery() {
 
         {/* Gallery Cards */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
-             gap-4 mt-6 w-full"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 
+             gap-6 mt-8 w-full"
         >
           {loading ? (
             <p className="col-span-full text-center text-gray-500 text-sm">
