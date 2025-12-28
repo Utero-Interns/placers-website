@@ -15,23 +15,19 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
   const totalPages = Math.ceil(totalData / itemsPerPage);
 
-  if (totalPages <= 1) {
-    return (
-      <div className="mt-8 flex justify-center items-center space-x-8 text-sm font-semibold text-gray-400">
-        <button disabled>Previous</button>
-        <span className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#D12027] text-white">
-          1
-        </span>
-        <button disabled>Next</button>
-      </div>
-    );
-  }
+  if (totalPages <= 1) return null;
+
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    onPageChange(page);
+  };
 
   return (
-    <div className="mt-8 flex justify-center items-center space-x-8">
+    <div className="mt-8 flex justify-center items-center gap-8">
+      {/* Previous */}
       <button
+        onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
         className={`font-semibold text-sm ${
           currentPage === 1
             ? 'text-gray-400 cursor-not-allowed'
@@ -41,15 +37,17 @@ const Pagination: React.FC<PaginationProps> = ({
         Previous
       </button>
 
-      <div className="flex space-x-4">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+      {/* Page Numbers */}
+      <div className="flex gap-3">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <button
             key={page}
-            onClick={() => onPageChange(page)}
+            onClick={() => goToPage(page)}
+            disabled={page === currentPage}
             className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
-              currentPage === page
-                ? 'bg-[#D12027] text-white'
-                : 'text-black hover:bg-gray-50'
+              page === currentPage
+                ? 'bg-[#D12027] text-white cursor-default'
+                : 'text-black hover:bg-gray-100'
             }`}
           >
             {page}
@@ -57,9 +55,10 @@ const Pagination: React.FC<PaginationProps> = ({
         ))}
       </div>
 
+      {/* Next */}
       <button
+        onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage === totalPages}
-        onClick={() => onPageChange(currentPage + 1)}
         className={`font-semibold text-sm ${
           currentPage === totalPages
             ? 'text-gray-400 cursor-not-allowed'
