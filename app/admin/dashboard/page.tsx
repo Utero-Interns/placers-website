@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/app/lib/auth';
@@ -10,6 +11,7 @@ import { AdminDashboard } from './core';
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -37,11 +39,11 @@ export default function AdminDashboardPage() {
       // Ensure specific DOM element exists before initializing
       // Small timeout to ensure DOM paint, though useEffect usually suffices
       const timer = setTimeout(() => {
-        new AdminDashboard('admin-dashboard-root');
+        new AdminDashboard('admin-dashboard-root', t);
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, t]);
 
   if (!isAuthorized) {
     return <div className="min-h-screen flex items-center justify-center">Loading Admin...</div>;

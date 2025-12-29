@@ -9,7 +9,7 @@ const LandingHero: React.FC = () => {
       {/* Left Column: Text Content & Search Bar */}
       <div id="left" className="flex flex-col lg:items-start items-center justify-center w-full lg:w-1/2 space-y-6 lg:text-left order-2 lg:order-1 px-6 md:px-12 2xl:px-20 py-16 lg:py-0">
         <h1 className="font-semibold text-4xl items-center justify-center sm:text-5xl 2xl:text-[64px] text-black leading-snug 2xl:font-[600] mb-4">
-          Marketplace Billboard Cerdas Pertama di Indonesia
+          Tingkatkan Visibilitas Bisnis Anda dengan Billboard Terbaik
         </h1>
         <p className="text-base sm:text-lg text-black max-w-2xl mb-4 leading-relaxed">
           <span className="text-[var(--color-primary)] font-semibold">Placers</span> menghubungkan pemilik titik billboard dengan pengiklan secara langsung, memudahkan Anda menemukan dan memesan lokasi iklan luar ruang kapan saja dan di mana saja.

@@ -18,7 +18,7 @@ const Homepage: React.FC = () => {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [status, setStatus] = useState('Semua');
+  const [status, setStatus] = useState('ALL');
 
   useEffect(() => {
     const loadBillboards = async () => {
@@ -39,8 +39,8 @@ const Homepage: React.FC = () => {
   // Filter logic
   const filteredBillboards = billboards.filter(billboard => {
     // 1. Status Filter
-    if (status !== 'Semua') {
-      const isAvailable = status === 'Tersedia';
+    if (status !== 'ALL') {
+      const isAvailable = status === 'AVAILABLE';
       // Adjust this based on your actual data structure. 
       // If billboard.status is strictly "Available" / "Unavailable":
       // const matchesStatus = isAvailable ? billboard.status === 'Available' : billboard.status === 'Unavailable';

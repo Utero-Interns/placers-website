@@ -43,14 +43,14 @@ export default function LandingInvestor() {
                     </p>
 
                     <a
-                        href="#"
+                        href="mailto:placers.official@gmail.com?subject=Investor%20Placers"
                         className="font-bold bg-[var(--color-primary)]/10 rounded-[10px] block mt-6 w-fit hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-300
                                    text-[var(--color-primary)]
                                    text-sm py-2.5 px-8
                                    xl:text-base
                                    lg:text-[20px] 2xl:py-3 2xl:px-9"
                     >
-                        Jadi Investor Sekarang
+                        Hubungi untuk Investasi
                     </a>
                 </div>
             </div>

@@ -1,14 +1,16 @@
 
+import { useLanguage } from '@/app/context/LanguageContext';
 import React from 'react';
 
 const Pagination: React.FC = () => {
   const pages = [1, 2, 3, 4, 5];
   const currentPage = 1;
+  const { t } = useLanguage();
 
   return (
     <div className="mt-8 flex justify-center items-center space-x-2">
       <button className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer">
-        Previous
+        {t('homepage.pagination.previous')}
       </button>
       {pages.map(page => (
         <button
@@ -23,7 +25,7 @@ const Pagination: React.FC = () => {
         </button>
       ))}
       <button className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer">
-        Next
+        {t('homepage.pagination.next')}
       </button>
     </div>
   );

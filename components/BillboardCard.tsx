@@ -1,3 +1,4 @@
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useState } from "react";
 import { Location } from "iconsax-react";
 import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
@@ -32,6 +33,7 @@ const BillboardCard = ({
   sellerName,
   id,
 }: BillboardCardProps) => {
+  const { t } = useLanguage();
   // ✅ State-based fallbacks
   const [billboardSrc, setBillboardSrc] = useState(image);
   const [sellerSrc, setSellerSrc] = useState(sellerImage);
@@ -92,7 +94,7 @@ const BillboardCard = ({
         {/* Price */}
         <div className="flex items-baseline">
           <h1 className="font-medium text-base md:text-lg text-black mr-1">
-            Mulai Dari Rp.
+            {t('homepage.billboard_card.start_from')}
           </h1>
           <span className="font-bold text-xl md:text-2xl text-black">
             {formatPrice(Number(price))}
@@ -124,7 +126,7 @@ const BillboardCard = ({
             href={`/billboard-detail/${id}`}
             className="block w-full bg-[var(--color-primary)] text-white text-lg md:text-xl py-2 px-4 rounded-[10px] font-medium text-center hover:text-[var(--color-primary)] hover:bg-gray-200"
           >
-            Detail
+            {t('homepage.billboard_card.detail')}
           </a>
         </div>
       </div>

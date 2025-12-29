@@ -2,6 +2,7 @@
 import { ChevronDownIcon, ChevronUpIcon, FilterIcon, GridIcon, MapPin, Move3DIcon, SearchIcon, ViewIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import FilterPopover from './FilterPopover';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 const CATEGORIES = [
   'Billboard',
@@ -47,10 +48,20 @@ interface StatusDropdownProps {
 
 const StatusDropdown: React.FC<StatusDropdownProps> = ({ selected, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleSelect = (option: string) => {
     onSelect(option);
     setIsOpen(false);
+  };
+
+  const getLabel = (status: string) => {
+    switch (status) {
+      case 'ALL': return t('homepage.filters.all_status');
+      case 'AVAILABLE': return t('homepage.filters.available');
+      case 'UNAVAILABLE': return t('homepage.filters.unavailable');
+      default: return status;
+    }
   };
 
   return (
@@ -61,7 +72,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ selected, onSelect }) =
           className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none cursor-pointer h-[42px]"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {selected === 'Semua' ? 'Status' : selected}
+          {selected === 'ALL' ? t('homepage.filters.status') : getLabel(selected)}
           {isOpen ? <ChevronUpIcon className="ml-2 -mr-1 h-5 w-5" /> : <ChevronDownIcon className="ml-2 -mr-1 h-5 w-5" />}
         </button>
       </div>
@@ -70,25 +81,25 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ selected, onSelect }) =
         <div className="origin-top-left absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
           <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Semua' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Semua')}
+              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'ALL' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
+              onClick={() => handleSelect('ALL')}
             >
-              Semua Status
-              {selected === 'Semua' && <span className="text-[var(--color-primary)]">✓</span>}
+              {t('homepage.filters.all_status')}
+              {selected === 'ALL' && <span className="text-[var(--color-primary)]">✓</span>}
             </button>
             <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Tersedia' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Tersedia')}
+              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'AVAILABLE' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
+              onClick={() => handleSelect('AVAILABLE')}
             >
-              Tersedia
-              {selected === 'Tersedia' && <span className="text-[var(--color-primary)]">✓</span>}
+               {t('homepage.filters.available')}
+              {selected === 'AVAILABLE' && <span className="text-[var(--color-primary)]">✓</span>}
             </button>
             <button
-              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'Tidak Tersedia' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
-              onClick={() => handleSelect('Tidak Tersedia')}
+              className={`flex justify-between items-center w-full text-left px-4 py-2 text-sm ${selected === 'UNAVAILABLE' ? 'text-[var(--color-primary)] bg-red-50' : 'text-gray-700'}`}
+              onClick={() => handleSelect('UNAVAILABLE')}
             >
-              Tidak Tersedia
-              {selected === 'Tidak Tersedia' && <span className="text-[var(--color-primary)]">✓</span>}
+               {t('homepage.filters.unavailable')}
+              {selected === 'UNAVAILABLE' && <span className="text-[var(--color-primary)]">✓</span>}
             </button>
           </div>
         </div>
@@ -108,6 +119,7 @@ interface FiltersProps {
 const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, onStatusChange }) => {
     const [showDetailedFilters, setShowDetailedFilters] = useState(false);
     const [localSearch, setLocalSearch] = useState(searchQuery);
+    const { t } = useLanguage();
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -135,7 +147,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         <input
                             type="text"
                             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm h-[42px]"
-                            placeholder="Cari lokasi, kategori, atau nama titik... (Tekan Enter)"
+                            placeholder={t('homepage.filters.search_placeholder')}
                             value={localSearch}
                             onChange={(e) => setLocalSearch(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -149,7 +161,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 cursor-pointer h-[42px]"
                     >
                         <FilterIcon className="h-4 w-4" />
-                        Filter Lainnya
+                        {t('homepage.filters.more_filters')}
                     </button>
                     {/* Reset Button could go here */}
                 </div>
@@ -157,7 +169,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
 
             {showDetailedFilters && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200">
-                    <FilterPopover title="Kategori" icon={<SearchIcon className="w-4 h-4 text-gray-400" />}>
+                    <FilterPopover title={t('homepage.filters.category')} icon={<SearchIcon className="w-4 h-4 text-gray-400" />}>
                         <div className="p-4 space-y-2">
                             {CATEGORIES.map(cat => (
                                 <label key={cat} className="flex items-center text-sm text-gray-700">
@@ -168,7 +180,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         </div>
                     </FilterPopover>
 
-                     <FilterPopover title="Lokasi" icon={<MapPin className="w-4 h-4 text-gray-400" />}>
+                     <FilterPopover title={t('homepage.filters.location')} icon={<MapPin className="w-4 h-4 text-gray-400" />}>
                         <div className="p-4 space-y-2">
                             {LOCATIONS.map(loc => (
                                 <label key={loc} className="flex items-center text-sm text-gray-700">
@@ -179,7 +191,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         </div>
                     </FilterPopover>
 
-                     <FilterPopover title="Ukuran" icon={<GridIcon className="w-4 h-4 text-gray-400" />}>
+                     <FilterPopover title={t('homepage.filters.size')} icon={<GridIcon className="w-4 h-4 text-gray-400" />}>
                         <div className="p-4 space-y-2">
                             {SIZES.map(size => (
                                 <label key={size} className="flex items-center text-sm text-gray-700">
@@ -190,7 +202,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         </div>
                     </FilterPopover>
 
-                     <FilterPopover title="Orientasi" icon={<Move3DIcon className="w-4 h-4 text-gray-400" />}>
+                     <FilterPopover title={t('homepage.filters.orientation')} icon={<Move3DIcon className="w-4 h-4 text-gray-400" />}>
                         <div className="p-4 space-y-2">
                             {ORIENTATIONS.map(ori => (
                                 <label key={ori} className="flex items-center text-sm text-gray-700">
@@ -201,7 +213,7 @@ const Filters: React.FC<FiltersProps> = ({ searchQuery, onSearchChange, status, 
                         </div>
                     </FilterPopover>
                     
-                     <FilterPopover title="Tampilan" icon={<ViewIcon className="w-4 h-4 text-gray-400" />}>
+                     <FilterPopover title={t('homepage.filters.display')} icon={<ViewIcon className="w-4 h-4 text-gray-400" />}>
                         <div className="p-4 space-y-2">
                             {DISPLAYS.map(disp => (
                                 <label key={disp} className="flex items-center text-sm text-gray-700">

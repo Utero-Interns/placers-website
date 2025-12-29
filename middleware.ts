@@ -4,9 +4,10 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Define protected routes and their required roles/logic
+    // Define protected routes groups
     const isAdminRoute = pathname.startsWith('/admin');
-    const isSellerRoute = pathname.startsWith('/seller/dashboard'); // Only protect dashboard, /seller might be landing
+    const isSellerRoute = pathname.startsWith('/seller/dashboard');
+    // Buyer routes - standard dashboard and user features
     const isBuyerRoute =
         pathname.startsWith('/dashboard') ||
         pathname.startsWith('/booking') ||
@@ -20,7 +21,6 @@ export async function middleware(request: NextRequest) {
     if (isAdminRoute || isSellerRoute || isBuyerRoute) {
 
         // 1. Initial Cookie Check (Fail fast)
-        // We look for common session cookies. Adjust if you know the specific cookie name.
         const cookieHeader = request.headers.get('cookie');
         if (!cookieHeader) {
             console.log('[Middleware] No cookie found for protected route, redirecting to login.');
@@ -31,7 +31,6 @@ export async function middleware(request: NextRequest) {
 
         try {
             // 2. Verify Session with Backend
-            // console.log('[Middleware] Verifying session with backend for path:', pathname);
             const authResponse = await fetch('http://utero.viewdns.net:3100/auth/me', {
                 method: 'GET',
                 headers: {
@@ -48,43 +47,48 @@ export async function middleware(request: NextRequest) {
             }
 
             const userData = await authResponse.json();
-            const userLevel = userData.user?.level || userData.data?.level; // Adapt based on API response structure
+            const userLevel = userData.user?.level || userData.data?.level;
 
-            // 3. Role-Based Access Control
+            // 3. Strict Role-Based Access Control
 
-            // ADMIN Route Protection
-            if (isAdminRoute) {
-                if (userLevel !== 'ADMIN') {
-                    // Redirect non-admins to their respective dashboards
+            // --- ADMIN LOGIC ---
+            if (userLevel === 'ADMIN') {
+                // Admin can ONLY access admin routes
+                if (!isAdminRoute) {
+                    // If admin tries to go to seller or buyer dashboard, redirect to admin dashboard
                     const url = request.nextUrl.clone();
-                    if (userLevel === 'SELLER') url.pathname = '/seller/dashboard';
-                    else url.pathname = '/dashboard';
+                    url.pathname = '/admin/dashboard';
                     return NextResponse.redirect(url);
                 }
+                // Allowed
+                return NextResponse.next();
             }
 
-            // SELLER Route Protection
-            // "for buyer, cant access the seller's features"
-            if (isSellerRoute) {
-                if (userLevel !== 'SELLER' && userLevel !== 'ADMIN') { // Assuming Admin might need access, if not remove ADMIN check
-                    // Buyer trying to access Seller route -> redirect to Buyer dashboard
+            // --- SELLER LOGIC ---
+            if (userLevel === 'SELLER') {
+                // Seller can ONLY access seller routes
+                if (!isSellerRoute) {
+                    // If seller tries to go to admin or buyer dashboard/profile, redirect to seller dashboard
                     const url = request.nextUrl.clone();
-                    url.pathname = '/dashboard';
+                    url.pathname = '/seller/dashboard';
                     return NextResponse.redirect(url);
                 }
+                // Allowed
+                return NextResponse.next();
             }
 
-            // BUYER/Common Protected Route Protection
-            // "for seller, cant access the admin's features" -> Handled by Admin check above
-            // "for guest..." -> Handled by auth check above
-            // Usually Sellers can access Buyer features (e.g. Profile), so we don't block Sellers from /dashboard or /profile.
-            // If we strictly want to keep them separate:
-            // if (isBuyerRoute && userLevel === 'SELLER') { ... } 
-
-            // However, typically "Buyer features" like Profile are shared. 
-            // The prompt says "for seller, cant access the admin's features". 
-            // It doesn't explicitly say Seller can't access Buyer features.
-            // So we allow authenticated users (Buyer/Seller/Admin) to access standard protected routes unless specific logic forbids it.
+            // --- BUYER (User) LOGIC ---
+            // Assuming anything else is a standard User/Buyer
+            // Buyer can ONLY access buyer routes
+            if (!isBuyerRoute) {
+                // If buyer tries to go to admin or seller dashboard, redirect to buyer dashboard
+                // Note: userLevel might be 'USER' or defined otherwise, treating as default fallback
+                const url = request.nextUrl.clone();
+                url.pathname = '/dashboard';
+                return NextResponse.redirect(url);
+            }
+            // Allowed
+            return NextResponse.next();
 
         } catch (error) {
             console.error('[Middleware] Auth check failed:', error);

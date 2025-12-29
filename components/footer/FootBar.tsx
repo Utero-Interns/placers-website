@@ -41,12 +41,11 @@ export default function FootBar() {
                     <FootLinkTitle text="CONTACT" />
                     <FootLink href="https://uteroindonesia.com/" text="PT. Utero Kreatif Indonesia" />
                     <FootLink
-                        href="https://maps.app.goo.gl/rSkKi7UfVtdWgyD99"
-                        text="Jalan Bantaran I No. 25, Tulusrejo, Kec. Lowokwaru, Malang - Jawa Timur, Indonesia | Postal Code 65141"
+                        href="https://maps.google.com/?q=Jl.+Soekarno+Hatta+No.10,+Jatimulyo,+Kec.+Lowokwaru,+Kota+Malang,+Jawa+Timur"
+                        text="Jl. Soekarno Hatta No.10, Jatimulyo, Kec. Lowokwaru, Kota Malang, Jawa Timur"
                     />
-                    <FootLink href="" text="+6281 999 900 900 (Wahyu)" />
-                    <FootLink href="" text="+6281 7388 616 (Utero)" />
-                    <FootLink href="mailto:marketingutero@gmail.com" text="marketingutero@gmail.com" />
+                    <FootLink href="https://wa.me/6282255900989" text="+62822 5590 0989" />
+                    <FootLink href="mailto:placers.official@gmail.com" text="placers.official@gmail.com" />
                 </div>
             </div>
 
