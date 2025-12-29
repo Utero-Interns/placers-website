@@ -100,6 +100,27 @@ export const authService = {
         }
     },
 
+    async forgotPassword(email: string): Promise<AuthResponse> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            return {
+                status: false,
+                message: 'Terjadi kesalahan saat mengirim permintaan reset password',
+            };
+        }
+    },
+
     async logout(): Promise<void> {
         try {
             await fetch(`${API_BASE_URL}/logout`, {

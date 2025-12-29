@@ -8,7 +8,7 @@ interface DashboardTabProps {
 }
 
 export default function DashboardTab({ user }: DashboardTabProps) {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{ revenue: number; billboards: number; sales: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function DashboardTab({ user }: DashboardTabProps) {
           const billboards = Array.isArray(billboardsRes) ? billboardsRes : [];
           const sales = Array.isArray(salesRes) ? salesRes : [];
           
-          const revenue = sales.reduce((acc: number, t: any) => acc + (t.status === 'PAID' ? t.totalPrice : 0), 0);
+          const revenue = sales.reduce((acc: number, t: { status: string; totalPrice: string | number }) => acc + (t.status === 'PAID' ? Number(t.totalPrice) : 0), 0);
           
           setStats({
             billboards: billboards.length,

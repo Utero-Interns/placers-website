@@ -48,10 +48,20 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
   onSelect,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleSelect = (option: string) => {
     onSelect(option);
     setIsOpen(false);
+  };
+
+  const getLabel = (status: string) => {
+    switch (status) {
+      case 'ALL': return t('homepage.filters.all_status');
+      case 'AVAILABLE': return t('homepage.filters.available');
+      case 'UNAVAILABLE': return t('homepage.filters.unavailable');
+      default: return status;
+    }
   };
 
   return (
