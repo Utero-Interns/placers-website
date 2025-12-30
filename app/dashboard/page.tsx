@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
-  const NavItem = ({ id, label, icon: Icon }: { id: Tab, label: string, icon: any }) => (
+  const NavItem = ({ id, label, icon: Icon }: { id: Tab, label: string, icon: React.ElementType }) => (
     <button
       onClick={() => {
         setActiveTab(id);
@@ -76,7 +76,7 @@ export default function DashboardPage() {
     </button>
   );
 
-  const LinkItem = ({ href, label, icon: Icon }: { href: string, label: string, icon: any }) => (
+  const LinkItem = ({ href, label, icon: Icon }: { href: string, label: string, icon: React.ElementType }) => (
     <Link
       href={href}
       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"

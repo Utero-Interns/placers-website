@@ -12,11 +12,11 @@ const handler = NextAuth({
         signIn: '/login',
     },
     callbacks: {
-        async signIn({ user, account, profile }) {
+        async signIn() {
             // Here you can handle backend syncing if needed in the future
             return true;
         },
-        async redirect({ url, baseUrl }) {
+        async redirect({ baseUrl }) {
             return baseUrl + '/dashboard';
         }
     }

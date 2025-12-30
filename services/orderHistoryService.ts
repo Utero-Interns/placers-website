@@ -87,7 +87,7 @@ export interface HistoryApiResponse {
 
 export const getOrders = async (params?: HistoryQueryParams): Promise<HistoryApiResponse> => {
   const searchParams = new URLSearchParams();
-  
+
   if (params) {
     if (params.take) searchParams.append('take', params.take.toString());
     if (params.cursor) searchParams.append('cursor', params.cursor);
@@ -99,8 +99,10 @@ export const getOrders = async (params?: HistoryQueryParams): Promise<HistoryApi
     if (params.sortDir) searchParams.append('sortDir', params.sortDir);
   }
 
-  const response = await fetch(`/api/history?${searchParams.toString()}`);
-  
+  const response = await fetch(`/api/history?${searchParams.toString()}`, {
+    credentials: 'include',
+  });
+
   if (!response.ok) {
     throw new Error(`Failed to fetch orders: ${response.statusText}`);
   }

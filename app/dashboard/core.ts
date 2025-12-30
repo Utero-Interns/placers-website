@@ -19,7 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'sales', label: 'My Sales', icon: '💰', roles: ['SELLER'] },
   { id: 'history', label: 'History', icon: '📜', roles: ['SELLER'] },
   { id: 'settings', label: 'Profile', icon: '⚙️', roles: ['SELLER'] }, // Mapped to /seller/me
-  { id: 'upgrade', label: 'Upgrade to Seller', icon: '🚀', roles: ['BUYER'] },
+  { id: 'upgrade', label: 'Daftar Jadi Seller', icon: '🚀', roles: ['BUYER'] },
 ];
 
 // Dashboard-specific DTO for Transaction Sales
@@ -622,38 +622,119 @@ export class UserDashboard {
 
   private renderUpgrade(container: Element) {
     container.innerHTML = `
-            <div class="upgrade-hero animate-slide-up">
-                <h2 class="text-2xl font-bold mb-4 text-slate-800">Start Selling on Placers</h2>
-                <p class="mb-8 text-slate-600 max-w-lg mx-auto">
-                    Transform your billboard assets into revenue. Join our network of premium sellers and reach thousands of advertisers.
-                </p>
-                <button id="start-upgrade-btn" class="btn btn-primary btn-lg shadow-lg hover:translate-y-[-2px] transition-transform">
-                    Register as Seller
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 animate-fade-in">
-                <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 text-center">
-                    <div class="text-4xl mb-4">📈</div>
-                    <h3 class="font-bold mb-2">Track Performance</h3>
-                    <p class="text-sm text-slate-500">Real-time analytics for your assets</p>
-                </div>
-                 <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 text-center">
-                    <div class="text-4xl mb-4">🤝</div>
-                    <h3 class="font-bold mb-2">Direct Deals</h3>
-                    <p class="text-sm text-slate-500">Connect directly with buyers</p>
-                </div>
-                 <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 text-center">
-                    <div class="text-4xl mb-4">🛡️</div>
-                    <h3 class="font-bold mb-2">Secure Payments</h3>
-                    <p class="text-sm text-slate-500">Guaranteed transactions</p>
+            <div class="max-w-4xl mx-auto space-y-8 animate-slide-up">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                     <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="w-full md:w-1/3">
+                            <h2 class="text-2xl font-bold mb-4">Gabung Jadi Seller</h2>
+                            <p class="text-slate-600 mb-6">
+                                Mulai tawarkan produk atau jasa kamu di Placers sekarang juga.
+                            </p>
+                            <div class="bg-slate-50 p-6 rounded-lg border border-slate-100 hidden md:block">
+                                <ul class="space-y-3 text-sm text-slate-600">
+                                    <li class="flex items-center gap-2">✅ Reach thousands of buyers</li>
+                                    <li class="flex items-center gap-2">✅ Secure transactions</li>
+                                    <li class="flex items-center gap-2">✅ Real-time analytics</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <form id="seller-register-form" class="w-full md:w-2/3 space-y-4">
+                            <!-- Nama -->
+                            <div class="form-group">
+                                <label class="form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" name="fullname" placeholder="Masukkan nama" required>
+                            </div>
+
+                            <!-- Nomor KTP -->
+                            <div class="form-group">
+                                <label class="form-label">Nomor KTP</label>
+                                <input type="number" class="form-control" name="ktp" placeholder="Masukkan nomor KTP" required>
+                            </div>
+
+                            <!-- NPWP -->
+                            <div class="form-group">
+                                <label class="form-label">NPWP</label>
+                                <input type="number" class="form-control" name="npwp" placeholder="Masukkan nomor NPWP" required>
+                            </div>
+
+                            <!-- Nama Perusahaan -->
+                            <div class="form-group">
+                                <label class="form-label">Nama Perusahaan / Usaha</label>
+                                <input type="text" class="form-control" name="companyName" placeholder="Masukkan nama perusahaan" required>
+                            </div>
+
+                            <!-- Alamat KTP -->
+                            <div class="form-group">
+                                <label class="form-label">Alamat KTP</label>
+                                <input type="text" class="form-control" name="ktpAddress" placeholder="Masukkan alamat KTP" required>
+                            </div>
+
+                            <!-- Alamat Perusahaan -->
+                            <div class="form-group">
+                                <label class="form-label">Alamat Perusahaan / Usaha</label>
+                                <input type="text" class="form-control" name="officeAddress" placeholder="Masukkan alamat perusahaan" required>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" class="btn btn-primary w-full">Daftar Jadi Seller</button>
+                            </div>
+                        </form>
+                     </div>
                 </div>
             </div>
         `;
 
-    container.querySelector('#start-upgrade-btn')?.addEventListener('click', () => {
-      // Redirect to the existing registration page
-      window.location.href = '/seller/register';
+    const form = container.querySelector('#seller-register-form') as HTMLFormElement;
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      // Basic Validation Logic (mirrored from page.tsx)
+      const errors: string[] = [];
+      if (!payload.fullname || (payload.fullname as string).length < 3) errors.push("Nama minimal 3 karakter");
+      if (!/^\d{16}$/.test(payload.ktp as string)) errors.push("Nomor KTP harus 16 digit angka");
+      if (!/^\d{15,16}$/.test(payload.npwp as string)) errors.push("NPWP harus 15–16 digit angka");
+      if (!payload.companyName) errors.push("Nama perusahaan wajib diisi");
+      if ((payload.ktpAddress as string).length < 10) errors.push("Alamat KTP minimal 10 karakter");
+      if ((payload.officeAddress as string).length < 10) errors.push("Alamat perusahaan minimal 10 karakter");
+
+      if (errors.length > 0) {
+        this.openConfirmModal('Validation Error', errors.join('\n'), async () => { }, 'error');
+        return;
+      }
+
+      // Submit
+      try {
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        btn.textContent = 'Mengirim...';
+        btn.disabled = true;
+
+        const res = await fetch("/api/proxy/seller", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          this.openConfirmModal('Success', 'Pendaftaran berhasil! Silakan login kembali untuk mengakses fitur Seller.', async () => {
+            await authService.logout();
+            window.location.href = '/login';
+          }, 'success');
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || 'Terjadi kesalahan');
+        }
+      } catch (err: unknown) {
+        this.openConfirmModal('Error', (err as Error).message || 'Gagal mendaftar', async () => { }, 'error');
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        btn.textContent = 'Daftar Jadi Seller';
+        btn.disabled = false;
+      }
     });
   }
 

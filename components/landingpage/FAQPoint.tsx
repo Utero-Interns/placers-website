@@ -4,10 +4,11 @@ type FAQPointProps = {
   question: string;
   answer: string;
   expanded: boolean;
+  hasBadge?: boolean;
   onClick: () => void;
 };
 
-export default function FAQPoint({ question, answer, expanded, onClick }: FAQPointProps) {
+export default function FAQPoint({ question, answer, expanded, hasBadge, onClick }: FAQPointProps) {
   return (
     <div
       className={`flex flex-col transition-all duration-300 ${expanded
@@ -25,6 +26,16 @@ export default function FAQPoint({ question, answer, expanded, onClick }: FAQPoi
             }`}
         >
           {question}
+          
+          {hasBadge && (
+              <span className={`text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full border ${
+                expanded 
+                  ? "bg-white/20 text-white border-white/40" 
+                  : "bg-red-50 text-[var(--color-primary)] border-red-200"
+              } inline-flex items-center justify-center`}>
+                Upgrade
+              </span>
+            )}
         </p>
         <div className="shrink-0">
           {expanded ? (

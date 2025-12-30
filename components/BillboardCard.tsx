@@ -1,3 +1,4 @@
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useState } from "react";
 import { Location } from "iconsax-react";
 import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
@@ -121,7 +122,7 @@ const BillboardCard = ({
             href={`/billboard-detail/${id}`}
             className="block w-full bg-[var(--color-primary)] text-white text-sm md:text-base py-2 px-4 rounded-lg font-semibold text-center transition-colors hover:bg-opacity-90"
           >
-            Detail
+            {t('homepage.billboard_card.detail')}
           </a>
         </div>
       </div>

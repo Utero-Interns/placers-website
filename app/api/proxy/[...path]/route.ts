@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_URL = 'http://utero.viewdns.net:3100';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://utero.viewdns.net:3100';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
     return handleProxy(request, await params);

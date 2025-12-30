@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { authService } from '@/app/lib/auth';
 import './styles.css';
 import { SellerDashboard } from './core';
@@ -9,6 +10,7 @@ import { SellerDashboard } from './core';
 export default function SellerDashboardPage() {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const { t } = useLanguage();
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -20,8 +22,6 @@ export default function SellerDashboardPage() {
             }
 
             // Check if user is SELLER (or ADMIN, but typically strict match)
-            // Usually users are just SELLER. If ADMIN can access too, we can adjust.
-            // But adhering to strict role separation for now as implied.
             if (res.user.level !== 'SELLER') {
                 router.push('/dashboard');
                 return;
@@ -36,11 +36,11 @@ export default function SellerDashboardPage() {
     useEffect(() => {
         if (isAuthorized) {
             const timer = setTimeout(() => {
-                new SellerDashboard('seller-dashboard-root');
+                new SellerDashboard('seller-dashboard-root', t);
             }, 0);
             return () => clearTimeout(timer);
         }
-    }, [isAuthorized]);
+    }, [isAuthorized, t]);
 
     if (!isAuthorized) {
         return <div className="min-h-screen flex items-center justify-center">Loading Seller Dashboard...</div>;

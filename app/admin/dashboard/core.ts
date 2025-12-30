@@ -51,11 +51,13 @@ export class AdminDashboard {
     };
     private currentModalAction: (() => Promise<void>) | null = null;
     private selectedDesignFiles: File[] = [];
+    private t: (key: string) => string;
 
-    constructor(rootId: string) {
+    constructor(rootId: string, t: (key: string) => string) {
         const root = document.getElementById(rootId);
         if (!root) throw new Error(`Root element #${rootId} not found`);
         this.root = root;
+        this.t = t;
         this.data = store.data;
         this.apiData = {
             users: [],
@@ -412,7 +414,7 @@ export class AdminDashboard {
       <div class="admin-container">
         <aside class="sidebar">
           <div class="sidebar-header">
-            PLACERS ADMIN
+            ${this.t('admin.sidebar.admin_title')}
           </div>
           <nav class="sidebar-nav">
             <!-- Nav items injected here -->
@@ -431,7 +433,7 @@ export class AdminDashboard {
             </div>
             <button class="logout-btn-sidebar">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-              Logout
+              ${this.t('admin.sidebar.logout')}
             </button>
           </div>
         </aside>
@@ -439,7 +441,7 @@ export class AdminDashboard {
           <header class="top-header">
             <div style="display:flex; align-items:center; gap:1rem;">
               <button class="mobile-toggle">â˜°</button>
-              <h1 class="page-title">Dashboard</h1>
+              <h1 class="page-title">${this.t('admin.sidebar.dashboard')}</h1>
             </div>
           </header>
           <div id="content-area">
@@ -523,18 +525,18 @@ export class AdminDashboard {
         const nav = this.root.querySelector('.sidebar-nav');
         if (!nav) return;
 
-        const tabs: { name: ModuleName; icon: string }[] = [
-            { name: 'Dashboard', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
-            { name: 'Users', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
-            { name: 'Sellers', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 21 3"/><path d="M3 3l18 18"/></svg>' }, // Placeholder icon, will replace with shop icon
-            { name: 'Billboards', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
-            { name: 'Transactions', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
-            { name: 'Recycle Bin', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' },
-            { name: 'Categories', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>' },
-            { name: 'Designs', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
-            { name: 'Add-ons', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' },
-            { name: 'Media', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' },
-            { name: 'My Profile', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' }
+        const tabs: { name: ModuleName; label: string; icon: string }[] = [
+            { name: 'Dashboard', label: this.t('admin.sidebar.dashboard'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
+            { name: 'Users', label: this.t('admin.sidebar.users'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+            { name: 'Sellers', label: this.t('admin.sidebar.sellers'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 21 3"/><path d="M3 3l18 18"/></svg>' }, // Placeholder icon, will replace with shop icon
+            { name: 'Billboards', label: this.t('admin.sidebar.billboards'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
+            { name: 'Transactions', label: this.t('admin.sidebar.transactions'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
+            { name: 'Recycle Bin', label: this.t('admin.sidebar.recycle_bin'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' },
+            { name: 'Categories', label: this.t('admin.sidebar.categories'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>' },
+            { name: 'Designs', label: this.t('admin.sidebar.designs'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
+            { name: 'Add-ons', label: this.t('admin.sidebar.addons'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' },
+            { name: 'Media', label: this.t('admin.sidebar.media'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' },
+            { name: 'My Profile', label: this.t('admin.sidebar.my_profile'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' }
         ];
 
         // Fix Sellers icon specifically
@@ -543,7 +545,7 @@ export class AdminDashboard {
         nav.innerHTML = tabs.map(tab => `
       <div class="nav-item ${this.state.activeTab === tab.name ? 'active' : ''}" data-tab="${tab.name}">
         <span class="nav-icon">${tab.icon}</span>
-        <span class="nav-text">${tab.name}</span>
+        <span class="nav-text">${tab.label}</span>
       </div>
     `).join('');
 
@@ -555,6 +557,23 @@ export class AdminDashboard {
         });
     }
 
+    private getTabs() {
+        return [
+            { name: 'Dashboard', label: this.t('admin.sidebar.dashboard'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>' },
+            { name: 'Users', label: this.t('admin.sidebar.users'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+            { name: 'Sellers', label: this.t('admin.sidebar.sellers'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>' }, // Placeholder icon, will replace with shop icon
+            { name: 'Billboards', label: this.t('admin.sidebar.billboards'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/></svg>' },
+            { name: 'Transactions', label: this.t('admin.sidebar.transactions'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>' },
+            { name: 'Recycle Bin', label: this.t('admin.sidebar.recycle_bin'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' },
+            { name: 'Categories', label: this.t('admin.sidebar.categories'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>' },
+            { name: 'Designs', label: this.t('admin.sidebar.designs'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
+            { name: 'Add-ons', label: this.t('admin.sidebar.addons'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' },
+            { name: 'Media', label: this.t('admin.sidebar.media'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' },
+            { name: 'My Profile', label: this.t('admin.sidebar.my_profile'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+            { name: 'Cities', label: this.t('admin.sidebar.cities'), icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M13 11v10"/><path d="M9 11v10"/></svg>' }
+        ] as { name: ModuleName; label: string; icon: string }[];
+    }
+
     private async setActiveTab(tab: ModuleName) {
         this.state.activeTab = tab;
         this.state.searchQuery = '';
@@ -564,7 +583,9 @@ export class AdminDashboard {
 
         // Update UI
         this.renderSidebarNav();
-        this.root.querySelector('.page-title')!.textContent = tab;
+        // Update page title logic
+        const currentTabConfig = this.getTabs().find(t => t.name === tab);
+        this.root.querySelector('.page-title')!.textContent = currentTabConfig?.label || tab;
 
         if (tab === 'Dashboard') {
             await this.fetchDashboardStats();
@@ -617,7 +638,7 @@ export class AdminDashboard {
         const user = this.apiData.currentUser || {};
         container.innerHTML = `
             <div class="table-container" style="padding: 2rem; max-width: 600px;">
-                <h3 style="margin-bottom: 2rem;">My Profile</h3>
+                <h3 style="margin-bottom: 2rem;">${this.t('admin.profile.title')}</h3>
                 
                 <form id="admin-profile-form">
                     <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 2rem;">
@@ -628,37 +649,37 @@ export class AdminDashboard {
             }
                         </div>
                         <div style="flex:1;">
-                            <label class="form-label">Profile Picture</label>
+                            <label class="form-label">${this.t('admin.profile.profile_picture')}</label>
                             <input type="file" name="file" id="admin-profile-input" class="form-control">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Username</label>
+                        <label class="form-label">${this.t('admin.profile.username')}</label>
                         <input type="text" class="form-control" name="username" value="${user.username || ''}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Email</label>
+                        <label class="form-label">${this.t('admin.profile.email')}</label>
                         <input type="email" class="form-control" name="email" value="${user.email || ''}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Phone</label>
+                        <label class="form-label">${this.t('admin.profile.phone')}</label>
                         <input type="text" class="form-control" name="phone" value="${user.phone || ''}">
                     </div>
                     
                     <div class="form-group" style="margin-top:2rem;">
-                    <label class="form-label">Change Password <span style="font-weight:normal; color:#666;">(Leave blank to keep current)</span></label>
+                    <label class="form-label">${this.t('admin.profile.change_password')} <span style="font-weight:normal; color:#666;">${this.t('admin.profile.leave_blank_password')}</span></label>
                     <div style="position: relative;">
-                        <input type="password" class="form-control" name="password" placeholder="New Password" style="padding-right: 40px;">
+                        <input type="password" class="form-control" name="password" placeholder="${this.t('admin.profile.change_password')}" style="padding-right: 40px;">
                         <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
+                    <label class="form-label">${this.t('admin.profile.confirm_password')}</label>
                     <div style="position: relative;">
-                        <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm New Password" style="padding-right: 40px;">
+                        <input type="password" class="form-control" name="confirmPassword" placeholder="${this.t('admin.profile.confirm_password')}" style="padding-right: 40px;">
                         <button type="button" class="toggle-password" data-target="confirmPassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
@@ -666,11 +687,11 @@ export class AdminDashboard {
                 </div>
 
                 <div class="form-group">
-                     <label class="form-label">Role</label>
+                     <label class="form-label">${this.t('admin.profile.role')}</label>
                      <input type="text" class="form-control" value="${user.level || 'ADMIN'}" disabled style="background:#eee;">
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Update Profile</button>
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">${this.t('admin.profile.update_button')}</button>
             </form>
         </div>
     `;
@@ -758,10 +779,10 @@ export class AdminDashboard {
     private renderDashboardOverview(container: Element) {
         const stats = this.apiData.stats || {};
         const displayStats = [
-            { label: 'Total Users', value: stats.totalUsers ?? (this.apiData.users.length || 0), change: '+12%' },
-            { label: 'Total Billboards', value: stats.totalBillboards ?? (this.apiData.billboards.length || 0), change: '+8%' },
-            { label: 'Active Billboards', value: stats.activeBillboards ?? 0, change: '+5%' },
-            { label: 'Total Transactions', value: stats.totalTransactions ?? (this.apiData.transactions.length || 0), change: '+25%' },
+            { label: this.t('admin.dashboard.total_users'), value: stats.totalUsers ?? (this.apiData.users.length || 0), change: '+12%' },
+            { label: this.t('admin.dashboard.total_billboards'), value: stats.totalBillboards ?? (this.apiData.billboards.length || 0), change: '+8%' },
+            { label: this.t('admin.dashboard.active_billboards'), value: stats.activeBillboards ?? 0, change: '+5%' },
+            { label: this.t('admin.dashboard.total_transactions'), value: stats.totalTransactions ?? (this.apiData.transactions.length || 0), change: '+25%' },
         ];
 
         container.innerHTML = `
@@ -771,21 +792,21 @@ export class AdminDashboard {
             <div class="stat-label">${stat.label}</div>
             <div class="stat-value">${stat.value}</div>
             <div style="color: var(--success-green); font-size: 0.875rem; margin-top: 0.5rem;">
-              ${stat.change} from last month
+              ${stat.change} ${this.t('admin.dashboard.change_from_last_month')}
             </div>
           </div>
         `).join('')}
       </div>
       <div class="table-container">
         <div class="table-controls">
-          <h3>Recent Transactions</h3>
+          <h3>${this.t('admin.dashboard.recent_transactions')}</h3>
         </div>
         ${this.generateTableHTML(this.data.transactions.slice(0, 5), [
-            { key: 'id', label: 'ID' },
-            { key: 'buyerId', label: 'Buyer', render: (v: string) => this.getUserName(v) },
-            { key: 'totalPrice', label: 'Amount', render: (v: number) => `Rp ${v.toLocaleString()}` },
-            { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
-            { key: 'createdAt', label: 'Date', render: (v: string) => new Date(v).toLocaleDateString() },
+            { key: 'id', label: this.t('admin.table.id') },
+            { key: 'buyerId', label: this.t('admin.table.buyer'), render: (v: string) => this.getUserName(v) },
+            { key: 'totalPrice', label: this.t('admin.table.amount'), render: (v: number) => `Rp ${v.toLocaleString()}` },
+            { key: 'status', label: this.t('admin.table.status'), render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
+            { key: 'createdAt', label: this.t('admin.table.date'), render: (v: string) => new Date(v).toLocaleDateString() },
         ])}
       </div>
     `;
@@ -805,12 +826,13 @@ export class AdminDashboard {
           <div class="filters">
             ${config.filters.map(f => `
               <select class="form-control filter-select" style="width: auto; display: inline-block;" data-key="${String(f.key)}">
-                <option value="">All ${f.label}</option>
+                <option value="">${this.t('admin.filters.all')} ${f.label}</option>
                 ${f.options.map(o => `<option value="${o}" ${this.state.filters[String(f.key)] === o ? 'selected' : ''}>${o}</option>`).join('')}
               </select>
             `).join('')}
           </div>
           ${!['Sellers', 'Billboards', 'Media', 'Transactions', 'Recycle Bin'].includes(this.state.activeTab) ? '<button class="btn btn-primary add-new-btn">Add New</button>' : ''}
+          ${['Users', 'Sellers', 'Billboards', 'Transactions'].includes(this.state.activeTab) ? '<button class="btn btn-outline export-excel-btn" style="margin-left: 0.5rem;">Export Excel</button>' : ''}
           ${this.state.activeTab === 'Transactions' ? `
             <button class="btn btn-danger bulk-delete-btn" style="display: flex; align-items: center; gap: 0.5rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
@@ -880,6 +902,16 @@ export class AdminDashboard {
 
         container.querySelector('.bulk-delete-btn')?.addEventListener('click', () => {
             this.handleBulkDeleteTransactionsPrompt();
+        });
+
+        container.querySelector('.export-excel-btn')?.addEventListener('click', () => {
+            const config = this.getModuleConfig() as ModuleConfig<any>;
+            // Use filtered/sorted data or just raw apiData? Usually export raw or filtered.
+            // Let's export what's currently in table view (filtered/sorted) but ALL pages?
+            // For simplicity, let's export filtered data (all pages).
+            const filteredData = this.getFilteredAndSortedData(config.data);
+            const filename = `${this.state.activeTab}_${new Date().toISOString().split('T')[0]}`;
+            this.exportToExcel(filteredData, filename);
         });
 
         this.attachTableListeners(container);
@@ -1125,14 +1157,14 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.users,
                     columns: [
-                        { key: 'username', label: 'Username' },
-                        { key: 'email', label: 'Email' },
-                        { key: 'phone', label: 'Phone' },
-                        { key: 'level', label: 'Level', render: (v: string) => `<span class="badge badge-info">${v}</span>` },
-                        { key: 'provider', label: 'Provider' },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'username', label: this.t('admin.table.username') },
+                        { key: 'email', label: this.t('admin.table.email') },
+                        { key: 'phone', label: this.t('admin.table.phone') },
+                        { key: 'level', label: this.t('admin.table.level'), render: (v: string) => `<span class="badge badge-info">${v}</span>` },
+                        { key: 'provider', label: this.t('admin.table.provider') },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1150,21 +1182,21 @@ export class AdminDashboard {
                         ` }
                     ],
                     filters: [
-                        { key: 'level', label: 'Level', options: ['ADMIN', 'BUYER', 'SELLER'] },
-                        { key: 'provider', label: 'Provider', options: ['GOOGLE', 'CREDENTIALS'] }
+                        { key: 'level', label: this.t('admin.filters.level'), options: ['ADMIN', 'BUYER', 'SELLER'] },
+                        { key: 'provider', label: this.t('admin.filters.provider'), options: ['GOOGLE', 'CREDENTIALS'] }
                     ]
                 };
             case 'Sellers':
                 return {
                     data: this.apiData.sellers,
                     columns: [
-                        { key: 'fullname', label: 'Full Name' },
-                        { key: 'companyName', label: 'Company' },
-                        { key: 'ktp', label: 'KTP' },
-                        { key: 'officeAddress', label: 'Office' },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'fullname', label: this.t('admin.table.fullname') },
+                        { key: 'companyName', label: this.t('admin.table.company') },
+                        { key: 'ktp', label: this.t('admin.table.ktp') },
+                        { key: 'officeAddress', label: this.t('admin.table.office') },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1183,15 +1215,15 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.billboards,
                     columns: [
-                        { key: 'location', label: 'Location' },
-                        { key: 'cityName', label: 'City', render: (v: string, row: any) => v || row.city?.name || '-' },
-                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${v === 'Available' ? 'badge-success' : 'badge-danger'}">${v}</span>` },
-                        { key: 'mode', label: 'Mode' },
-                        { key: 'size', label: 'Size' },
-                        { key: 'rentPrice', label: 'Rent Price', render: (v: number) => v > 0 ? `Rp ${parseFloat(String(v)).toLocaleString()}` : '-' },
-                        { key: 'sellPrice', label: 'Sell Price', render: (v: number) => v > 0 ? `Rp ${parseFloat(String(v)).toLocaleString()}` : '-' },
+                        { key: 'location', label: this.t('admin.table.location') },
+                        { key: 'cityName', label: this.t('admin.table.city'), render: (v: string, row: any) => v || row.city?.name || '-' },
+                        { key: 'status', label: this.t('admin.table.status'), render: (v: string) => `<span class="badge ${v === 'Available' ? 'badge-success' : 'badge-danger'}">${v}</span>` },
+                        { key: 'mode', label: this.t('admin.table.mode') },
+                        { key: 'size', label: this.t('admin.table.size') },
+                        { key: 'rentPrice', label: this.t('admin.table.rent_price'), render: (v: number) => v > 0 ? `Rp ${parseFloat(String(v)).toLocaleString()}` : '-' },
+                        { key: 'sellPrice', label: this.t('admin.table.sell_price'), render: (v: number) => v > 0 ? `Rp ${parseFloat(String(v)).toLocaleString()}` : '-' },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1201,8 +1233,8 @@ export class AdminDashboard {
                         ` }
                     ],
                     filters: [
-                        { key: 'status', label: 'Status', options: ['Available', 'NotAvailable'] },
-                        { key: 'mode', label: 'Mode', options: ['Rent', 'Buy'] }
+                        { key: 'status', label: this.t('admin.filters.status'), options: ['Available', 'NotAvailable'] },
+                        { key: 'mode', label: this.t('admin.filters.mode'), options: ['Rent', 'Buy'] }
                     ]
                 };
             case 'Transactions':
@@ -1210,14 +1242,14 @@ export class AdminDashboard {
                     // Use real data
                     data: this.apiData.transactions,
                     columns: [
-                        { key: 'id', label: 'ID' },
-                        { key: 'user', label: 'Buyer', render: (v: any) => v?.username || 'Unknown' },
-                        { key: 'billboard', label: 'Billboard', render: (v: any) => v?.location || 'Unknown Location' },
-                        { key: 'totalPrice', label: 'Amount', render: (v: number) => `Rp ${v ? v.toLocaleString() : '0'}` },
-                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
-                        { key: 'createdAt', label: 'Date', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
+                        { key: 'id', label: this.t('admin.table.id'), render: (v: string) => v ? v.substring(0, 8).toUpperCase() : '-' },
+                        { key: 'user', label: this.t('admin.table.buyer'), render: (v: any) => v?.username || 'Unknown' },
+                        { key: 'billboard', label: this.t('admin.table.billboard'), render: (v: any) => v?.location || 'Unknown Location' },
+                        { key: 'totalPrice', label: this.t('admin.table.amount'), render: (v: number) => `Rp ${v ? v.toLocaleString() : '0'}` },
+                        { key: 'status', label: this.t('admin.table.status'), render: (v: string) => `<span class="badge ${this.getStatusBadgeClass(v)}">${v}</span>` },
+                        { key: 'createdAt', label: this.t('admin.table.date'), render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1231,21 +1263,21 @@ export class AdminDashboard {
                         ` }
                     ],
                     filters: [
-                        { key: 'status', label: 'Status', options: ['PENDING', 'PAID', 'COMPLETED', 'CANCELLED', 'REJECTED'] }
+                        { key: 'status', label: this.t('admin.filters.status'), options: ['PENDING', 'PAID', 'COMPLETED', 'CANCELLED', 'REJECTED'] }
                     ]
                 };
             case 'Recycle Bin':
                 return {
                     data: this.apiData.recycleBin,
                     columns: [
-                        { key: 'location', label: 'Location' },
-                        { key: 'owner', label: 'Owner', render: (v: any, row: any) => row.owner?.fullname || row.owner?.companyName || '-' },
-                        { key: 'deletedBy', label: 'Deleted By', render: (v: any, row: any) => row.deletedBy?.username || '-' },
-                        { key: 'mode', label: 'Mode' },
-                        { key: 'status', label: 'Status', render: (v: string) => `<span class="badge ${v === 'Available' ? 'badge-success' : 'badge-danger'}">${v}</span>` },
-                        { key: 'deletedAt', label: 'Deleted At', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
+                        { key: 'location', label: this.t('admin.table.location') },
+                        { key: 'owner', label: this.t('admin.table.owner'), render: (v: any, row: any) => row.owner?.fullname || row.owner?.companyName || '-' },
+                        { key: 'deletedBy', label: this.t('admin.table.deleted_by'), render: (v: any, row: any) => row.deletedBy?.username || '-' },
+                        { key: 'mode', label: this.t('admin.table.mode') },
+                        { key: 'status', label: this.t('admin.table.status'), render: (v: string) => `<span class="badge ${v === 'Available' ? 'badge-success' : 'badge-danger'}">${v}</span>` },
+                        { key: 'deletedAt', label: this.t('admin.table.deleted_at'), render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-restore" data-id="${row.id}" title="Restore" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #dcfce7; color: #166534; cursor: pointer; transition: all 0.2s;">
@@ -1264,10 +1296,10 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.categories,
                     columns: [
-                        { key: 'name', label: 'Name' },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'name', label: this.t('admin.table.name') },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn edit action-edit" data-id="${row.id}" title="Edit Category"
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fef3c7; color: #b45309; cursor: pointer; transition: all 0.2s;">
@@ -1286,11 +1318,11 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.cities,
                     columns: [
-                        { key: 'name', label: 'Name' },
-                        { key: 'provinceId', label: 'Province ID' },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'name', label: this.t('admin.table.name') },
+                        { key: 'provinceId', label: this.t('admin.table.province') },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn edit action-edit" data-id="${row.id}" title="Edit City"
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #fef3c7; color: #b45309; cursor: pointer; transition: all 0.2s;">
@@ -1309,12 +1341,12 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.designs,
                     columns: [
-                        { key: 'name', label: 'Name' },
-                        { key: 'description', label: 'Description' },
-                        { key: 'price', label: 'Price', render: (v: number) => `Rp ${v.toLocaleString()}` },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'name', label: this.t('admin.table.name') },
+                        { key: 'description', label: this.t('admin.table.description') },
+                        { key: 'price', label: this.t('admin.table.price'), render: (v: number) => `Rp ${v.toLocaleString()}` },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1337,12 +1369,12 @@ export class AdminDashboard {
                 return {
                     data: this.apiData.addons,
                     columns: [
-                        { key: 'name', label: 'Name' },
-                        { key: 'description', label: 'Description' },
-                        { key: 'price', label: 'Price', render: (v: number) => `Rp ${v.toLocaleString()}` },
-                        { key: 'createdAt', label: 'Created', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'name', label: this.t('admin.table.name') },
+                        { key: 'description', label: this.t('admin.table.description') },
+                        { key: 'price', label: this.t('admin.table.price'), render: (v: number) => `Rp ${v.toLocaleString()}` },
+                        { key: 'createdAt', label: this.t('admin.table.created'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Details" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1392,13 +1424,13 @@ export class AdminDashboard {
                     columns: [
                         {
                             key: 'url',
-                            label: 'Preview',
+                            label: this.t('admin.table.preview'),
                             render: (v: string) => `<div style="width: 50px; height: 50px; border-radius: 6px; overflow: hidden; background: #f1f5f9;"><img src="${getImageUrl(v)}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://placehold.co/50?text=Wait'" /></div>`
                         },
-                        { key: 'type', label: 'Type', render: (v: string) => `<span class="badge badge-info">${v}</span>` },
-                        { key: 'createdAt', label: 'Uploaded', render: (v: string) => new Date(v).toLocaleDateString() },
+                        { key: 'type', label: this.t('admin.table.type'), render: (v: string) => `<span class="badge badge-info">${v}</span>` },
+                        { key: 'createdAt', label: this.t('admin.table.uploaded'), render: (v: string) => new Date(v).toLocaleDateString() },
                         {
-                            key: 'actions', label: 'Actions', render: (v: any, row: any) => `
+                            key: 'actions', label: this.t('admin.table.actions'), render: (v: any, row: any) => `
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-btn view action-view" data-id="${row.id}" title="View Media" 
                                     style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background-color: #e0f2fe; color: #0369a1; cursor: pointer; transition: all 0.2s;">
@@ -1412,7 +1444,7 @@ export class AdminDashboard {
                         ` }
                     ],
                     filters: [
-                        { key: 'type', label: 'Type', options: ['design', 'billboard', 'image/png'] }
+                        { key: 'type', label: this.t('admin.filters.type'), options: ['design', 'billboard', 'image/png'] }
                     ]
                 };
             default:
@@ -1423,20 +1455,20 @@ export class AdminDashboard {
     private attachFloatingNotificationListener() {
         const notifBtn = this.root.querySelector('.floating-notif-btn');
         notifBtn?.addEventListener('click', async () => {
-            this.openModal('Notifications');
+            this.openModal(this.t('admin.modal.notifications'));
             const modalBody = this.root.querySelector('.modal-body');
             if (modalBody) {
-                modalBody.innerHTML = '<div class="loading-spinner">Loading...</div>';
+                modalBody.innerHTML = `<div class="loading-spinner">${this.t('admin.modal.loading')}</div>`;
 
                 await this.fetchNotifications();
                 const notifications = this.apiData.notifications;
 
                 if (notifications.length === 0) {
-                    modalBody.innerHTML = '<div style="text-align:center; padding: 2rem; color: #64748b;">No notifications</div>';
+                    modalBody.innerHTML = `<div style="text-align:center; padding: 2rem; color: #64748b;">${this.t('admin.modal.no_notifications')}</div>`;
                 } else {
                     modalBody.innerHTML = `
                         <div style="display: flex; justify-content: flex-end; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
-                             <button id="mark-all-read" style="background: none; border: none; color: var(--primary-red); font-weight: 500; cursor: pointer; font-size: 0.875rem;">Mark All as Read</button>
+                             <button id="mark-all-read" style="background: none; border: none; color: var(--primary-red); font-weight: 500; cursor: pointer; font-size: 0.875rem;">${this.t('admin.modal.mark_all_read')}</button>
                         </div>
                         <div class="notifications-list">
                             ${notifications.map((n: any) => `
@@ -1457,7 +1489,7 @@ export class AdminDashboard {
                             (item as HTMLElement).style.background = 'transparent';
                         });
                         this.fetchUnreadCount();
-                        this.showToast('All notifications marked as read', 'success');
+                        this.showToast(this.t('admin.toast.notifications_read'), 'success');
                     });
 
                     // Attach click listeners to mark as read
@@ -1709,8 +1741,8 @@ export class AdminDashboard {
                 const id = (e.currentTarget as HTMLElement).dataset.id;
                 if (id) {
                     this.openConfirmModal(
-                        'Delete Media',
-                        `Are you sure you want to delete this media item?`,
+                        this.t('admin.modal.delete_media'),
+                        this.t('admin.modal.confirm_delete_media').replace('{id}', id),
                         async () => {
                             try {
                                 const res = await fetch(`/api/proxy/image/${id}`, {
@@ -1720,25 +1752,50 @@ export class AdminDashboard {
                                 if (res.ok) {
                                     this.apiData.media = this.apiData.media.filter(m => m.id !== id);
                                     this.renderMediaGallery(container); // Re-render
-                                    this.showToast('Media deleted', 'success');
+                                    this.showToast(this.t('admin.toast.delete_media_success').replace('{id}', id), 'success');
                                     this.closeModal();
                                 } else {
                                     const json = await res.json().catch(() => ({}));
-                                    this.showToast(json.message || 'Failed to delete media', 'error');
+                                    this.showToast(json.message || this.t('admin.toast.delete_media_fail'), 'error');
                                 }
                             } catch (e) {
                                 console.error('Failed to delete media', e);
-                                this.showToast('Failed to delete media', 'error');
+                                this.showToast(this.t('admin.toast.delete_media_fail'), 'error');
                             }
                         }
                     );
                 }
-
             });
         });
     }
 
 
+
+    // --- Export Helper ---
+    private exportToExcel(data: any[], filename: string) {
+        if (!data || data.length === 0) {
+            this.showToast('No data to export', 'info');
+            return;
+        }
+
+        try {
+            // Check if XLSX is available
+            if (!(window as any).XLSX) {
+                this.showToast('Excel library not loaded', 'error');
+                return;
+            }
+            const XLSX = (window as any).XLSX;
+
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            XLSX.writeFile(workbook, `${filename}.xlsx`);
+            this.showToast('Export successful', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showToast('Failed to export data', 'error');
+        }
+    }
 
     private generateTableHTML<T>(data: T[], columns: ColumnConfig<T>[]) {
         if (data.length === 0) return '<div class="data-table-wrapper" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No data found</div>';
@@ -1849,7 +1906,7 @@ export class AdminDashboard {
         }
     }
 
-    private openModal(title: string) {
+    private openModal(title: string, type: string | null = null) {
         this.ensureModalFooter();
 
         const overlay = this.root.querySelector('.modal-overlay');
@@ -1863,7 +1920,7 @@ export class AdminDashboard {
             // Reset modal width to default (defined in CSS)
             if (modal) modal.style.maxWidth = '';
 
-            if (title.includes('Add New User')) {
+            if (type === 'ADD_USER' || title.includes('Add New User')) {
                 body.innerHTML = this.renderAddUserForm();
                 this.currentModalAction = () => this.handleAddUserSubmit();
 
@@ -1876,20 +1933,25 @@ export class AdminDashboard {
                             if (input) {
                                 const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
                                 input.setAttribute('type', type);
-                                // Optional: Toggle icon styling based on state if desired, for now just simple toggle
                             }
                         }
                     });
                 });
-            } else if (title.includes('Add New Design')) {
+            } else if (type === 'ADD_DESIGN' || title.includes('Add New Design')) {
                 body.innerHTML = this.renderAddDesignForm();
                 this.setupAddDesignForm();
                 this.currentModalAction = () => this.handleAddDesignSubmit();
-            } else if (title.includes('Add New Add-on')) {
+            } else if (type === 'ADD_ADDON' || title.includes('Add New Add-on')) {
                 body.innerHTML = this.renderAddAddonForm();
                 this.currentModalAction = () => this.handleAddAddonSubmit();
             } else {
-                body.innerHTML = '<p>Form placeholder for ' + title + '</p>';
+                // If it's a notification popup or something else, we might clear body. 
+                // Checks for 'Notifications' title specifically might not be needed if we handle it elsewhere, 
+                // but openModal is generic.
+                if (!type && !['Mark All as Read', 'Notifications'].some(s => title.includes(s))) {
+                    // Only set placeholder if not one of the cases where caller sets content immediately
+                    body.innerHTML = '<p>Loading...</p>';
+                }
                 this.currentModalAction = null;
             }
 
@@ -2009,21 +2071,21 @@ export class AdminDashboard {
             <form id="add-user-form">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label" for="username">Username <span style="color:red">*</span></label>
-                        <input type="text" id="username" name="username" class="form-control" placeholder="johndoe" required />
+                        <label class="form-label" for="username">${this.t('admin.form.username')} <span style="color:red">*</span></label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="${this.t('admin.form.username')}" required />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="email">Email <span style="color:red">*</span></label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required />
+                        <label class="form-label" for="email">${this.t('admin.form.email')} <span style="color:red">*</span></label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="email@example.com" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="phone">Phone <span style="color:red">*</span></label>
+                    <label class="form-label" for="phone">${this.t('admin.profile.phone')} <span style="color:red">*</span></label>
                     <input type="tel" id="phone" name="phone" class="form-control" placeholder="08123456789" required />
                 </div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label" for="password">Password <span style="color:red">*</span></label>
+                        <label class="form-label" for="password">${this.t('admin.form.password')} <span style="color:red">*</span></label>
                         <div style="position: relative;">
                             <input type="password" id="password" name="password" class="form-control" placeholder="******" required style="padding-right: 2.5rem;" />
                             <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary);">
@@ -2032,7 +2094,7 @@ export class AdminDashboard {
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="confirmPassword">Confirm Password <span style="color:red">*</span></label>
+                        <label class="form-label" for="confirmPassword">${this.t('admin.form.confirm_password')} <span style="color:red">*</span></label>
                         <div style="position: relative;">
                             <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="******" required style="padding-right: 2.5rem;" />
                             <button type="button" class="toggle-password" data-target="confirmPassword" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary);">
@@ -2042,7 +2104,7 @@ export class AdminDashboard {
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="level">Level <span style="color:red">*</span></label>
+                    <label class="form-label" for="level">${this.t('admin.form.level')} <span style="color:red">*</span></label>
                     <select id="level" name="level" class="form-control" required>
                         <option value="" disabled selected>Select User Level</option>
                         <option value="BUYER">BUYER</option>
@@ -2094,7 +2156,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('User created successfully', 'success');
+                this.showToast(this.t('admin.toast.user_created'), 'success');
                 this.closeModal();
                 await this.fetchUsers();
                 if (this.state.activeTab === 'Users') {
@@ -2104,7 +2166,7 @@ export class AdminDashboard {
                     this.setActiveTab('Users');
                 }
             } else {
-                this.showToast(json.message || 'Failed to create user', 'error');
+                this.showToast(json.message || this.t('admin.toast.user_create_fail'), 'error');
                 if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
@@ -2130,7 +2192,7 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('User Details');
+        this.openModal(this.t('admin.modal.view_user'));
         const body = this.root.querySelector('.modal-body');
         const confirmBtn = this.root.querySelector('.confirm-modal') as HTMLButtonElement;
 
@@ -2146,7 +2208,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete User';
+        deleteBtn.textContent = this.t('admin.modal.delete_user');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteUser(id);
 
@@ -2179,11 +2241,11 @@ export class AdminDashboard {
                 
                 <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Email</label>
+                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${this.t('admin.form.email')}</label>
                         <div style="font-weight: 500;">${user.email || '-'}</div>
                     </div>
                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Phone</label>
+                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${this.t('admin.profile.phone')}</label>
                         <div style="font-weight: 500;">${user.phone || '-'}</div>
                     </div>
                     <div class="detail-item">
@@ -2206,7 +2268,7 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('Edit User');
+        this.openModal(this.t('admin.modal.edit_user'));
         const body = this.root.querySelector('.modal-body');
 
         if (body) {
@@ -2235,16 +2297,16 @@ export class AdminDashboard {
             <form id="edit-user-form">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label" for="username">Username</label>
+                        <label class="form-label" for="username">${this.t('admin.form.username')}</label>
                         <input type="text" id="username" name="username" class="form-control" value="${user.username}" required />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
+                        <label class="form-label" for="email">${this.t('admin.form.email')}</label>
                         <input type="email" id="email" name="email" class="form-control" value="${user.email}" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="phone">Phone</label>
+                    <label class="form-label" for="phone">${this.t('admin.profile.phone')}</label>
                     <input type="tel" id="phone" name="phone" class="form-control" value="${user.phone}" required />
                 </div>
                 
@@ -2252,7 +2314,7 @@ export class AdminDashboard {
                     <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: var(--text-secondary);">Leave password blank to keep unchanged</p>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label" for="password">New Password</label>
+                            <label class="form-label" for="password">${this.t('admin.form.password')}</label>
                             <div style="position: relative;">
                                 <input type="password" id="password" name="password" class="form-control" placeholder="******" style="padding-right: 2.5rem;" />
                                 <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary);">
@@ -2264,7 +2326,7 @@ export class AdminDashboard {
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="level">Level</label>
+                    <label class="form-label" for="level">${this.t('admin.form.level')}</label>
                     <select id="level" name="level" class="form-control" required>
                         <option value="BUYER" ${user.level === 'BUYER' ? 'selected' : ''}>BUYER</option>
                         <option value="SELLER" ${user.level === 'SELLER' ? 'selected' : ''}>SELLER</option>
@@ -2311,7 +2373,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('User updated successfully', 'success');
+                this.showToast(this.t('admin.toast.user_updated'), 'success');
                 this.closeModal();
                 await this.fetchUsers();
                 if (this.state.activeTab === 'Users') {
@@ -2319,7 +2381,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to update user', 'error');
+                this.showToast(json.message || this.t('admin.toast.user_update_fail'), 'error');
                 if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
@@ -2338,13 +2400,13 @@ export class AdminDashboard {
 
     private handleDeleteUser(id: string) {
         if (this.apiData.currentUser && this.apiData.currentUser.id === id) {
-            this.showToast('You cannot delete your own account', 'error');
+            this.showToast(this.t('admin.toast.delete_self_error'), 'error');
             return;
         }
 
         this.openConfirmModal(
-            'Delete User',
-            'Are you sure you want to delete this user? This action cannot be undone.',
+            this.t('admin.modal.delete_user'),
+            this.t('admin.modal.confirm_delete_user'),
             async () => {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net:3100/user/{id} -> /api/proxy/user/{id}
@@ -2356,7 +2418,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('User deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.user_deleted'), 'success');
                         this.closeModal();
                         await this.fetchUsers();
                         if (this.state.activeTab === 'Users') {
@@ -2364,7 +2426,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete user', 'error');
+                        this.showToast(json.message || this.t('admin.toast.user_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -2385,7 +2447,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Seller';
+        deleteBtn.textContent = this.t('admin.modal.delete_seller');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteSeller(id);
 
@@ -2404,7 +2466,7 @@ export class AdminDashboard {
             .then(json => {
                 if (json.status && json.data) {
                     const titleEl = this.root.querySelector('.modal-title');
-                    if (titleEl) titleEl.textContent = 'Seller Details';
+                    if (titleEl) titleEl.textContent = this.t('admin.modal.view_seller');
 
                     if (body) {
                         body.innerHTML = this.renderViewSellerDetails(json.data);
@@ -2477,6 +2539,10 @@ export class AdminDashboard {
                             <div style="font-weight: 500;">${seller.companyName || '-'}</div>
                         </div>
                         <div class="detail-item">
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Position (Jabatan)</label>
+                            <div style="font-weight: 500;">${seller.position || '-'}</div>
+                        </div>
+                        <div class="detail-item">
                             <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">NPWP</label>
                             <div style="font-weight: 500;">${seller.npwp || '-'}</div>
                         </div>
@@ -2508,8 +2574,8 @@ export class AdminDashboard {
 
     private handleDeleteSeller(id: string) {
         this.openConfirmModal(
-            'Delete Seller',
-            'Are you sure you want to delete this seller? This action cannot be undone.',
+            this.t('admin.modal.delete_seller'),
+            this.t('admin.modal.confirm_delete_seller'),
             async () => {
                 try {
                     const res = await fetch(`/api/proxy/seller/${id}`, {
@@ -2520,7 +2586,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Seller deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.seller_deleted'), 'success');
                         this.closeModal();
                         await this.fetchSellers();
                         if (this.state.activeTab === 'Sellers') {
@@ -2528,7 +2594,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete seller', 'error');
+                        this.showToast(json.message || this.t('admin.toast.seller_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -2541,8 +2607,8 @@ export class AdminDashboard {
 
     private handleDeleteDesign(id: string) {
         this.openConfirmModal(
-            'Delete Design',
-            'Are you sure you want to delete this design? This action cannot be undone.',
+            this.t('admin.modal.delete_design'),
+            this.t('admin.modal.confirm_delete_design'),
             async () => {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net:3100/design/{id} -> /api/proxy/design/{id}
@@ -2554,7 +2620,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Design deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.design_deleted'), 'success');
                         this.closeModal();
                         await this.fetchDesigns();
                         if (this.state.activeTab === 'Designs') {
@@ -2562,7 +2628,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete design', 'error');
+                        this.showToast(json.message || this.t('admin.toast.design_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -2587,7 +2653,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Design';
+        deleteBtn.textContent = this.t('admin.modal.delete_design');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteDesign(id);
 
@@ -2730,19 +2796,19 @@ export class AdminDashboard {
         return `
             <form id="add-design-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Design Name <span style="color:red">*</span></label>
+                    <label class="form-label" for="name">${this.t('admin.form.design_name')} <span style="color:red">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Modern Minimalist Banner" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="description">Description <span style="color:red">*</span></label>
-                    <textarea id="description" name="description" class="form-control" rows="4" placeholder="Describe the design details..." required></textarea>
+                    <label class="form-label" for="description">${this.t('admin.form.description')} <span style="color:red">*</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="4" placeholder="${this.t('admin.form.description')}" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="price">Price (Rp) <span style="color:red">*</span></label>
+                    <label class="form-label" for="price">${this.t('admin.form.price')} (Rp) <span style="color:red">*</span></label>
                     <input type="number" id="price" name="price" class="form-control" placeholder="0" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Images <span style="color:red">*</span></label>
+                    <label class="form-label">${this.t('admin.form.images')} <span style="color:red">*</span></label>
                     <div class="upload-zone" id="upload-zone">
                         <input type="file" id="images" name="images" multiple accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
                         <div class="upload-icon">
@@ -2915,7 +2981,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Design created successfully', 'success');
+                this.showToast(this.t('admin.toast.design_created'), 'success');
                 this.closeModal();
                 await this.fetchDesigns();
                 if (this.state.activeTab === 'Designs') {
@@ -2923,7 +2989,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to create design', 'error');
+                this.showToast(json.message || this.t('admin.toast.design_create_fail'), 'error');
             }
 
             btn.textContent = originalText;
@@ -2952,7 +3018,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Design';
+        deleteBtn.textContent = this.t('admin.modal.delete_design');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteDesign(id);
 
@@ -3172,7 +3238,7 @@ export class AdminDashboard {
 
 
     private openViewTransactionModal(id: string) {
-        this.openModal('Loading Transaction Details...');
+        this.openModal(this.t('admin.modal.loading'));
 
         // Use a wider modal for transaction details to accommodate the comprehensive data
         const modal = this.root.querySelector('.modal') as HTMLElement;
@@ -3187,7 +3253,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Transaction';
+        deleteBtn.textContent = this.t('admin.modal.delete_transaction');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteTransaction(id);
 
@@ -3201,12 +3267,13 @@ export class AdminDashboard {
 
 
         // Endpoint: GET http://utero.viewdns.net:3100/transaction/detail/{id} -> /api/proxy/transaction/detail/{id}
-        fetch(`/api/proxy/transaction/detail/${id}`)
+        // Endpoint: GET /transaction/{id} -> /api/proxy/transaction/{id}
+        fetch(`/api/proxy/transaction/${id}`, { credentials: 'include' })
             .then(res => res.json())
             .then(json => {
                 if (json.status && json.data) {
                     const titleEl = this.root.querySelector('.modal-title');
-                    if (titleEl) titleEl.textContent = 'Transaction Details';
+                    if (titleEl) titleEl.textContent = this.t('admin.modal.view_transaction');
 
                     if (body) {
                         body.innerHTML = this.renderViewTransactionDetails(json.data);
@@ -3428,20 +3495,20 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('Update Transaction Status');
+        this.openModal(this.t('admin.modal.edit_transaction'));
         const body = this.root.querySelector('.modal-body');
 
         if (body) {
             body.innerHTML = `
                 <form id="update-transaction-form">
                     <div class="form-group">
-                        <label class="form-label" for="status">Status</label>
+                        <label class="form-label" for="status">${this.t('admin.form.status')}</label>
                          <select id="status" name="status" class="form-control" required>
-                            <option value="PENDING" ${transaction.status === 'PENDING' ? 'selected' : ''}>PENDING</option>
-                            <option value="PAID" ${transaction.status === 'PAID' ? 'selected' : ''}>PAID</option>
-                            <option value="COMPLETED" ${transaction.status === 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
-                            <option value="CANCELLED" ${transaction.status === 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
-                            <option value="REJECTED" ${transaction.status === 'REJECTED' ? 'selected' : ''}>REJECTED</option>
+                            <option value="PENDING" ${transaction.status === 'PENDING' ? 'selected' : ''}>${this.t('admin.filters.pending')}</option>
+                            <option value="PAID" ${transaction.status === 'PAID' ? 'selected' : ''}>${this.t('admin.filters.paid')}</option>
+                            <option value="COMPLETED" ${transaction.status === 'COMPLETED' ? 'selected' : ''}>${this.t('admin.filters.completed')}</option>
+                            <option value="CANCELLED" ${transaction.status === 'CANCELLED' ? 'selected' : ''}>${this.t('admin.filters.cancelled')}</option>
+                            <option value="REJECTED" ${transaction.status === 'REJECTED' ? 'selected' : ''}>${this.t('admin.filters.rejected')}</option>
                         </select>
                     </div>
                      <div class="form-group" style="margin-top: 1rem;">
@@ -3510,8 +3577,8 @@ export class AdminDashboard {
 
     private handleDeleteTransaction(id: string) {
         this.openConfirmModal(
-            'Delete Transaction',
-            'Are you sure you want to delete this transaction? This action cannot be undone.',
+            this.t('admin.modal.delete_transaction'),
+            this.t('admin.modal.confirm_delete_transaction'),
             async () => {
                 try {
                     // Endpoint: DELETE http://utero.viewdns:3100/transaction/{id} -> /api/proxy/transaction/{id}
@@ -3523,7 +3590,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Transaction deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.transaction_deleted'), 'success');
                         this.closeModal();
                         await this.fetchTransactions();
                         if (this.state.activeTab === 'Transactions') {
@@ -3531,7 +3598,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete transaction', 'error');
+                        this.showToast(json.message || this.t('admin.toast.transaction_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -3546,8 +3613,8 @@ export class AdminDashboard {
 
     private handleDeleteBillboard(id: string) {
         this.openConfirmModal(
-            'Delete Billboard',
-            'Are you sure you want to delete this billboard? This action cannot be undone.',
+            this.t('admin.modal.delete_billboard'),
+            this.t('admin.modal.confirm_delete_billboard'),
             async () => {
                 try {
                     // Endpoint: DELETE http://utero.viewdns.net/billboard/{id} -> /api/proxy/billboard/{id}
@@ -3564,7 +3631,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Billboard deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.billboard_deleted'), 'success');
                         this.closeModal();
                         await this.fetchBillboards();
                         if (this.state.activeTab === 'Billboards') {
@@ -3572,7 +3639,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete billboard', 'error');
+                        this.showToast(json.message || this.t('admin.toast.billboard_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -3584,7 +3651,7 @@ export class AdminDashboard {
     }
 
     private openViewBillboardModal(id: string) {
-        this.openModal('Loading Billboard Details...');
+        this.openModal(this.t('admin.modal.loading'));
 
         // Increase modal width for better card layout
         const modal = this.root.querySelector('.modal') as HTMLElement;
@@ -3606,7 +3673,7 @@ export class AdminDashboard {
             .then(json => {
                 if (json.status && json.data) {
                     const titleEl = this.root.querySelector('.modal-title');
-                    if (titleEl) titleEl.textContent = 'Billboard Details';
+                    if (titleEl) titleEl.textContent = this.t('admin.modal.view_billboard');
 
                     if (body) {
                         body.innerHTML = this.renderBillboardDetailView(json.data);
@@ -3884,7 +3951,7 @@ export class AdminDashboard {
 
             if (detailsJson.status && detailsJson.data) {
                 const titleEl = this.root.querySelector('.modal-title');
-                if (titleEl) titleEl.textContent = 'Edit Billboard';
+                if (titleEl) titleEl.textContent = this.t('admin.modal.edit_billboard');
 
                 if (body) {
                     body.innerHTML = this.renderEditBillboardForm(detailsJson.data);
@@ -3894,11 +3961,11 @@ export class AdminDashboard {
 
                 if (confirmBtn) {
                     confirmBtn.style.display = '';
-                    confirmBtn.textContent = 'Save Changes';
+                    confirmBtn.textContent = this.t('admin.modal.save');
                     this.currentModalAction = () => this.handleEditBillboardSubmit(id);
                 }
             } else {
-                this.showToast('Failed to load billboard details', 'error');
+                this.showToast(this.t('admin.toast.billboard_load_fail') || 'Failed to load billboard details', 'error');
                 this.closeModal();
             }
         } catch (e) {
@@ -3916,7 +3983,13 @@ export class AdminDashboard {
                 </style>
                 <div class="form-grid">
                     <div class="form-group">
-                         <label class="form-label" for="mode">Mode</label>
+                        <label class="form-label" for="sku">SKU</label>
+                        <input type="text" id="sku" name="sku" class="form-control" value="${billboard.sku || ''}" placeholder="SKU-12345" />
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                         <label class="form-label" for="mode">${this.t('admin.form.mode')}</label>
                         <select id="mode" name="mode" class="form-control">
                             <option value="Rent" ${billboard.mode === 'Rent' ? 'selected' : ''}>Rent</option>
                             <option value="Buy" ${billboard.mode === 'Buy' ? 'selected' : ''}>Buy</option>
@@ -3924,48 +3997,48 @@ export class AdminDashboard {
                         </select>
                     </div>
                      <div class="form-group">
-                        <label class="form-label" for="status">Status</label>
+                        <label class="form-label" for="status">${this.t('admin.form.status')}</label>
                         <select id="status" name="status" class="form-control">
-                            <option value="Available" ${billboard.status === 'Available' ? 'selected' : ''}>Available</option>
-                            <option value="NotAvailable" ${billboard.status === 'NotAvailable' ? 'selected' : ''}>Not Available</option>
+                            <option value="Available" ${billboard.status === 'Available' ? 'selected' : ''}>${this.t('admin.filters.available')}</option>
+                            <option value="NotAvailable" ${billboard.status === 'NotAvailable' ? 'selected' : ''}>${this.t('admin.filters.not_available')}</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                         <label class="form-label" for="rentPrice">Rent Price</label>
+                         <label class="form-label" for="rentPrice">${this.t('admin.form.rent_price')}</label>
                          <input type="number" id="rentPrice" name="rentPrice" class="form-control" value="${billboard.rentPrice || 0}" />
                     </div>
                     <div class="form-group">
-                         <label class="form-label" for="sellPrice">Sell Price</label>
+                         <label class="form-label" for="sellPrice">${this.t('admin.form.sell_price')}</label>
                          <input type="number" id="sellPrice" name="sellPrice" class="form-control" value="${billboard.sellPrice || 0}" />
                     </div>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group" id="province-container">
-                        <label class="form-label">Province</label>
+                        <label class="form-label">${this.t('admin.form.province')}</label>
                         <input type="hidden" id="provinceId" name="provinceId" value="${billboard.provinceId || ''}">
                         <div class="custom-select-container">
                             <div class="custom-select-trigger" id="province-trigger">
-                                ${billboard.provinceName || (billboard.provinceId ? (this.apiData.provinces.find((p: any) => p.id === billboard.provinceId)?.name || 'Select Province') : 'Select Province')}
+                                ${billboard.provinceName || (billboard.provinceId ? (this.apiData.provinces.find((p: any) => p.id === billboard.provinceId)?.name || this.t('admin.form.select_province')) : this.t('admin.form.select_province'))}
                             </div>
                             <div class="custom-options-container">
-                                <input type="text" class="custom-search-input" placeholder="Search province...">
+                                <input type="text" class="custom-search-input" placeholder="${this.t('admin.form.search_placeholder')}">
                                 <div class="custom-options-list"></div>
                             </div>
                         </div>
                     </div>
                     <div class="form-group" id="city-container">
-                        <label class="form-label">City</label>
+                        <label class="form-label">${this.t('admin.form.city')}</label>
                         <input type="hidden" id="cityId" name="cityId" value="${billboard.cityId || ''}">
                         <div class="custom-select-container">
                             <div class="custom-select-trigger" id="city-trigger">
-                                ${billboard.cityName || (billboard.cityId ? (this.apiData.cities.find((c: any) => c.id === billboard.cityId)?.name || 'Select City') : 'Select City')}
+                                ${billboard.cityName || (billboard.cityId ? (this.apiData.cities.find((c: any) => c.id === billboard.cityId)?.name || this.t('admin.form.select_city')) : this.t('admin.form.select_city'))}
                             </div>
                             <div class="custom-options-container">
-                                <input type="text" class="custom-search-input" placeholder="Search city...">
+                                <input type="text" class="custom-search-input" placeholder="${this.t('admin.form.search_placeholder')}">
                                 <div class="custom-options-list"></div>
                             </div>
                         </div>
@@ -3974,18 +4047,18 @@ export class AdminDashboard {
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label" for="location">Location Name</label>
+                        <label class="form-label" for="location">${this.t('admin.form.location_name')}</label>
                         <input type="text" id="location" name="location" class="form-control" value="${billboard.location || ''}" />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="size">Size</label>
+                        <label class="form-label" for="size">${this.t('admin.form.size')}</label>
                         <input type="text" id="size" name="size" class="form-control" value="${billboard.size || ''}" />
                     </div>
                 </div>
 
                  <div class="form-group">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea id="description" name="description" class="form-control" rows="3">${billboard.description || ''}</textarea>
+                    <label class="form-label" for="description">${this.t('admin.form.description')}</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="${this.t('admin.form.description')}">${billboard.description || ''}</textarea>
                 </div>
 
                 <!-- Hidden fields for Map Data -->
@@ -3999,7 +4072,7 @@ export class AdminDashboard {
                 <div class="form-group">
                     <label class="form-label">Location Helper (Map)</label>
                     <div id="billboard-map" style="width: 100%; height: 300px; background: #e2e8f0; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-                        Map Loading...
+                        ${this.t('admin.modal.loading')}
                     </div>
                     <small style="display: block; margin-top: 0.5rem; color: var(--text-secondary);">
                         Search location above or click on map to set coordinates.
@@ -4409,7 +4482,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Billboard updated successfully', 'success');
+                this.showToast(this.t('admin.toast.billboard_updated'), 'success');
                 this.closeModal();
                 await this.fetchBillboards();
                 if (this.state.activeTab === 'Billboards') {
@@ -4417,7 +4490,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to update billboard', 'error');
+                this.showToast(json.message || this.t('admin.toast.billboard_update_fail'), 'error');
                 if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
@@ -4432,7 +4505,7 @@ export class AdminDashboard {
     // --- Category Actions ---
 
     private handleAddCategory() {
-        this.openModal('Add New Category');
+        this.openModal(this.t('admin.modal.add_category'));
         const body = this.root.querySelector('.modal-body');
         if (body) {
             body.innerHTML = this.renderAddCategoryForm();
@@ -4444,7 +4517,7 @@ export class AdminDashboard {
         return `
             <form id="add-category-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Category Name <span style="color:red">*</span></label>
+                    <label class="form-label" for="name">${this.t('admin.form.category_name')} <span style="color:red">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Commercial" required />
                 </div>
             </form>
@@ -4482,7 +4555,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Category created successfully', 'success');
+                this.showToast(this.t('admin.toast.category_created'), 'success');
                 this.closeModal();
                 await this.fetchCategories();
                 if (this.state.activeTab === 'Categories') {
@@ -4490,7 +4563,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to create category', 'error');
+                this.showToast(json.message || this.t('admin.toast.category_create_fail'), 'error');
                 if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
@@ -4514,13 +4587,13 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('Edit Category');
+        this.openModal(this.t('admin.modal.edit_category'));
         const body = this.root.querySelector('.modal-body');
 
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Category';
+        deleteBtn.textContent = this.t('admin.modal.delete_category');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteCategory(id);
 
@@ -4544,7 +4617,7 @@ export class AdminDashboard {
         return `
             <form id="edit-category-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Category Name <span style="color:red">*</span></label>
+                    <label class="form-label" for="name">${this.t('admin.form.category_name')} <span style="color:red">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" value="${category.name}" required />
                 </div>
             </form>
@@ -4582,7 +4655,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Category updated successfully', 'success');
+                this.showToast(this.t('admin.toast.category_updated'), 'success');
                 this.closeModal();
                 await this.fetchCategories();
                 if (this.state.activeTab === 'Categories') {
@@ -4590,7 +4663,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to update category', 'error');
+                this.showToast(json.message || this.t('admin.toast.category_update_fail'), 'error');
                 if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
@@ -4622,7 +4695,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Category deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.category_deleted'), 'success');
                         this.closeModal();
                         await this.fetchCategories();
                         if (this.state.activeTab === 'Categories') {
@@ -4630,7 +4703,7 @@ export class AdminDashboard {
                             if (container) this.updateModuleData(container);
                         }
                     } else {
-                        this.showToast(json.message || 'Failed to delete category', 'error');
+                        this.showToast(json.message || this.t('admin.toast.category_delete_fail'), 'error');
                         if (json.message) this.openErrorModal('Delete Failed', json.message);
                     }
                 } catch (e) {
@@ -4647,15 +4720,15 @@ export class AdminDashboard {
         return `
             <form id="add-addon-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Name <span style="color:red">*</span></label>
-                    <input type="text" id="name" name="name" class="form-control" placeholder="Add-on Name" required />
+                    <label class="form-label" for="name">${this.t('admin.form.name')} <span style="color:red">*</span></label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="${this.t('admin.form.name')}" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="description">Description <span style="color:red">*</span></label>
-                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="Description of the add-on" required></textarea>
+                    <label class="form-label" for="description">${this.t('admin.form.description')} <span style="color:red">*</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="${this.t('admin.form.description')}" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="price">Price <span style="color:red">*</span></label>
+                    <label class="form-label" for="price">${this.t('admin.form.price')} <span style="color:red">*</span></label>
                     <div style="position: relative;">
                         <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">Rp</span>
                         <input type="number" id="price" name="price" class="form-control" style="padding-left: 2.5rem;" placeholder="0" required min="0" />
@@ -4696,7 +4769,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Add-on created successfully', 'success');
+                this.showToast(this.t('admin.toast.addon_created'), 'success');
                 this.closeModal();
                 await this.fetchAddons();
                 if (this.state.activeTab === 'Add-ons') {
@@ -4704,7 +4777,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to create add-on', 'error');
+                this.showToast(json.message || this.t('admin.toast.addon_create_fail'), 'error');
                 if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
@@ -4722,7 +4795,7 @@ export class AdminDashboard {
     }
 
     private openViewAddonModal(id: string) {
-        this.openModal('Loading Add-on Details...');
+        this.openModal(this.t('admin.modal.loading'));
         const body = this.root.querySelector('.modal-body');
         if (body) body.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
@@ -4732,7 +4805,7 @@ export class AdminDashboard {
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Add-on';
+        deleteBtn.textContent = this.t('admin.modal.delete_addon');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteAddon(id);
 
@@ -4751,7 +4824,7 @@ export class AdminDashboard {
             .then(json => {
                 if (json.status && json.data) {
                     const titleEl = this.root.querySelector('.modal-title');
-                    if (titleEl) titleEl.textContent = 'Add-on Details';
+                    if (titleEl) titleEl.textContent = this.t('admin.modal.view_addon');
 
                     if (body) {
                         body.innerHTML = this.renderViewAddonDetails(json.data);
@@ -4778,7 +4851,7 @@ export class AdminDashboard {
                 
                 <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="detail-item">
-                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Price</label>
+                        <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${this.t('admin.form.price')}</label>
                         <div style="font-weight: 500; font-size: 1.1rem; color: var(--primary-color);">Rp ${addon.price ? addon.price.toLocaleString() : '0'}</div>
                     </div>
                      <div class="detail-item">
@@ -4798,13 +4871,13 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('Edit Add-on');
+        this.openModal(this.t('admin.modal.edit_addon'));
         const body = this.root.querySelector('.modal-body');
 
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete Add-on';
+        deleteBtn.textContent = this.t('admin.modal.delete_addon');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteAddon(id);
 
@@ -4829,15 +4902,15 @@ export class AdminDashboard {
         return `
             <form id="edit-addon-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Name <span style="color:red">*</span></label>
+                    <label class="form-label" for="name">${this.t('admin.form.name')} <span style="color:red">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" value="${addon.name}" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="description">Description <span style="color:red">*</span></label>
+                    <label class="form-label" for="description">${this.t('admin.form.description')} <span style="color:red">*</span></label>
                     <textarea id="description" name="description" class="form-control" rows="3" required>${addon.description}</textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="price">Price <span style="color:red">*</span></label>
+                    <label class="form-label" for="price">${this.t('admin.form.price')} <span style="color:red">*</span></label>
                     <div style="position: relative;">
                         <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">Rp</span>
                         <input type="number" id="price" name="price" class="form-control" value="${addon.price}" style="padding-left: 2.5rem;" required min="0" />
@@ -4878,7 +4951,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('Add-on updated successfully', 'success');
+                this.showToast(this.t('admin.toast.addon_updated'), 'success');
                 this.closeModal();
                 await this.fetchAddons();
                 if (this.state.activeTab === 'Add-ons') {
@@ -4886,7 +4959,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to update add-on', 'error');
+                this.showToast(json.message || this.t('admin.toast.addon_update_fail'), 'error');
                 if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
@@ -4917,7 +4990,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('Add-on deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.addon_deleted'), 'success');
                         this.closeModal();
                         await this.fetchAddons();
                         if (this.state.activeTab === 'Add-ons') {
@@ -4943,7 +5016,7 @@ export class AdminDashboard {
     // --- Cities Actions ---
 
     private handleAddCity() {
-        this.openModal('Add New City');
+        this.openModal(this.t('admin.modal.add_city'));
         const body = this.root.querySelector('.modal-body');
         if (body) {
             body.innerHTML = this.renderAddCityForm();
@@ -4955,12 +5028,12 @@ export class AdminDashboard {
         return `
             <form id="add-city-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Name <span style="color:red">*</span></label>
-                    <input type="text" id="name" name="name" class="form-control" placeholder="City Name" required />
+                    <label class="form-label" for="name">${this.t('admin.form.name')} <span style="color:red">*</span></label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="${this.t('admin.form.city_name')}" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="provinceId">Province ID <span style="color:red">*</span></label>
-                    <input type="text" id="provinceId" name="provinceId" class="form-control" placeholder="Province ID" required />
+                    <label class="form-label" for="provinceId">${this.t('admin.form.province_id')} <span style="color:red">*</span></label>
+                    <input type="text" id="provinceId" name="provinceId" class="form-control" placeholder="${this.t('admin.form.province_id')}" required />
                 </div>
             </form>
         `;
@@ -4996,7 +5069,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('City created successfully', 'success');
+                this.showToast(this.t('admin.toast.city_created'), 'success');
                 this.closeModal();
                 await this.fetchCities();
                 if (this.state.activeTab === 'Cities') {
@@ -5004,7 +5077,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to create city', 'error');
+                this.showToast(json.message || this.t('admin.toast.city_create_fail'), 'error');
                 if (json.message) this.openErrorModal('Creation Failed', json.message);
             }
 
@@ -5028,13 +5101,13 @@ export class AdminDashboard {
             return;
         }
 
-        this.openModal('Edit City');
+        this.openModal(this.t('admin.modal.edit_city'));
         const body = this.root.querySelector('.modal-body');
 
         // Add Delete Button functionality
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete City';
+        deleteBtn.textContent = this.t('admin.modal.delete_city');
         deleteBtn.style.marginRight = 'auto'; // Push to left
         deleteBtn.onclick = () => this.handleDeleteCity(id);
 
@@ -5059,11 +5132,11 @@ export class AdminDashboard {
         return `
             <form id="edit-city-form">
                 <div class="form-group">
-                    <label class="form-label" for="name">Name <span style="color:red">*</span></label>
+                    <label class="form-label" for="name">${this.t('admin.form.city_name')} <span style="color:red">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" value="${city.name}" required />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="provinceId">Province ID <span style="color:red">*</span></label>
+                    <label class="form-label" for="provinceId">${this.t('admin.form.province_id')} <span style="color:red">*</span></label>
                     <input type="text" id="provinceId" name="provinceId" class="form-control" value="${city.provinceId}" required />
                 </div>
             </form>
@@ -5100,7 +5173,7 @@ export class AdminDashboard {
             const json = await res.json();
 
             if (json.status) {
-                this.showToast('City updated successfully', 'success');
+                this.showToast(this.t('admin.toast.city_updated'), 'success');
                 this.closeModal();
                 await this.fetchCities();
                 if (this.state.activeTab === 'Cities') {
@@ -5108,7 +5181,7 @@ export class AdminDashboard {
                     if (container) this.updateModuleData(container);
                 }
             } else {
-                this.showToast(json.message || 'Failed to update city', 'error');
+                this.showToast(json.message || this.t('admin.toast.city_update_fail'), 'error');
                 if (json.message) this.openErrorModal('Update Failed', json.message);
             }
 
@@ -5127,8 +5200,8 @@ export class AdminDashboard {
 
     private handleDeleteCity(id: string) {
         this.openConfirmModal(
-            'Delete City',
-            'Are you sure you want to delete this city? This action cannot be undone.',
+            this.t('admin.modal.delete_city'),
+            this.t('admin.modal.confirm_delete_city'),
             async () => {
                 try {
                     const res = await fetch(`/api/proxy/city/${id}`, {
@@ -5139,7 +5212,7 @@ export class AdminDashboard {
                     const json = await res.json();
 
                     if (json.status) {
-                        this.showToast('City deleted successfully', 'success');
+                        this.showToast(this.t('admin.toast.city_deleted'), 'success');
                         this.closeModal();
                         await this.fetchCities();
                         if (this.state.activeTab === 'Cities') {

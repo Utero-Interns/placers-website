@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from '@/app/context/LanguageContext';
 import { Billboard } from "@/types";
 import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
 import Script from "next/script";
@@ -60,6 +61,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
   const [mapsReady, setMapsReady] = useState(false);
   const [isMapInitialized, setIsMapInitialized] = useState(false); 
   const [listings, setListings] = useState<Listing[]>([]);
+  const { t } = useLanguage();
   
   // Keep track of the map instance and clusterer
   const googleMapRef = useRef<google.maps.Map | null>(null);
@@ -77,7 +79,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
 
         return {
           id: b.id,
-          type: b.category?.name || "Undefined",
+          type: b.category?.name || t('homepage.map.undefined_category'),
           address: b.location,
           image,
           lat: Number(b.latitude),
@@ -87,7 +89,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
       .filter((l) => !isNaN(l.lat) && !isNaN(l.lng));
 
     setListings(mapped);
-  }, [billboards]);
+  }, [billboards, t]);
 
   // Check if Google Maps is already loaded (navigating back to page)
   useEffect(() => {
@@ -227,7 +229,7 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
       <div ref={mapRef} className="w-full h-[500px] rounded-xl" />
 
       <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GMAP_API_KEY}`}
         strategy="afterInteractive"
         onLoad={() => setMapsReady(true)}
       />
