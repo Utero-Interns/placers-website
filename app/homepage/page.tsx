@@ -59,7 +59,7 @@ const Homepage: React.FC = () => {
     return true;
   });
 
-  // ===== PAGINATION LOGIC =====
+  // ===== PAGINATION =====
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
@@ -68,7 +68,7 @@ const Homepage: React.FC = () => {
     endIndex
   );
 
-  // Reset ke page 1 kalau filter berubah
+  // Reset page kalau filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, status]);
@@ -83,14 +83,39 @@ const Homepage: React.FC = () => {
         <Hero billboards={filteredBillboards} />
 
         <div className="mt-8">
-          <Filters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            status={status}
-            onStatusChange={setStatus}
-          />
+          {/* FILTER + UPGRADE BUTTON */}
+          <div className="flex items-center gap-3">
+            {/* FILTER */}
+            <div className="flex-1">
+              <Filters
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                status={status}
+                onStatusChange={setStatus}
+              />
+            </div>
 
-          {/* 🔥 PAKAI DATA YANG SUDAH DISLICE */}
+            {/* 🔴 UPGRADE SMARTSCUCO */}
+            <a
+              href="https://smartsuco.utero.id/" // ganti kalau URL beda
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                whitespace-nowrap
+                px-4 py-2
+                text-sm font-medium text-white
+                rounded-lg
+                bg-gradient-to-r from-[#680C0F] to-[var(--color-primary)]
+                hover:opacity-90
+                transition
+                shadow-sm
+              "
+            >
+              Upgrade SmartScuco
+            </a>
+          </div>
+
+          {/* CARD GRID */}
           <CardGrid billboards={paginatedBillboards} />
 
           {filteredBillboards.length > 0 && (

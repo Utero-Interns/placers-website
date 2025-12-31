@@ -2,7 +2,6 @@ import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import SocialIconLink from "./SocialIconLink";
 import FootLinkTitle from "./FootLinkTitle";
 import FootLink from "./FootLink";
-import Image from "next/image";
 
 export default function FootBar() {
     return (
@@ -10,11 +9,9 @@ export default function FootBar() {
             <div className="flex w-full flex-col gap-12 mb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8 2xl:w-11/12 2xl:items-center 2xl:mb-11">
 
                 {/* Logo hanya tampil di desktop */}
-                <Image
+                <img
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
-                    width={500}
-                    height={500}
                     className="hidden lg:block h-24 w-24 mx-auto lg:mx-0 lg:my-auto lg:h-32 lg:w-32 2xl:h-48 2xl:w-48"
                 />
 
@@ -41,22 +38,21 @@ export default function FootBar() {
                     <FootLinkTitle text="CONTACT" />
                     <FootLink href="https://uteroindonesia.com/" text="PT. Utero Kreatif Indonesia" />
                     <FootLink
-                        href="https://maps.google.com/?q=Jl.+Soekarno+Hatta+No.10,+Jatimulyo,+Kec.+Lowokwaru,+Kota+Malang,+Jawa+Timur"
-                        text="Jl. Soekarno Hatta No.10, Jatimulyo, Kec. Lowokwaru, Kota Malang, Jawa Timur"
+                        href="https://maps.app.goo.gl/rSkKi7UfVtdWgyD99"
+                        text="Jalan Bantaran I No. 25, Tulusrejo, Kec. Lowokwaru, Malang - Jawa Timur, Indonesia | Postal Code 65141"
                     />
-                    <FootLink href="https://wa.me/6282255900989" text="+62822 5590 0989" />
-                    <FootLink href="mailto:placers.official@gmail.com" text="placers.official@gmail.com" />
+                    <FootLink href="" text="+6281 999 900 900 (Chang)" />
+                    <FootLink href="" text="+6281 7388 616 (Utero)" />
+                    <FootLink href="mailto:placers.id@gmail.com" text="placers.id@gmail.com" />
                 </div>
             </div>
 
             {/* Bottom Section */}
             <div className="flex w-11/12 items-center border-t border-gray-700 pt-6 justify-between">
                 {/* Logo hanya tampil di mobile */}
-                <Image
+                <img
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
-                    height={250}
-                    width={250}
                     className="h-8 w-8 lg:hidden"
                 />
 
