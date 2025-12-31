@@ -4,42 +4,53 @@ import { useState } from "react";
 import SectionTag from "./SectionTag";
 import FAQPoint from "./FAQPoint";
 
+type FAQAccess = "default" | "upgrade";
+
+interface FAQItem {
+  question: string;
+  answer: string;
+  access: FAQAccess;
+}
+
 export default function LandingFAQ() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const faqs = [
+  const faqs: FAQItem[] = [
     {
       question: "Upload Lokasi Mudah dan Fleksibel",
       answer:
         "Upload titik billboard bisa dilakukan di mana saja dan kapan saja, tanpa batasan wilayah atau waktu.",
+      access: "default",
     },
     {
       question: "Cari Titik Billboard Tanpa Ribet",
       answer:
         "Dengan teknologi pencarian pintar, temukan lokasi billboard sesuai target audiens Anda dengan cepat dan akurat.",
+      access: "default",
     },
     {
       question: "Hemat Biaya & Transparan",
       answer:
         "Proses transaksi langsung dengan pemilik titik lokasi atau penerima kuasa, tanpa perantara, membuat biaya lebih efisien dan transparan.",
+      access: "default",
     },
     {
       question: "Live Streaming Traffic & Laporan Real-Time",
       answer:
-        "Nikmati fasilitas pemantauan trafik live streaming dan akses laporan data akurat dan real-time untuk evaluasi efektivitas iklan Anda.",
-      hasBadge: true
+        "Fitur pemantauan trafik melalui live streaming serta laporan data real-time untuk evaluasi performa iklan. Tersedia pada paket Upgrade.",
+      access: "upgrade",
     },
     {
       question: "Menuju Billboard Cerdas",
       answer:
-        "Terus berkembang menuju sistem billboard pintar dengan dukungan teknologi IoT (Internet of Things) dan AI (Artificial Intelligence).",
-      hasBadge: true
+        "Pengembangan berkelanjutan menuju sistem billboard pintar dengan dukungan teknologi IoT dan AI. Termasuk dalam paket Upgrade.",
+      access: "upgrade",
     },
     {
       question: "Remote Monitoring Management (RMM)",
       answer:
-        "Semua titik iklan dapat dipantau dan dikelola dari jarak jauh menggunakan sistem RMM, memastikan performa dan keandalan terus terjaga.",
-      hasBadge: true
+        "Pemantauan dan pengelolaan seluruh titik iklan dari jarak jauh menggunakan sistem RMM. Tersedia setelah upgrade paket.",
+      access: "upgrade",
     },
   ];
 
@@ -60,44 +71,24 @@ export default function LandingFAQ() {
           textColor="white"
         />
 
-        <h1
-          className="
-            text-center font-bold text-black
-            mt-4
-            text-xl md:text-2xl lg:text-3xl
-            leading-tight
-          "
-        >
+        <h1 className="text-center font-bold text-black mt-4 text-xl md:text-2xl lg:text-3xl">
           Ada Pertanyaan?
           <br />
           Kami Punya Jawabannya
         </h1>
 
-        <p
-          className="
-            text-center text-black
-            mt-2
-            text-sm md:text-base lg:text-base
-            2xl:text-lg
-            max-w-3xl
-          "
-        >
+        <p className="text-center text-black mt-2 text-sm md:text-base max-w-3xl">
           Semua yang perlu Anda ketahui tentang Placers dan bagaimana platform ini
-          dapat membantu kebutuhan iklan luar ruang Anda.
+          membantu kebutuhan iklan luar ruang Anda.
         </p>
 
-        <div
-          className="
-            w-full
-            mt-8 md:mt-10
-            space-y-4 md:space-y-5 2xl:space-y-6
-          "
-        >
+        <div className="w-full mt-8 space-y-4">
           {faqs.map((faq, i) => (
             <FAQPoint
-              key={i}
+              key={faq.question}
               question={faq.question}
               answer={faq.answer}
+              access={faq.access}
               expanded={expandedIndex === i}
               onClick={() =>
                 setExpandedIndex(expandedIndex === i ? null : i)
@@ -105,17 +96,6 @@ export default function LandingFAQ() {
             />
           ))}
         </div>
-      </div>
-      
-      <div className="mt-10">
-        <a 
-          href="https://wa.me/6282255900989" 
-          target="_blank" 
-          className="inline-flex items-center justify-center bg-[#25D366] text-white px-6 py-3 rounded-full font-semibold hover:bg-opacity-90 transition shadow-lg gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg>
-          Tanya Admin
-        </a>
       </div>
     </section>
   );
