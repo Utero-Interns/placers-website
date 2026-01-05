@@ -21,8 +21,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Placers",
-  description: "Marketplace Billboard Cerdas Pertama di Indonesia",
+    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+  description:
+    "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+
+  metadataBase: new URL("https://placers.id"),
+
+  openGraph: {
+    type: "website",
+    url: "https://placers.id/",
+    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+    description:
+      "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+    images: [
+      {
+        url: "https://metatags.io/images/meta-tags.png",
+        width: 1200,
+        height: 630,
+        alt: "Placers.id Marketplace Billboard Digital",
+      },
+    ],
+    siteName: "Placers",
+    locale: "id_ID",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+    description:
+      "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+    images: ["https://metatags.io/images/meta-tags.png"],
+  },
 };
 
 import { Toaster } from "sonner";
@@ -35,9 +64,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-
-      </head>
       <body
         suppressHydrationWarning={true}
         className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}

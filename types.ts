@@ -166,6 +166,8 @@ export interface BillboardDetail {
   category: Category;
   city: City;
   transaction: Transaction[];
+  latitude: string;
+  longitude: string;
 }
 
 export interface Owner {

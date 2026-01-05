@@ -2,6 +2,7 @@ import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import SocialIconLink from "./SocialIconLink";
 import FootLinkTitle from "./FootLinkTitle";
 import FootLink from "./FootLink";
+import Image from "next/image";
 
 export default function FootBar() {
     return (
@@ -9,9 +10,11 @@ export default function FootBar() {
             <div className="flex w-full flex-col gap-12 mb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8 2xl:w-11/12 2xl:items-center 2xl:mb-11">
 
                 {/* Logo hanya tampil di desktop */}
-                <img
+                <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
+                    width={400}
+                    height={400}
                     className="hidden lg:block h-24 w-24 mx-auto lg:mx-0 lg:my-auto lg:h-32 lg:w-32 2xl:h-48 2xl:w-48"
                 />
 
@@ -41,8 +44,8 @@ export default function FootBar() {
                         href="https://maps.app.goo.gl/rSkKi7UfVtdWgyD99"
                         text="Jalan Bantaran I No. 25, Tulusrejo, Kec. Lowokwaru, Malang - Jawa Timur, Indonesia | Postal Code 65141"
                     />
-                    <FootLink href="" text="+6281 999 900 900 (Chang)" />
-                    <FootLink href="" text="+6281 7388 616 (Utero)" />
+                    <FootLink href="https://api.whatsapp.com/send/?phone=6281999900900&text=Hallo%20kak%2C%20saya%20mendaptakankan%20nomor%20ini%20dari%20Placers.%0A%0ASebelum%20lanjut%20bisa%20mengisi%20informasi%20dibawah%20ini%20%3A%0ANama%20%3A%20%0AAlamat%20%3A%20%0APertanyaan%20%3A%20" text="+6281 999 900 900 (Chang)" />
+                    <FootLink href="https://api.whatsapp.com/send/?phone=62817388616&text=Hallo%20kak%2C%20saya%20mendaptakankan%20nomor%20ini%20dari%20Placers.%0A%0ASebelum%20lanjut%20bisa%20mengisi%20informasi%20dibawah%20ini%20%3A%0ANama%20%3A%20%0AAlamat%20%3A%20%0APertanyaan%20%3A%20" text="+6281 7388 616 (Utero)" />
                     <FootLink href="mailto:placers.id@gmail.com" text="placers.id@gmail.com" />
                 </div>
             </div>
@@ -50,9 +53,11 @@ export default function FootBar() {
             {/* Bottom Section */}
             <div className="flex w-11/12 items-center border-t border-gray-700 pt-6 justify-between">
                 {/* Logo hanya tampil di mobile */}
-                <img
+                <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
+                    width={100}
+                    height={100}
                     className="h-8 w-8 lg:hidden"
                 />
 

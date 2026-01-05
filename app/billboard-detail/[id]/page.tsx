@@ -10,6 +10,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import NavBar from '@/components/NavBar';
 import BillboardHeader from '@/components/billboard-detail/BillboardHeader';
 import BillboardImage from '@/components/billboard-detail/BillboardImage';
+import BillboardMap from '@/components/billboard-detail/BillboardMap';
 import BillboardPriceCTA from '@/components/billboard-detail/BillboardPriceCTA';
 import BillboardReviews from '@/components/billboard-detail/BillboardReview';
 import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
@@ -165,6 +166,14 @@ const BillboardPage: React.FC = () => {
                   <dd>{billboard.tax}</dd>
                 </div>
               </dl>
+
+              {billboard.latitude && billboard.longitude && (
+                <BillboardMap
+                  latitude={billboard.latitude}
+                  longitude={billboard.longitude}
+                  address={fullLocation}
+                />
+              )}
             </div>
 
             <BillboardReviews averageRating={averageRating} ratings={ratings} />

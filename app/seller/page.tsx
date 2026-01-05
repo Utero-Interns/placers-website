@@ -5,6 +5,7 @@ import Navbar from "@/components/NavBar"
 import Footer from "@/components/footer/FootBar"
 import Link from "next/link"
 import { motion, Variants } from "framer-motion"
+import Image from "next/image"
 
 /* ================== ANIMATION VARIANTS ================== */
 const fadeInUp: Variants = {
@@ -59,7 +60,7 @@ export default function SellerPage() {
 
                         <motion.div variants={fadeInUp}>
                             <Link href="/seller/register">
-                                <button className="font-semibold text-white bg-[var(--color-primary)] rounded-xl text-sm py-3 px-6 animate-pulse-glow">
+                                <button className="font-semibold text-white bg-[var(--color-primary)] rounded-xl text-sm py-3 px-6 animate-pulse-glow cursor-pointer">
                                     Daftar jadi Seller Sekarang
                                 </button>
                             </Link>
@@ -82,9 +83,10 @@ export default function SellerPage() {
                                 whileHover={{ scale: 1.05, zIndex: 10 }}
                                 transition={{ duration: 0.4 }}
                             >
-                                <img
-                                    src="seller_page1.png"
+                                <Image
+                                    src="/seller_page1.png"
                                     alt="Seller Preview 1"
+                                    fill
                                     className="w-full h-full object-contain"
                                 />
                             </motion.div>
@@ -95,9 +97,10 @@ export default function SellerPage() {
                                 whileHover={{ scale: 1.05, zIndex: 20 }}
                                 transition={{ duration: 0.4, delay: 0.15 }}
                             >
-                                <img
-                                    src="seller_page2.png"
+                                <Image
+                                    src="/seller_page2.png"
                                     alt="Seller Preview 2"
+                                    fill
                                     className="w-full h-full object-contain"
                                 />
                             </motion.div>
