@@ -60,7 +60,7 @@ export default function SellerPage() {
 
                         <motion.div variants={fadeInUp}>
                             <Link href="/seller/register">
-                                <button className="font-semibold text-white bg-[var(--color-primary)] rounded-xl text-sm py-3 px-6 animate-pulse-glow">
+                                <button className="font-semibold text-white bg-[var(--color-primary)] rounded-xl text-sm py-3 px-6 animate-pulse-glow cursor-pointer">
                                     Daftar jadi Seller Sekarang
                                 </button>
                             </Link>
@@ -86,6 +86,7 @@ export default function SellerPage() {
                                 <Image
                                     src="/seller_page1.png"
                                     alt="Seller Preview 1"
+                                    fill
                                     className="w-full h-full object-contain"
                                 />
                             </motion.div>
@@ -99,6 +100,7 @@ export default function SellerPage() {
                                 <Image
                                     src="/seller_page2.png"
                                     alt="Seller Preview 2"
+                                    fill
                                     className="w-full h-full object-contain"
                                 />
                             </motion.div>
