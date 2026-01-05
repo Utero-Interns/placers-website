@@ -1,6 +1,6 @@
 'use client';
 
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import React, { useMemo } from 'react';
 
 interface BillboardMapProps {
@@ -22,10 +22,23 @@ const BillboardMap: React.FC<BillboardMapProps> = ({ latitude, longitude, addres
     lng: Number(longitude) 
   }), [latitude, longitude]);
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GMAP_API_KEY || '',
-  });
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check if google maps is already loaded
+    if (window.google?.maps) {
+      setIsLoaded(true);
+    } else {
+      // Wait for it to load
+      const checkGoogleMapsDetails = setInterval(() => {
+        if (window.google?.maps) {
+          setIsLoaded(true);
+          clearInterval(checkGoogleMapsDetails);
+        }
+      }, 100);
+      return () => clearInterval(checkGoogleMapsDetails);
+    }
+  }, []);
 
   const onLoad = React.useCallback(function callback() {
   }, []);

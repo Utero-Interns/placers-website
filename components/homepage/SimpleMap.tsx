@@ -3,7 +3,6 @@
 import { useLanguage } from '@/app/context/LanguageContext';
 import { Billboard } from "@/types";
 import { Cluster, MarkerClusterer } from "@googlemaps/markerclusterer";
-import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
 declare global {
@@ -91,10 +90,18 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
     setListings(mapped);
   }, [billboards, t]);
 
-  // Check if Google Maps is already loaded (navigating back to page)
+  // Check if Google Maps is loaded
   useEffect(() => {
     if (window.google?.maps) {
       setMapsReady(true);
+    } else {
+      const interval = setInterval(() => {
+        if (window.google?.maps) {
+          setMapsReady(true);
+          clearInterval(interval);
+        }
+      }, 100);
+      return () => clearInterval(interval);
     }
   }, []);
 
@@ -228,11 +235,6 @@ export default function SimpleMap({ billboards }: { billboards: Billboard[] }) {
     <>
       <div ref={mapRef} className="w-full h-[500px] rounded-xl" />
 
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GMAP_API_KEY}`}
-        strategy="afterInteractive"
-        onLoad={() => setMapsReady(true)}
-      />
     </>
   );
 }
