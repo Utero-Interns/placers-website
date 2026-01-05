@@ -10,12 +10,14 @@ import LoadingScreen from '@/components/LoadingScreen';
 import NavBar from '@/components/NavBar';
 import BillboardHeader from '@/components/billboard-detail/BillboardHeader';
 import BillboardImage from '@/components/billboard-detail/BillboardImage';
-import BillboardMap from '@/components/billboard-detail/BillboardMap';
 import BillboardPriceCTA from '@/components/billboard-detail/BillboardPriceCTA';
 import BillboardReviews from '@/components/billboard-detail/BillboardReview';
 import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
 import ShareModal from '@/components/billboard-detail/ShareModal';
 import FootBar from '@/components/footer/FootBar';
+import dynamic from 'next/dynamic';
+
+const BillboardMap = dynamic(() => import('@/components/billboard-detail/BillboardMap'), { ssr: false });
 
 const BillboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -72,6 +73,10 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GMAP_API_KEY}&loading=async&libraries=maps,marker`}
+          strategy="beforeInteractive"
+        />
       </body>
     </html>
   );
