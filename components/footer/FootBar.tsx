@@ -2,6 +2,7 @@ import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import SocialIconLink from "./SocialIconLink";
 import FootLinkTitle from "./FootLinkTitle";
 import FootLink from "./FootLink";
+import Image from "next/image";
 
 export default function FootBar() {
     return (
@@ -9,7 +10,7 @@ export default function FootBar() {
             <div className="flex w-full flex-col gap-12 mb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8 2xl:w-11/12 2xl:items-center 2xl:mb-11">
 
                 {/* Logo hanya tampil di desktop */}
-                <img
+                <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
                     className="hidden lg:block h-24 w-24 mx-auto lg:mx-0 lg:my-auto lg:h-32 lg:w-32 2xl:h-48 2xl:w-48"
@@ -50,7 +51,7 @@ export default function FootBar() {
             {/* Bottom Section */}
             <div className="flex w-11/12 items-center border-t border-gray-700 pt-6 justify-between">
                 {/* Logo hanya tampil di mobile */}
-                <img
+                <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
                     className="h-8 w-8 lg:hidden"
