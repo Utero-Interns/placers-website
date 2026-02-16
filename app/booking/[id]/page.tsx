@@ -13,6 +13,7 @@ import type { BookingFormData, Step } from '@/types';
 import { PackageCheckIcon, PuzzleIcon, SendIcon, UserIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 const steps: Step[] = [
   { name: 'Data Pemesanan', icon: UserIcon },
@@ -22,9 +23,6 @@ const steps: Step[] = [
 ];
 
 const initialFormData: BookingFormData = {
-  nama: '',
-  noTelepon: '',
-  alamat: '',
   periodeAwal: '',
   periodeAkhir: '',
   penerangan: 'Pilih jenis penerangan',
@@ -62,8 +60,40 @@ function Booking() {
         const billboardId = params?.id as string;
         const result = await submitBooking(formData, billboardId);
         setSubmissionResult(result);
-      } catch {
-        setSubmissionResult({ success: false, message: 'An error occurred during submission.' });
+        
+        if (result.success) {
+          toast.success('Booking berhasil dibuat!');
+        } else {
+          // Handle failed submission with specific error message
+          toast.error(result.message || 'Terjadi kesalahan, silakan coba lagi');
+        }
+      } catch (error: unknown) {
+        console.error('Booking submission error:', error);
+        
+        // Parse backend error message if available
+        let errorMessage = 'Terjadi kesalahan, silakan coba lagi';
+        
+        const err = error as { response?: { data?: { message?: string } }; message?: string };
+        
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.message) {
+          // Provide user-friendly messages for common errors
+          if (err.message.includes('401') || err.message.includes('unauthorized')) {
+            errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+          } else if (err.message.includes('400') || err.message.includes('validation')) {
+            errorMessage = 'Data yang Anda masukkan tidak valid. Periksa kembali formulir.';
+          } else if (err.message.includes('404')) {
+            errorMessage = 'Billboard tidak ditemukan. Mungkin sudah tidak tersedia.';
+          } else if (err.message.includes('409') || err.message.includes('conflict')) {
+            errorMessage = 'Periode yang Anda pilih sudah dibooking. Pilih tanggal lain.';
+          } else if (err.message.includes('network') || err.message.includes('fetch')) {
+            errorMessage = 'Koneksi bermasalah. Periksa internet Anda dan coba lagi.';
+          }
+        }
+        
+        toast.error(errorMessage);
+        setSubmissionResult({ success: false, message: errorMessage });
       } finally {
         setIsSubmitting(false);
       }

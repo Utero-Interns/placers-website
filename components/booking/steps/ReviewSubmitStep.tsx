@@ -66,11 +66,8 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
     <div className="space-y-8">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Periksa kembali detail pesanan sebelum Anda melakukan pembayaran.</h2>
       <div className="space-y-6">
-        <ReviewSection title="Informasi Pemesan dan Detail Pesanan">
-          <ReviewItem label="Nama" value={data.nama} />
-          <ReviewItem label="No. Telp" value={data.noTelepon} />
-          <ReviewItem label="Alamat" value={data.alamat} />
-          <ReviewItem label="Durasi waktu" value={`Akumulasi ${data.periodeAwal} - ${data.periodeAkhir}`} />
+        <ReviewSection title="Detail Pesanan">
+          <ReviewItem label="Periode Sewa" value={`${data.periodeAwal} - ${data.periodeAkhir}`} />
           <div className="pt-2">
             <p className="font-medium text-gray-500">Detail:</p>
             <ul className="list-disc list-inside pl-2 text-gray-600">

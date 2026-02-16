@@ -15,6 +15,7 @@ import BillboardReviews from '@/components/billboard-detail/BillboardReview';
 import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
 import ShareModal from '@/components/billboard-detail/ShareModal';
 import FootBar from '@/components/footer/FootBar';
+import { toast } from 'sonner';
 
 const BillboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,13 +46,24 @@ const BillboardPage: React.FC = () => {
   const handleToggleBookmark = async () => {
     if (!id) return;
 
-    const prev = isBookmarked;
-    setIsBookmarked(!prev);
+    const prevState = isBookmarked;
+    setIsBookmarked(!isBookmarked); // Optimistic update
 
-    const success = prev ? await removeBookmark(id) : await addBookmark(id);
-    if (!success) {
-      setIsBookmarked(prev);
-      alert('Gagal mengubah status bookmark');
+    try {
+      const success = isBookmarked
+        ? await removeBookmark(id)
+        : await addBookmark(id);
+
+      if (!success) {
+        throw new Error('Bookmark operation failed');
+      }
+
+      toast.success(isBookmarked ? 'Bookmark dihapus' : 'Ditambahkan ke bookmark');
+    } catch (error) {
+      // Revert state on failure
+      setIsBookmarked(prevState);
+      toast.error('Gagal mengubah bookmark. Silakan coba lagi.');
+      console.error('Bookmark error:', error);
     }
   };
 

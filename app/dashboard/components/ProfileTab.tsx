@@ -50,7 +50,14 @@ export default function ProfileTab() {
   };
 
   if (isLoading || !user) {
-    return <div className="p-8 text-center">Loading profile...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mb-4"></div>
+          <p className="text-gray-600">Memuat profil...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

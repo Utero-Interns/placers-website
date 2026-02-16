@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Order } from '@/types';
 import { X } from 'lucide-react';
+import StatusBadge from './StatusBadge';
 
 interface OrderDetailModalProps {
   isOpen: boolean;
@@ -42,8 +43,11 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, on
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{order.category} - {order.seller}</h3>
+                <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">{order.category} - {order.seller}</h3>
+                        <StatusBadge status={order.transactionStatus || 'PENDING'} />
+                    </div>
                     <p className="text-sm text-gray-500">Spesifikasi: {order.specifications}</p>
                 </div>
                 <button onClick={onPrint} className="w-full sm:w-auto text-sm bg-white text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-red-50 rounded-lg px-4 py-2 font-semibold cursor-pointer">

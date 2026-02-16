@@ -6,6 +6,12 @@ import LandingGallery from "@/components/landingpage/LandingGallery";
 import LandingHero from "@/components/landingpage/LandingHero";
 import LandingInvestor from "@/components/landingpage/LandingInvestor";
 import LandingValues from "@/components/landingpage/LandingValues";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Placers - Platform Billboard Advertising Terpercaya',
+  description: 'Temukan dan sewa lokasi billboard terbaik untuk iklan Anda di seluruh Indonesia. Platform marketplace billboard advertising terpercaya.',
+};
 
 export default function Home() {
   return (

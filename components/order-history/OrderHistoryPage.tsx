@@ -3,6 +3,7 @@ import { Order, OrderStatus } from '@/types';
 import { Calendar, ChevronLeft, ChevronRight, HistoryIcon, MapPin, Search, SquareDashed } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import OrderDetailModal from './OrderDetailModal';
+import StatusBadge from './StatusBadge';
 
 const mapToOrder = (item: HistoryItem): Order => {
   const transaction = item.transaction;
@@ -115,6 +116,7 @@ const mapToOrder = (item: HistoryItem): Order => {
     totalCost: parseFloat(transaction.totalPrice),
     paymentStatus: 'Lunas', 
     status: status,
+    transactionStatus: transaction.status, // Add raw transaction status
     seller: 'Placers Vendor',
     specifications: `${billboard.size}, ${billboard.cityName}`,
     adminDetails: adminDetails, 
@@ -216,19 +218,6 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
 
   const tabs: (OrderStatus | 'Semua')[] = ['Semua', OrderStatus.Upcoming, OrderStatus.Ongoing, OrderStatus.Completed];
 
-  const getStatusChip = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.Upcoming:
-        return <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Akan Datang</span>;
-      case OrderStatus.Ongoing:
-        return <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Berjalan</span>;
-      case OrderStatus.Completed:
-        return <span className="px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Selesai</span>;
-      default:
-        return null;
-    }
-  };
-
   const formatCurrency = (amount: number) => {
     return `Rp ${amount.toLocaleString('id-ID')}`;
   };
@@ -300,7 +289,10 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
 
       {isLoading ? (
         <div className="text-center py-16 px-6 bg-white rounded-lg border border-gray-200">
-          <p className="text-gray-600 text-lg">Loading your orders...</p>
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mb-4"></div>
+            <p className="text-gray-600 text-lg">Memuat riwayat pesanan...</p>
+          </div>
         </div>
       ) : paginatedOrders.length > 0 ? (
         <div className="space-y-4">
@@ -310,7 +302,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-3">
                   <div className="flex items-center gap-4">
                     <span className="font-bold text-gray-800 text-lg">{order.id}</span>
-                    {getStatusChip(order.status)}
+                    <StatusBadge status={order.transactionStatus || 'PENDING'} />
                   </div>
                   <div className="text-sm text-gray-500 flex items-center gap-1.5">
                     <Calendar size={14} />

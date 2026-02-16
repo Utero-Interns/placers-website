@@ -30,10 +30,7 @@ export interface Transaction {
 
 // booking form
 export interface BookingFormData {
-  // Step 1: Data Pemesanan
-  nama: string;
-  noTelepon: string;
-  alamat: string;
+  // Step 1: Data Pemesanan - Periode sewa
   periodeAwal: string;
   periodeAkhir: string;
 

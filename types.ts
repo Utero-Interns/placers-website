@@ -254,10 +254,7 @@ export interface UserRating {
 
 // booking form
 export interface BookingFormData {
-  // Step 1: Data Pemesanan
-  nama: string;
-  noTelepon: string;
-  alamat: string;
+  // Step 1: Data Pemesanan - Periode sewa
   periodeAwal: string;
   periodeAkhir: string;
 
@@ -341,6 +338,7 @@ export interface Order {
   totalCost: number;
   paymentStatus: 'Lunas';
   status: OrderStatus;
+  transactionStatus?: string; // Raw transaction status from backend
   seller: string;
   specifications: string;
   adminDetails: string[];

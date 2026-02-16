@@ -8,6 +8,7 @@ import type { Bookmark } from '../../types';
 
 import NavBar from '@/components/NavBar';
 import FootBar from '@/components/footer/FootBar';
+import LoadingScreen from '@/components/LoadingScreen';
 
 
 const BookmarksPage: React.FC = () => {
@@ -114,6 +115,8 @@ const BookmarksPage: React.FC = () => {
 
   const allSelected = filteredBookmarks.length > 0 && selectedIds.size === filteredBookmarks.length;
 
+  if (loading) return <LoadingScreen />;
+
   return (
     <div className="bg-[#FCFCFC] min-h-screen">
       <NavBar />
@@ -151,16 +154,12 @@ const BookmarksPage: React.FC = () => {
             </div>
         )}
         
-        {loading ? (
-            <div className="py-8 text-center">Loading bookmarks...</div>
-        ) : (
-            <BookmarkList
-            bookmarks={filteredBookmarks}
-            isEditing={isEditing}
-            selectedIds={selectedIds}
-            onSelectOne={handleSelectOne}
-            />
-        )}
+        <BookmarkList
+          bookmarks={filteredBookmarks}
+          isEditing={isEditing}
+          selectedIds={selectedIds}
+          onSelectOne={handleSelectOne}
+        />
       </div>
 
       <FootBar />
