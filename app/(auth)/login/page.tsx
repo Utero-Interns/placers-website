@@ -88,7 +88,11 @@ export default function LoginPage() {
         <hr className="flex-1 border-gray-300" />
       </div>
 
-      <AuthEmailInput value={identifier} onChange={e => setIdentifier(e.target.value)} />
+      <AuthEmailInput 
+        value={identifier} 
+        onChange={e => setIdentifier(e.target.value)} 
+        placeholder="Email atau No. Telepon"
+      />
 
       <AuthPasswordInput
         placeholder="Password"
@@ -98,7 +102,7 @@ export default function LoginPage() {
       />
 
       <div className="text-right text-sm">
-        <Link href="/auth/forgot" className="text-[#5A5A5A] hover:underline">
+        <Link href="/forgot" className="text-[#5A5A5A] hover:underline">
           Lupa Password?
         </Link>
       </div>

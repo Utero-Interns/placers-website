@@ -30,9 +30,23 @@ export default function ProfileTab() {
 
   const handleSavePassword = async (passwordData: PasswordData) => {
     console.log('Updating password:', passwordData);
-    await userService.updatePassword();
-    alert('Password updated successfully!');
-    setView('profile');
+    
+    if (!passwordData.oldPassword || !passwordData.newPassword) {
+      alert('Please provide both old and new passwords');
+      return;
+    }
+    
+    const result = await userService.updatePassword(
+      passwordData.oldPassword,
+      passwordData.newPassword
+    );
+    
+    if (result.success) {
+      alert(result.message || 'Password updated successfully!');
+      setView('profile');
+    } else {
+      alert(result.message || 'Failed to update password');
+    }
   };
 
   if (isLoading || !user) {

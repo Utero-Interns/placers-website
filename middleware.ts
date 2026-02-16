@@ -31,7 +31,8 @@ export async function middleware(request: NextRequest) {
 
         try {
             // 2. Verify Session with Backend
-            const authResponse = await fetch('http://utero.viewdns.net:3100/auth/me', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://utero.viewdns.net:3100';
+            const authResponse = await fetch(`${apiUrl}/auth/me`, {
                 method: 'GET',
                 headers: {
                     'Cookie': cookieHeader,

@@ -33,6 +33,7 @@ const BillboardCard = ({
   sellerName,
   id,
 }: BillboardCardProps) => {
+  const { t } = useLanguage();
   const [billboardSrc, setBillboardSrc] = useState(image);
   const [sellerSrc, setSellerSrc] = useState(sellerImage);
 

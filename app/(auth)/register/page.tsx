@@ -34,6 +34,25 @@ export default function RegisterPage() {
     signIn('google', { callbackUrl: '/dashboard' });
   };
 
+  // Format phone number to international format (+62...)
+  const formatPhoneNumber = (phoneInput: string): string => {
+    // Remove all non-digit characters
+    const cleaned = phoneInput.replace(/\D/g, '');
+    
+    // If starts with 0, replace with +62
+    if (cleaned.startsWith('0')) {
+      return `+62${cleaned.slice(1)}`;
+    }
+    
+    // If starts with 62, add +
+    if (cleaned.startsWith('62')) {
+      return `+${cleaned}`;
+    }
+    
+    // If doesn't start with 0 or 62, assume it's local number without 0
+    return `+62${cleaned}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,13 +60,17 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
       setError('Password dan Konfirmasi Password tidak sama');
+      setLoading(false);
       return;
     }
+
+    // Format phone number to international format
+    const formattedPhone = formatPhoneNumber(phone);
 
     try {
       const res = await authService.register({
         email,
-        phone,
+        phone: formattedPhone,
         username,
         password,
         confirmPassword

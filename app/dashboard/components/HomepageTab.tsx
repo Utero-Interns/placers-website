@@ -15,6 +15,10 @@ export default function HomepageTab() {
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState('Semua');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const loadBillboards = async () => {
@@ -58,6 +62,16 @@ export default function HomepageTab() {
     return true;
   });
 
+  // Paginate filtered billboards
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedBillboards = filteredBillboards.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, status]);
+
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Loading billboards...</div>;
   }
@@ -72,8 +86,13 @@ export default function HomepageTab() {
             status={status}
             onStatusChange={setStatus}
         />
-        <CardGrid billboards={filteredBillboards} />
-        <Pagination />
+        <CardGrid billboards={paginatedBillboards} />
+        <Pagination 
+          totalData={filteredBillboards.length}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>   
   );

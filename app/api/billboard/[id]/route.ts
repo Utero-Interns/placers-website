@@ -8,7 +8,7 @@ export async function GET(
     const { id } = await context.params;
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/billboard/detail/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/billboard/${id}`,
       { cache: "no-store" }
     );
 
