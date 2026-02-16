@@ -9,6 +9,7 @@ import {
   Move3DIcon,
   SearchIcon,
   ViewIcon,
+  X,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import FilterPopover from './FilterPopover';
@@ -161,6 +162,13 @@ const Filters: React.FC<FiltersProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') onSearchChange(localSearch);
   };
+  
+  // Calculate active filter count
+  const activeFilterCount = 
+    selectedCategories.length + 
+    selectedProvinces.length + 
+    selectedOrientations.length + 
+    selectedDisplays.length;
 
   return (
     <div className="space-y-4">
@@ -189,13 +197,45 @@ const Filters: React.FC<FiltersProps> = ({
         </div>
 
         {/* FILTER BUTTON */}
-        <button
-          onClick={() => setShowDetailedFilters(!showDetailedFilters)}
-          className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          <FilterIcon className="h-4 w-4" />
-          Filter Lainnya
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDetailedFilters(!showDetailedFilters)}
+            className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 flex-1 relative"
+          >
+            <FilterIcon className="h-4 w-4" />
+            Filter Lainnya
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          
+          {/* Reset Filters Button - show only if filters are active */}
+          {(selectedCategories.length > 0 || 
+            selectedProvinces.length > 0 || 
+            selectedOrientations.length > 0 || 
+            selectedDisplays.length > 0 || 
+            status !== 'Semua' ||
+            searchQuery !== '') && (
+            <button
+              onClick={() => {
+                onCategoriesChange([]);
+                onProvincesChange([]);
+                onOrientationsChange([]);
+                onDisplaysChange([]);
+                onStatusChange('Semua');
+                onSearchChange('');
+                setLocalSearch('');
+              }}
+              className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 text-sm font-medium text-red-600 hover:bg-red-100"
+              title="Reset semua filter"
+            >
+              <X className="h-4 w-4" />
+              Reset
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ================== ADVANCED FILTERS ================== */}
