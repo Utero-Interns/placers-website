@@ -20,12 +20,44 @@ const Homepage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState('Semua');
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // Advanced filters
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
+  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
+  const [selectedDisplays, setSelectedDisplays] = useState<string[]>([]);
 
   useEffect(() => {
     const loadBillboards = async () => {
       setLoading(true);
       try {
-        const data = await fetchBillboards();
+        // Build query parameters
+        const params = new URLSearchParams();
+        
+        // Add search query
+        if (searchQuery) {
+          params.append('search', searchQuery);
+        }
+        
+        // Add status filter
+        if (status !== 'Semua') {
+          const statusValue = status === 'Tersedia' ? 'Available' : 'Unavailable';
+          params.append('status', statusValue);
+        }
+        
+        // Add category filter (can be multiple)
+        selectedCategories.forEach(cat => params.append('categoryId', cat));
+        
+        // Add province filter
+        selectedProvinces.forEach(prov => params.append('provinceId', prov));
+        
+        // Add orientation filter
+        selectedOrientations.forEach(ori => params.append('orientation', ori));
+        
+        // Add display filter
+        selectedDisplays.forEach(disp => params.append('display', disp));
+        
+        const data = await fetchBillboards(params.toString());
         setBillboards(data);
       } catch (error) {
         console.error('Failed to fetch billboards:', error);
@@ -35,35 +67,14 @@ const Homepage: React.FC = () => {
     };
 
     loadBillboards();
-  }, []);
-
-  // ===== FILTER =====
-  const filteredBillboards = billboards.filter((billboard) => {
-    if (status !== 'Semua') {
-      const targetStatus = status === 'Tersedia' ? 'Available' : 'Unavailable';
-      if (billboard.status?.toLowerCase() !== targetStatus.toLowerCase()) {
-        return false;
-      }
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        billboard.location?.toLowerCase().includes(query) ||
-        billboard.cityName?.toLowerCase().includes(query) ||
-        billboard.provinceName?.toLowerCase().includes(query) ||
-        billboard.category?.name?.toLowerCase().includes(query)
-      );
-    }
-
-    return true;
-  });
+  }, [searchQuery, status, selectedCategories, selectedProvinces, selectedOrientations, selectedDisplays]);
 
   // ===== PAGINATION LOGIC =====
+  // Filtering now done on backend, so billboards is already filtered
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const paginatedBillboards = filteredBillboards.slice(
+  const paginatedBillboards = billboards.slice(
     startIndex,
     endIndex
   );
@@ -71,7 +82,7 @@ const Homepage: React.FC = () => {
   // Reset ke page 1 kalau filter berubah
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, status]);
+  }, [searchQuery, status, selectedCategories, selectedProvinces, selectedOrientations, selectedDisplays]);
 
   if (loading) return <LoadingScreen />;
 
@@ -80,7 +91,7 @@ const Homepage: React.FC = () => {
       <NavBar />
 
       <main className="container mx-auto px-4 py-8">
-        <Hero billboards={filteredBillboards} />
+        <Hero billboards={billboards} />
 
         <div className="mt-8">
           <Filters
@@ -88,14 +99,22 @@ const Homepage: React.FC = () => {
             onSearchChange={setSearchQuery}
             status={status}
             onStatusChange={setStatus}
+            selectedCategories={selectedCategories}
+            onCategoriesChange={setSelectedCategories}
+            selectedProvinces={selectedProvinces}
+            onProvincesChange={setSelectedProvinces}
+            selectedOrientations={selectedOrientations}
+            onOrientationsChange={setSelectedOrientations}
+            selectedDisplays={selectedDisplays}
+            onDisplaysChange={setSelectedDisplays}
           />
 
           {/* 🔥 PAKAI DATA YANG SUDAH DISLICE */}
           <CardGrid billboards={paginatedBillboards} />
 
-          {filteredBillboards.length > 0 && (
+          {billboards.length > 0 && (
             <Pagination
-              totalData={filteredBillboards.length}
+              totalData={billboards.length}
               itemsPerPage={ITEMS_PER_PAGE}
               currentPage={currentPage}
               onPageChange={setCurrentPage}

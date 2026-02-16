@@ -85,6 +85,14 @@ export default function HomepageTab() {
             onSearchChange={setSearchQuery}
             status={status}
             onStatusChange={setStatus}
+            selectedCategories={[]}
+            onCategoriesChange={() => {}}
+            selectedProvinces={[]}
+            onProvincesChange={() => {}}
+            selectedOrientations={[]}
+            onOrientationsChange={() => {}}
+            selectedDisplays={[]}
+            onDisplaysChange={() => {}}
         />
         <CardGrid billboards={paginatedBillboards} />
         <Pagination 
