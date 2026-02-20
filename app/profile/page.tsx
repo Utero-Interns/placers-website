@@ -24,7 +24,7 @@ const Profile: React.FC = () => {
     });
   }, []);
 
-  const handleSaveProfile = async (updatedData: Partial<User>) => {
+  const handleSaveProfile = async (updatedData: Partial<User> & { _avatarFile?: File }) => {
     if (!user) return;
     const updatedUser = await userService.updateUser(updatedData);
     setUser(updatedUser);

@@ -34,15 +34,30 @@ export const userService = {
     }
   },
 
-  updateUser: async (updatedData: Partial<User>): Promise<User> => {
+  updateUser: async (updatedData: Partial<User> & { _avatarFile?: File }): Promise<User> => {
     try {
+      const { _avatarFile, ...fields } = updatedData;
+      let body: BodyInit;
+      const headers: Record<string, string> = {};
+
+      if (_avatarFile) {
+        const form = new FormData();
+        Object.entries(fields).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) form.append(k, String(v));
+        });
+        form.append('file', _avatarFile);
+        body = form;
+        // Don't set Content-Type — browser sets it with boundary automatically
+      } else {
+        body = JSON.stringify(fields);
+        headers['Content-Type'] = 'application/json';
+      }
+
       const res = await fetch(`${API_BASE_URL}/user/me`, {
         method: 'PUT',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData)
+        headers,
+        body,
       });
 
       if (!res.ok) {

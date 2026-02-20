@@ -43,12 +43,21 @@ const Homepage: React.FC = () => {
           params.append('status', statusValue);
         }
 
-        selectedCategories.forEach(cat => params.append('categoryId', cat));
-        selectedProvinces.forEach(prov => params.append('provinceId', prov));
-        selectedOrientations.forEach(ori => params.append('orientation', ori));
-        selectedDisplays.forEach(disp => params.append('display', disp));
+        // Backend supports single province/orientation/display filter values
+        if (selectedProvinces.length > 0) params.append('province', selectedProvinces[0]);
+        if (selectedOrientations.length > 0) params.append('orientation', selectedOrientations[0]);
+        if (selectedDisplays.length > 0) params.append('display', selectedDisplays[0]);
+        // Category filter not supported by backend /billboard/all — filtered client-side below
 
-        const data = await fetchBillboards(params.toString());
+        let data = await fetchBillboards(params.toString());
+        // Client-side category filter (backend has no category name filter)
+        if (selectedCategories.length > 0) {
+          data = data.filter(b =>
+            selectedCategories.some(cat =>
+              b.category?.name?.toLowerCase() === cat.toLowerCase()
+            )
+          );
+        }
         setBillboards(data);
       } catch (error) {
         console.error('Failed to fetch billboards:', error);
