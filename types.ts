@@ -258,20 +258,7 @@ export interface BookingFormData {
   periodeAwal: string;
   periodeAkhir: string;
 
-  // Fix: Add properties for AdministrasiPajakStep to resolve type errors.
-  penerangan: string;
-  lahan: string;
-  pajakPPN: string;
-  pajakPPH: string;
-
-  // Step 3: Add-On
-  pengawasanMedia: boolean;
-  asuransi: boolean;
-  nomorAsuransi: string;
-  maintenanceMedia: boolean;
-  rmm: boolean;
-  augmentedReality: number;
-  trafficDataReporting: number;
+  // Step 2: Add-On
   catatan: string;
   customAddOns?: Record<string, boolean>;
   designId?: string | null;

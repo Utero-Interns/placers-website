@@ -25,17 +25,6 @@ const steps: Step[] = [
 const initialFormData: BookingFormData = {
   periodeAwal: '',
   periodeAkhir: '',
-  penerangan: 'Pilih jenis penerangan',
-  lahan: 'Pilih lahan',
-  pajakPPN: 'Pilih status PPN',
-  pajakPPH: 'Pilih status PPH',
-  pengawasanMedia: true,
-  asuransi: true,
-  nomorAsuransi: '',
-  maintenanceMedia: false,
-  rmm: false,
-  augmentedReality: 0,
-  trafficDataReporting: 0,
   catatan: '',
 };
 

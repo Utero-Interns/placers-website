@@ -58,8 +58,6 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
 
   const addOnServices = [
     ...dynamicAddOns,
-    data.augmentedReality > 0 && `Augmented Reality (AR) x${data.augmentedReality}`,
-    data.trafficDataReporting > 0 && `Traffic Data Reporting x${data.trafficDataReporting}`,
   ].filter(Boolean);
 
   return (
