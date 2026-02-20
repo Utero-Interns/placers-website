@@ -67,9 +67,9 @@ export async function middleware(request: NextRequest) {
 
             // --- SELLER LOGIC ---
             if (userLevel === 'SELLER') {
-                // Seller can ONLY access seller routes
-                if (!isSellerRoute) {
-                    // If seller tries to go to admin or buyer dashboard/profile, redirect to seller dashboard
+                // Sellers can access their own dashboard AND buyer routes (booking, profile, etc.)
+                if (!isSellerRoute && !isBuyerRoute) {
+                    // If seller tries to go to admin route, redirect to seller dashboard
                     const url = request.nextUrl.clone();
                     url.pathname = '/seller/dashboard';
                     return NextResponse.redirect(url);

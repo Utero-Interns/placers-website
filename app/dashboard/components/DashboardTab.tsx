@@ -16,12 +16,15 @@ export default function DashboardTab({ user }: DashboardTabProps) {
       if (user.level === 'SELLER') {
         try {
           const [billboardsRes, salesRes] = await Promise.all([
-            fetch('/api/proxy/billboard/myBillboards').then(r => r.json()),
-            fetch('/api/proxy/transaction/mySales').then(r => r.json())
+            fetch('/api/proxy/billboard/myBillboards', { credentials: 'include' }).then(r => r.json()),
+            fetch('/api/proxy/transaction/mySales', { credentials: 'include' }).then(r => r.json())
           ]);
 
-          const billboards = Array.isArray(billboardsRes) ? billboardsRes : [];
-          const sales = Array.isArray(salesRes) ? salesRes : [];
+          // Backend wraps responses in { status, data: [] }
+          const billboards = Array.isArray(billboardsRes?.data) ? billboardsRes.data
+            : Array.isArray(billboardsRes) ? billboardsRes : [];
+          const sales = Array.isArray(salesRes?.data) ? salesRes.data
+            : Array.isArray(salesRes) ? salesRes : [];
           
           const revenue = sales.reduce((acc: number, t: { status: string; totalPrice: string | number }) => acc + (t.status === 'PAID' ? Number(t.totalPrice) : 0), 0);
           
