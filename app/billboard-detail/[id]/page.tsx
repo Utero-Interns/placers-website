@@ -61,7 +61,7 @@ const BillboardPage: React.FC = () => {
         throw new Error('Bookmark operation failed');
       }
 
-      toast.success(isBookmarked ? 'Bookmark dihapus' : 'Ditambahkan ke bookmark');
+      toast.success(prevState ? 'Bookmark dihapus' : 'Ditambahkan ke bookmark');
     } catch (error) {
       // Revert state on failure
       setIsBookmarked(prevState);

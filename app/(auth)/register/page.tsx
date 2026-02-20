@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-
 // Components
 import { toast } from 'sonner';
 import { authService } from '@/app/lib/auth';
@@ -31,25 +29,32 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const googleRegister = () => {
-    signIn('google', { callbackUrl: '/dashboard' });
+    toast.info('Daftar dengan Google belum tersedia. Gunakan email dan password.');
   };
 
   // Format phone number to international format (+62...)
   const formatPhoneNumber = (phoneInput: string): string => {
+    const trimmed = phoneInput.trim();
+
+    // Already in +62... format — return as-is
+    if (trimmed.startsWith('+62')) {
+      return trimmed;
+    }
+
     // Remove all non-digit characters
-    const cleaned = phoneInput.replace(/\D/g, '');
-    
-    // If starts with 0, replace with +62
+    const cleaned = trimmed.replace(/\D/g, '');
+
+    // If starts with 0, replace leading 0 with +62
     if (cleaned.startsWith('0')) {
       return `+62${cleaned.slice(1)}`;
     }
-    
-    // If starts with 62, add +
+
+    // If starts with 62 (e.g. user typed 628xxx), add + prefix
     if (cleaned.startsWith('62')) {
       return `+${cleaned}`;
     }
-    
-    // If doesn't start with 0 or 62, assume it's local number without 0
+
+    // Bare local number (e.g. 81234567890) — prepend +62
     return `+62${cleaned}`;
   };
 

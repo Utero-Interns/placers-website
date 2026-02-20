@@ -219,7 +219,8 @@ export default function SellerRegisterPage() {
             <div>
               <label className="block text-sm font-medium mb-1">Nomor KTP</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 name="ktp"
                 value={formData.ktp}
                 onChange={handleChange}
@@ -236,7 +237,8 @@ export default function SellerRegisterPage() {
             <div>
               <label className="block text-sm font-medium mb-1">NPWP</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 name="npwp"
                 value={formData.npwp}
                 onChange={handleChange}

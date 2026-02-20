@@ -31,7 +31,7 @@ const CardGrid: React.FC<CardGridProps> = ({ billboards }) => {
               ? `/api/uploads/${b.image[0].url.replace(/^uploads\//, "")}`
               : "/billboard-placeholder.png";
           
-          const sellerImageUrl = b.owner.user.profilePicture
+          const sellerImageUrl = b.owner?.user?.profilePicture
               ? `/api/uploads/${b.owner.user.profilePicture.replace(/^uploads\//, "")}`
               : '/seller-placeholder.png';
 
