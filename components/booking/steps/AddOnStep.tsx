@@ -1,10 +1,11 @@
-import type { BookingFormData } from '@/types';
+import type { AddOnItem, BookingFormData } from '@/types';
 import { CheckIcon } from 'lucide-react';
 import React from 'react';
 
 interface AddOnStepProps {
   data: BookingFormData;
   updateData: (fields: Partial<BookingFormData>) => void;
+  addOns: AddOnItem[];
 }
 
 const CustomCheckbox: React.FC<{
@@ -36,30 +37,7 @@ const CustomCheckbox: React.FC<{
 
 
 
-import { AddOnApiResponse, AddOnItem } from '@/types';
-import { useEffect, useState } from 'react';
-
-export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
-  const [fetchedAddOns, setFetchedAddOns] = useState<AddOnItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchAddOns = async () => {
-      try {
-        const response = await fetch('/api/add-on');
-        const result: AddOnApiResponse = await response.json();
-        if (result.status && Array.isArray(result.data)) {
-          setFetchedAddOns(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch add-ons:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAddOns();
-  }, []);
+export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData, addOns }) => {
   
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updateData({ [e.target.name]: e.target.value });
@@ -81,10 +59,9 @@ export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
       
       <div className="space-y-6">
         {/* Dynamic Add-Ons Section */}
-        {!loading && (
-          <div className="space-y-4">
-             {fetchedAddOns.length > 0 ? (
-                fetchedAddOns.map((addOn) => (
+        <div className="space-y-4">
+             {addOns.length > 0 ? (
+                addOns.map((addOn) => (
                     <div key={addOn.id} className="flex items-center gap-8">
                         <CustomCheckbox 
                             id={addOn.id} 
@@ -102,8 +79,7 @@ export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
              ) : (
                 <p className="text-gray-500">Tidak ada layanan tambahan tersedia saat ini.</p>
              )}
-          </div>
-        )}
+        </div>
         
         {/* Notes Section */}
         <div>

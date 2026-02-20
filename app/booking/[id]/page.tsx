@@ -9,10 +9,11 @@ import { IncludeStep } from '@/components/booking/steps/IncludeStep';
 import { ReviewSubmitStep } from '@/components/booking/steps/ReviewSubmitStep';
 import FootBar from '@/components/footer/FootBar';
 import { submitBooking } from '@/services/bookingService';
-import type { BookingFormData, Step } from '@/types';
+import { fetchBillboardById } from '@/services/billboardService';
+import type { AddOnApiResponse, AddOnItem, BillboardDetail, BookingFormData, Step } from '@/types';
 import { PackageCheckIcon, PuzzleIcon, SendIcon, UserIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 const steps: Step[] = [
@@ -34,6 +35,25 @@ function Booking() {
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [billboard, setBillboard] = useState<BillboardDetail | null>(null);
+  const [addOns, setAddOns] = useState<AddOnItem[]>([]);
+
+  useEffect(() => {
+    const billboardId = params?.id as string;
+    if (!billboardId) return;
+    fetchBillboardById(billboardId).then(res => {
+      if (res?.data) setBillboard(res.data);
+    });
+  }, [params?.id]);
+
+  useEffect(() => {
+    fetch('/api/add-on')
+      .then(r => r.json())
+      .then((result: AddOnApiResponse) => {
+        if (result.status && Array.isArray(result.data)) setAddOns(result.data);
+      })
+      .catch(e => console.error('Failed to fetch add-ons:', e));
+  }, []);
 
   const updateData = useCallback((fields: Partial<BookingFormData>) => {
     setFormData(prev => ({ ...prev, ...fields }));
@@ -107,11 +127,11 @@ function Booking() {
       case 0:
         return <DataPemesananStep data={formData} updateData={updateData} />;
       case 1:
-        return <AddOnStep data={formData} updateData={updateData} />;
+        return <AddOnStep data={formData} updateData={updateData} addOns={addOns} />;
       case 2:
         return <IncludeStep />;
       case 3:
-        return <ReviewSubmitStep data={formData} />;
+        return <ReviewSubmitStep data={formData} billboard={billboard} addOns={addOns} />;
       default:
         return null;
     }

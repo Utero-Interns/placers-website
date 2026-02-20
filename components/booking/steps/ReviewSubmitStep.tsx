@@ -1,8 +1,10 @@
-import { AddOnApiResponse, AddOnItem, BookingFormData } from '@/types';
-import React, { useEffect, useState } from 'react';
+import { AddOnItem, BillboardDetail, BookingFormData } from '@/types';
+import React from 'react';
 
 interface ReviewSubmitStepProps {
   data: BookingFormData;
+  billboard: BillboardDetail | null;
+  addOns: AddOnItem[];
 }
 
 const ReviewSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -22,34 +24,16 @@ const ReviewItem: React.FC<{ label: string; value: string | number | React.React
 );
 
 
-export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
-  const [fetchedAddOns, setFetchedAddOns] = useState<AddOnItem[]>([]);
-
-  useEffect(() => {
-    const fetchAddOns = async () => {
-      try {
-        const response = await fetch('/api/add-on');
-        const result: AddOnApiResponse = await response.json();
-        if (result.status && Array.isArray(result.data)) {
-          setFetchedAddOns(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch add-ons:', error);
-      }
-    };
-
-    fetchAddOns();
-  }, []);
-
+export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data, billboard, addOns }) => {
   const getSelectedAddOnNames = () => {
       if (!data.customAddOns) return [];
       
       const selectedIds = Object.entries(data.customAddOns)
-        .filter(([isSelected]) => isSelected)
+        .filter(([, isSelected]) => isSelected)
         .map(([id]) => id);
       
       return selectedIds.map(id => {
-          const addon = fetchedAddOns.find(item => item.id === id);
+          const addon = addOns.find(item => item.id === id);
           return addon ? addon.name : null;
       }).filter(Boolean);
   };
@@ -66,13 +50,16 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({ data }) => {
       <div className="space-y-6">
         <ReviewSection title="Detail Pesanan">
           <ReviewItem label="Periode Sewa" value={`${data.periodeAwal} - ${data.periodeAkhir}`} />
-          <div className="pt-2">
-            <p className="font-medium text-gray-500">Detail:</p>
-            <ul className="list-disc list-inside pl-2 text-gray-600">
-              <li>Billboard, Jalan abcd</li>
-              <li>Spesifikasi: a, b, c, d</li>
-            </ul>
-          </div>
+          {billboard && (
+            <div className="pt-2">
+              <p className="font-medium text-gray-500">Detail:</p>
+              <ul className="list-disc list-inside pl-2 text-gray-600">
+                <li>{billboard.category?.name || 'Billboard'} — {billboard.location}</li>
+                <li>Ukuran: {billboard.size} | {billboard.orientation} | {billboard.display}</li>
+                <li>Kota: {billboard.cityName}, {billboard.provinceName}</li>
+              </ul>
+            </div>
+          )}
         </ReviewSection>
 
         <ReviewSection title="Pilihan Layanan Tambahan">

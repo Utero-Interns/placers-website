@@ -153,19 +153,19 @@ export default function NavBar() {
                              ) : (
                                 <>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <History className="w-4 h-4" />
                                             {t('nav.history')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <Bookmark className="w-4 h-4" />
                                             {t('nav.bookmark')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <UserIcon className="w-4 h-4" />
                                             {t('nav.profile')}
                                         </Link>

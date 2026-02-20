@@ -1,11 +1,12 @@
 import { getOrders, HistoryItem } from '@/services/orderHistoryService';
 import { Order, OrderStatus } from '@/types';
+import { authService, User } from '@/app/lib/auth';
 import { Calendar, ChevronLeft, ChevronRight, HistoryIcon, MapPin, Search, SquareDashed } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import OrderDetailModal from './OrderDetailModal';
 import StatusBadge from './StatusBadge';
 
-const mapToOrder = (item: HistoryItem): Order => {
+const mapToOrder = (item: HistoryItem, currentUser: User | null): Order => {
   const transaction = item.transaction;
   const billboard = transaction.billboard;
   const design = transaction.design;
@@ -121,7 +122,7 @@ const mapToOrder = (item: HistoryItem): Order => {
     specifications: `${billboard.size}, ${billboard.cityName}`,
     adminDetails: adminDetails, 
     serviceDetails: serviceDetails, 
-    billTo: { name: 'User', email: 'user@example.com', phone: '-' }, 
+    billTo: { name: currentUser?.username || 'User', email: currentUser?.email || '-', phone: '-' }, 
     sellerInfo: { name: 'Placers Vendor', address: '-', phone: '-' }, 
     items: orderItems,
     subtotal: parseFloat(transaction.totalPrice),
@@ -141,6 +142,14 @@ interface OrderHistoryPageProps {
 const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    authService.getProfile().then(res => {
+      if (res.user) setCurrentUser(res.user);
+      else if (res.data) setCurrentUser(res.data);
+    });
+  }, []);
   const [activeTab, setActiveTab] = useState<OrderStatus | 'Semua'>('Semua');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -167,7 +176,7 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ onShowInvoice }) =>
             status: activeTab === 'Semua' ? undefined : activeTab,
         });
         
-        const mappedOrders = response.data.map(mapToOrder);
+        const mappedOrders = response.data.map(item => mapToOrder(item, currentUser));
         setOrders(mappedOrders);
         
         if (response.meta.nextCursor) {

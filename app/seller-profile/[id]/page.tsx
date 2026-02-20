@@ -9,12 +9,16 @@ import Image from "next/image";
 import type { Billboard } from "@/types";
 import NavBar from "@/components/NavBar";
 import FootBar from "@/components/footer/FootBar";
+import { useParams } from "next/navigation";
 
 const SellerProfile: React.FC = () => {
+  const params = useParams();
+  const sellerId = params?.id as string;
+
   const categories = ["Semua", "Billboard", "Baliho", "Videotron", "Roadsign"];
 
-  const [activeCategory, setActiveCategory] = useState("Billboard");
-  const [billboards, setBillboards] = useState<Billboard[]>([]);
+  const [activeCategory, setActiveCategory] = useState("Semua");
+  const [allBillboards, setAllBillboards] = useState<Billboard[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,7 +26,7 @@ const SellerProfile: React.FC = () => {
       setLoading(true);
       try {
         const data = await fetchBillboards();
-        setBillboards(data);
+        setAllBillboards(data);
       } catch (error) {
         console.error("Failed to fetch billboards:", error);
       } finally {
@@ -33,11 +37,22 @@ const SellerProfile: React.FC = () => {
     loadBillboards();
   }, []);
 
+  // Filter to only this seller's billboards
+  const billboards = useMemo(() => {
+    if (!sellerId) return allBillboards;
+    return allBillboards.filter(b => b.ownerId === sellerId);
+  }, [allBillboards, sellerId]);
+
+  // Derive seller info from first billboard's owner
+  const sellerName = billboards[0]?.owner?.fullname || billboards[0]?.owner?.companyName || 'Seller';
+  const sellerCity = billboards[0]?.cityName || '-';
+  const sellerProvince = billboards[0]?.provinceName || '';
+  const sellerPicture = billboards[0]?.owner?.user?.profilePicture
+    ? `/api/uploads/${billboards[0].owner.user.profilePicture.replace(/^uploads\//, '')}`
+    : '/seller-placeholder.png';
+
   const filteredBillboards = useMemo(() => {
-    if (!billboards || billboards.length === 0) return [];
-
     if (activeCategory === "Semua") return billboards;
-
     return billboards.filter((billboard) => {
       const billboardCategory = billboard.category?.name?.toLowerCase() || "";
       return billboardCategory === activeCategory.toLowerCase();
@@ -53,15 +68,15 @@ const SellerProfile: React.FC = () => {
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center space-x-4">
             <Image
-              src="/seller-placeholder.png"
+              src={sellerPicture}
               alt="Seller"
               width={250}
               height={250}
               className="h-16 w-16 rounded-full object-cover"
             />
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Seller XX</h1>
-              <p className="text-gray-500">Kota Malang • Jawa Timur</p>
+              <h1 className="text-2xl font-bold text-gray-800">{sellerName}</h1>
+              <p className="text-gray-500">{sellerCity}{sellerProvince ? ` • ${sellerProvince}` : ''}</p>
             </div>
           </div>
 
