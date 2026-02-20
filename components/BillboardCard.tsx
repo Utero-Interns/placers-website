@@ -1,10 +1,10 @@
 import { useLanguage } from '@/app/context/LanguageContext';
-import { useState } from "react";
-import { Location } from "iconsax-react";
-import { SidebarOpen, Grid2X2, Rotate3D, Star } from "lucide-react";
-import BillboardTag from "./BillboardTag";
 import { formatPrice } from "@/utils/formatPrice";
+import { Location } from "iconsax-react";
+import { Grid2X2, Rotate3D, SidebarOpen, Star } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
+import BillboardTag from "./BillboardTag";
 
 type BillboardCardProps = {
   image: string;

@@ -16,6 +16,9 @@ import BillboardSpecs from '@/components/billboard-detail/BillboardSpecs';
 import ShareModal from '@/components/billboard-detail/ShareModal';
 import FootBar from '@/components/footer/FootBar';
 import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
+
+const BillboardMap = dynamic(() => import('@/components/billboard-detail/BillboardMap'), { ssr: false });
 
 const BillboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -177,6 +180,14 @@ const BillboardPage: React.FC = () => {
                   <dd>{billboard.tax}</dd>
                 </div>
               </dl>
+
+              {billboard.latitude && billboard.longitude && (
+                <BillboardMap
+                  latitude={billboard.latitude}
+                  longitude={billboard.longitude}
+                  address={fullLocation}
+                />
+              )}
             </div>
 
             <BillboardReviews averageRating={averageRating} ratings={ratings} />

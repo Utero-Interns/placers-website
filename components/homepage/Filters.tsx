@@ -47,7 +47,6 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
   onSelect,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // const { t } = useLanguage(); // Temporarily unused
 
   const handleSelect = (option: string) => {
     onSelect(option);

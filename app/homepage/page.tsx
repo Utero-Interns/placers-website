@@ -20,7 +20,7 @@ const Homepage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState('Semua');
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Advanced filters
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
@@ -33,30 +33,21 @@ const Homepage: React.FC = () => {
       try {
         // Build query parameters
         const params = new URLSearchParams();
-        
-        // Add search query
+
         if (searchQuery) {
           params.append('search', searchQuery);
         }
-        
-        // Add status filter
+
         if (status !== 'Semua') {
           const statusValue = status === 'Tersedia' ? 'Available' : 'Unavailable';
           params.append('status', statusValue);
         }
-        
-        // Add category filter (can be multiple)
+
         selectedCategories.forEach(cat => params.append('categoryId', cat));
-        
-        // Add province filter
         selectedProvinces.forEach(prov => params.append('provinceId', prov));
-        
-        // Add orientation filter
         selectedOrientations.forEach(ori => params.append('orientation', ori));
-        
-        // Add display filter
         selectedDisplays.forEach(disp => params.append('display', disp));
-        
+
         const data = await fetchBillboards(params.toString());
         setBillboards(data);
       } catch (error) {
@@ -69,17 +60,14 @@ const Homepage: React.FC = () => {
     loadBillboards();
   }, [searchQuery, status, selectedCategories, selectedProvinces, selectedOrientations, selectedDisplays]);
 
-  // ===== PAGINATION LOGIC =====
-  // Filtering now done on backend, so billboards is already filtered
+  // ===== PAGINATION =====
+  // Filtering done on backend; billboards is already filtered
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
-  const paginatedBillboards = billboards.slice(
-    startIndex,
-    endIndex
-  );
+  const paginatedBillboards = billboards.slice(startIndex, endIndex);
 
-  // Reset ke page 1 kalau filter berubah
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, status, selectedCategories, selectedProvinces, selectedOrientations, selectedDisplays]);
@@ -94,22 +82,47 @@ const Homepage: React.FC = () => {
         <Hero billboards={billboards} />
 
         <div className="mt-8">
-          <Filters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            status={status}
-            onStatusChange={setStatus}
-            selectedCategories={selectedCategories}
-            onCategoriesChange={setSelectedCategories}
-            selectedProvinces={selectedProvinces}
-            onProvincesChange={setSelectedProvinces}
-            selectedOrientations={selectedOrientations}
-            onOrientationsChange={setSelectedOrientations}
-            selectedDisplays={selectedDisplays}
-            onDisplaysChange={setSelectedDisplays}
-          />
+          {/* FILTER + UPGRADE BUTTON */}
+          <div className="flex items-center gap-3">
+            {/* FILTER */}
+            <div className="flex-1">
+              <Filters
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                status={status}
+                onStatusChange={setStatus}
+                selectedCategories={selectedCategories}
+                onCategoriesChange={setSelectedCategories}
+                selectedProvinces={selectedProvinces}
+                onProvincesChange={setSelectedProvinces}
+                selectedOrientations={selectedOrientations}
+                onOrientationsChange={setSelectedOrientations}
+                selectedDisplays={selectedDisplays}
+                onDisplaysChange={setSelectedDisplays}
+              />
+            </div>
 
-          {/* 🔥 PAKAI DATA YANG SUDAH DISLICE */}
+            {/* UPGRADE SMARTSCUCO */}
+            <a
+              href="https://smartsuco.utero.id/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                whitespace-nowrap
+                px-4 py-2
+                text-sm font-medium text-white
+                rounded-lg
+                bg-gradient-to-r from-[#680C0F] to-[var(--color-primary)]
+                hover:opacity-90
+                transition
+                shadow-sm
+              "
+            >
+              Upgrade SmartScuco
+            </a>
+          </div>
+
+          {/* CARD GRID */}
           <CardGrid billboards={paginatedBillboards} />
 
           {billboards.length > 0 && (

@@ -13,8 +13,8 @@ export default function FootBar() {
                 <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
-                    width={500}
-                    height={500}
+                    width={400}
+                    height={400}
                     className="hidden lg:block h-24 w-24 mx-auto lg:mx-0 lg:my-auto lg:h-32 lg:w-32 2xl:h-48 2xl:w-48"
                 />
 
@@ -41,11 +41,12 @@ export default function FootBar() {
                     <FootLinkTitle text="CONTACT" />
                     <FootLink href="https://uteroindonesia.com/" text="PT. Utero Kreatif Indonesia" />
                     <FootLink
-                        href="https://maps.google.com/?q=Jl.+Soekarno+Hatta+No.10,+Jatimulyo,+Kec.+Lowokwaru,+Kota+Malang,+Jawa+Timur"
-                        text="Jl. Soekarno Hatta No.10, Jatimulyo, Kec. Lowokwaru, Kota Malang, Jawa Timur"
+                        href="https://maps.app.goo.gl/rSkKi7UfVtdWgyD99"
+                        text="Jalan Bantaran I No. 25, Tulusrejo, Kec. Lowokwaru, Malang - Jawa Timur, Indonesia | Postal Code 65141"
                     />
-                    <FootLink href="https://wa.me/6282255900989" text="+62822 5590 0989" />
-                    <FootLink href="mailto:placers.official@gmail.com" text="placers.official@gmail.com" />
+                    <FootLink href="https://api.whatsapp.com/send/?phone=6281999900900&text=Hallo%20kak%2C%20saya%20mendaptakankan%20nomor%20ini%20dari%20Placers.%0A%0ASebelum%20lanjut%20bisa%20mengisi%20informasi%20dibawah%20ini%20%3A%0ANama%20%3A%20%0AAlamat%20%3A%20%0APertanyaan%20%3A%20" text="+6281 999 900 900 (Chang)" />
+                    <FootLink href="https://api.whatsapp.com/send/?phone=62817388616&text=Hallo%20kak%2C%20saya%20mendaptakankan%20nomor%20ini%20dari%20Placers.%0A%0ASebelum%20lanjut%20bisa%20mengisi%20informasi%20dibawah%20ini%20%3A%0ANama%20%3A%20%0AAlamat%20%3A%20%0APertanyaan%20%3A%20" text="+6281 7388 616 (Utero)" />
+                    <FootLink href="mailto:placers.id@gmail.com" text="placers.id@gmail.com" />
                 </div>
             </div>
 
@@ -55,8 +56,8 @@ export default function FootBar() {
                 <Image
                     src="/logo-placers-white.png"
                     alt="Placers Logo"
-                    height={250}
-                    width={250}
+                    width={100}
+                    height={100}
                     className="h-8 w-8 lg:hidden"
                 />
 

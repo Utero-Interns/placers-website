@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -21,27 +22,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Placers - Platform Billboard Advertising Terpercaya',
-    template: '%s | Placers'
-  },
-  description: 'Temukan dan sewa lokasi billboard terbaik untuk iklan Anda di seluruh Indonesia. Platform marketplace billboard advertising terpercaya.',
-  keywords: ['billboard', 'advertising', 'iklan', 'billboard Indonesia', 'sewa billboard', 'outdoor advertising'],
-  authors: [{ name: 'Placers Team' }],
-  creator: 'Placers',
-  publisher: 'Placers',
+  title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+  description:
+    "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+
+  metadataBase: new URL("https://placers.id"),
+
   openGraph: {
-    type: 'website',
-    locale: 'id_ID',
-    url: 'https://placers.id',
-    title: 'Placers - Platform Billboard Advertising',
-    description: 'Temukan dan sewa billboard untuk iklan Anda',
-    siteName: 'Placers',
+    type: "website",
+    url: "https://placers.id/",
+    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+    description:
+      "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+    images: [
+      {
+        url: "https://metatags.io/images/meta-tags.png",
+        width: 1200,
+        height: 630,
+        alt: "Placers.id Marketplace Billboard Digital",
+      },
+    ],
+    siteName: "Placers",
+    locale: "id_ID",
   },
+
   twitter: {
-    card: 'summary_large_image',
-    title: 'Placers - Platform Billboard Advertising',
-    description: 'Temukan dan sewa billboard untuk iklan Anda',
+    card: "summary_large_image",
+    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+    description:
+      "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
+    images: ["https://metatags.io/images/meta-tags.png"],
   },
 };
 
@@ -55,9 +65,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <head>
-
-      </head>
       <body
         suppressHydrationWarning={true}
         className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -66,6 +73,10 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GMAP_API_KEY}&loading=async&libraries=maps,marker`}
+          strategy="beforeInteractive"
+        />
       </body>
     </html>
   );

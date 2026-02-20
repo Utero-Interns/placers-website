@@ -15,7 +15,7 @@ export default function HomepageTab() {
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState('Semua');
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -38,24 +38,19 @@ export default function HomepageTab() {
 
   // Filter logic
   const filteredBillboards = billboards.filter(billboard => {
-    // 1. Status Filter
     if (status !== 'Semua') {
-      const isAvailable = status === 'Tersedia';
-      const targetStatus = isAvailable ? 'Available' : 'Unavailable';
-      // Case insensitive check
+      const targetStatus = status === 'Tersedia' ? 'Available' : 'Unavailable';
       if (billboard.status?.toLowerCase() !== targetStatus.toLowerCase()) {
         return false;
       }
     }
 
-    // 2. Search Filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const matchesAddress = billboard.location?.toLowerCase().includes(query) || 
+      const matchesAddress = billboard.location?.toLowerCase().includes(query) ||
                              billboard.cityName?.toLowerCase().includes(query) ||
                              billboard.provinceName?.toLowerCase().includes(query);
       const matchesType = billboard.category?.name?.toLowerCase().includes(query);
-
       return matchesAddress || matchesType;
     }
 
@@ -78,30 +73,30 @@ export default function HomepageTab() {
 
   return (
     <div className="space-y-8">
-      <Hero billboards={filteredBillboards}/>
+      <Hero billboards={filteredBillboards} />
       <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
-        <Filters 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            status={status}
-            onStatusChange={setStatus}
-            selectedCategories={[]}
-            onCategoriesChange={() => {}}
-            selectedProvinces={[]}
-            onProvincesChange={() => {}}
-            selectedOrientations={[]}
-            onOrientationsChange={() => {}}
-            selectedDisplays={[]}
-            onDisplaysChange={() => {}}
+        <Filters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          status={status}
+          onStatusChange={setStatus}
+          selectedCategories={[]}
+          onCategoriesChange={() => {}}
+          selectedProvinces={[]}
+          onProvincesChange={() => {}}
+          selectedOrientations={[]}
+          onOrientationsChange={() => {}}
+          selectedDisplays={[]}
+          onDisplaysChange={() => {}}
         />
         <CardGrid billboards={paginatedBillboards} />
-        <Pagination 
+        <Pagination
           totalData={filteredBillboards.length}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           itemsPerPage={itemsPerPage}
         />
       </div>
-    </div>   
+    </div>
   );
 }
