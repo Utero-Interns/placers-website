@@ -1,12 +1,12 @@
 
 import type { User } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://utero.viewdns.net:3100';
+const API_BASE_URL = '/api/proxy';
 
 export const userService = {
   getUser: async (): Promise<User> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/user/profile/me`, {
+      const res = await fetch(`${API_BASE_URL}/user/me`, {
         credentials: 'include',
         cache: 'no-store',
         headers: {
@@ -54,7 +54,7 @@ export const userService = {
       }
 
       const res = await fetch(`${API_BASE_URL}/user/me`, {
-        method: 'PUT',
+        method: 'PATCH',
         credentials: 'include',
         headers,
         body,
