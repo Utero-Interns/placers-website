@@ -4,9 +4,8 @@ const nextConfig: NextConfig = {
     images: {
         remotePatterns: [
             {
-                protocol: 'http',
-                hostname: 'utero.viewdns.net',
-                port: '3100',
+                protocol: 'https',
+                hostname: 'vps-placers.utero.cloud',
                 pathname: '/uploads/**',
             },
         ],

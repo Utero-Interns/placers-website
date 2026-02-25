@@ -6,7 +6,6 @@ import FootBar from "@/components/footer/FootBar"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { authService } from "../../lib/auth"
 
 type FormDataType = {
   fullname: string
@@ -139,11 +138,11 @@ export default function SellerRegisterPage() {
       })
 
       if (response.ok) {
-        toast.success("Register successfully")
+        toast.success("Pendaftaran seller berhasil!")
         setIsLoadingRedirect(true) // Trigger loading overlay
         
-        // Refresh session by logging out and redirecting
-        await authService.logout()
+        // Refresh Next.js cache/session to update user role
+        router.refresh()
         router.push("/seller/dashboard")
       } else {
         const errorData = await response.json().catch(() => ({}))
@@ -220,7 +219,8 @@ export default function SellerRegisterPage() {
             <div>
               <label className="block text-sm font-medium mb-1">Nomor KTP</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 name="ktp"
                 value={formData.ktp}
                 onChange={handleChange}
@@ -237,7 +237,8 @@ export default function SellerRegisterPage() {
             <div>
               <label className="block text-sm font-medium mb-1">NPWP</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 name="npwp"
                 value={formData.npwp}
                 onChange={handleChange}

@@ -1,6 +1,5 @@
 import React from 'react';
 import type { BookingFormData } from '@/types';
-import { MapPinIcon } from 'lucide-react';
 
 interface DataPemesananStepProps {
   data: BookingFormData;
@@ -14,49 +13,11 @@ export const DataPemesananStep: React.FC<DataPemesananStepProps> = ({ data, upda
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Informasi dasar pemesan atau penyewa</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Pilih Periode Penyewaan</h2>
+      <p className="text-gray-600 text-sm">
+        Tentukan periode awal dan akhir untuk penyewaan billboard Anda. Pastikan tanggal yang dipilih masih tersedia.
+      </p>
       <div className="space-y-6">
-        <div>
-          <label htmlFor="nama" className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-          <input
-            type="text"
-            id="nama"
-            name="nama"
-            value={data.nama}
-            onChange={handleChange}
-            placeholder="Masukkan nama"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="noTelepon" className="block text-sm font-medium text-gray-700 mb-1">No. Telepon</label>
-            <input
-              type="tel"
-              id="noTelepon"
-              name="noTelepon"
-              value={data.noTelepon}
-              onChange={handleChange}
-              placeholder="Masukkan no. telepon"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition"
-            />
-          </div>
-          <div className="relative">
-            <label htmlFor="alamat" className="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-            <MapPinIcon className="absolute left-3 top-10 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              id="alamat"
-              name="alamat"
-              value={data.alamat}
-              onChange={handleChange}
-              placeholder="Masukkan alamat"
-              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition"
-            />
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Periode Awal */}
             <div>

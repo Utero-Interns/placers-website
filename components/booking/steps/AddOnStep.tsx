@@ -1,10 +1,11 @@
-import type { BookingFormData } from '@/types';
+import type { AddOnItem, BookingFormData } from '@/types';
 import { CheckIcon } from 'lucide-react';
 import React from 'react';
 
 interface AddOnStepProps {
   data: BookingFormData;
   updateData: (fields: Partial<BookingFormData>) => void;
+  addOns: AddOnItem[];
 }
 
 const CustomCheckbox: React.FC<{
@@ -32,53 +33,11 @@ const CustomCheckbox: React.FC<{
   </div>
 );
 
-const QuantityInput: React.FC<{
-  label: string;
-  price: string;
-  value: number;
-  onUpdate: (value: number) => void;
-}> = ({ label, price, value, onUpdate }) => {
-  const handleDecrement = () => onUpdate(Math.max(0, value - 1));
-  const handleIncrement = () => onUpdate(value + 1);
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <p className="text-sm text-gray-500 mb-2">Rp {price}</p>
-      <div className="flex items-center border border-gray-300 rounded-lg w-32">
-        <button type="button" onClick={handleDecrement} className="px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-l-lg cursor-pointer">-</button>
-        <input type="text" readOnly value={value} className="w-full text-center bg-white border-l border-r border-gray-300 text-gray-700 outline-none" />
-        <button type="button" onClick={handleIncrement} className="px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-r-lg cursor-pointer">+</button>
-      </div>
-    </div>
-  );
-};
 
 
-import { AddOnApiResponse, AddOnItem } from '@/types';
-import { useEffect, useState } from 'react';
 
-export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
-  const [fetchedAddOns, setFetchedAddOns] = useState<AddOnItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchAddOns = async () => {
-      try {
-        const response = await fetch('/api/add-on');
-        const result: AddOnApiResponse = await response.json();
-        if (result.status && Array.isArray(result.data)) {
-          setFetchedAddOns(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch add-ons:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAddOns();
-  }, []);
+export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData, addOns }) => {
   
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updateData({ [e.target.name]: e.target.value });
@@ -100,10 +59,9 @@ export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
       
       <div className="space-y-6">
         {/* Dynamic Add-Ons Section */}
-        {!loading && (
-          <div className="space-y-4">
-             {fetchedAddOns.length > 0 ? (
-                fetchedAddOns.map((addOn) => (
+        <div className="space-y-4">
+             {addOns.length > 0 ? (
+                addOns.map((addOn) => (
                     <div key={addOn.id} className="flex items-center gap-8">
                         <CustomCheckbox 
                             id={addOn.id} 
@@ -121,15 +79,6 @@ export const AddOnStep: React.FC<AddOnStepProps> = ({ data, updateData }) => {
              ) : (
                 <p className="text-gray-500">Tidak ada layanan tambahan tersedia saat ini.</p>
              )}
-          </div>
-        )}
-        
-        {/* Static Quantity Inputs */}
-        <div className="pt-4 border-t border-gray-200">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <QuantityInput label="Augmented Reality (AR)" price="5.000.000" value={data.augmentedReality} onUpdate={(val) => updateData({ augmentedReality: val })} />
-                <QuantityInput label="Traffic Data Reporting" price="3.000.000" value={data.trafficDataReporting} onUpdate={(val) => updateData({ trafficDataReporting: val })} />
-             </div>
         </div>
         
         {/* Notes Section */}

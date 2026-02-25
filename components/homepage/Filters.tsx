@@ -5,14 +5,15 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   FilterIcon,
-  GridIcon,
   MapPin,
   Move3DIcon,
   SearchIcon,
   ViewIcon,
+  X,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import FilterPopover from './FilterPopover';
+// import { useLanguage } from '@/app/context/LanguageContext'; // Temporarily unused
 
 /* ================== CONSTANTS ================== */
 
@@ -29,8 +30,6 @@ const CATEGORIES = [
 ];
 
 const LOCATIONS = ['Jabodetabek', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur'];
-
-const SIZES = ['4 x 8', '5 x 10', '6 x 12', '8 x 16'];
 
 const ORIENTATIONS = ['Horizontal', 'Vertical'];
 
@@ -100,6 +99,14 @@ interface FiltersProps {
   onSearchChange: (query: string) => void;
   status: string;
   onStatusChange: (status: string) => void;
+  selectedCategories: string[];
+  onCategoriesChange: (categories: string[]) => void;
+  selectedProvinces: string[];
+  onProvincesChange: (provinces: string[]) => void;
+  selectedOrientations: string[];
+  onOrientationsChange: (orientations: string[]) => void;
+  selectedDisplays: string[];
+  onDisplaysChange: (displays: string[]) => void;
 }
 
 const Filters: React.FC<FiltersProps> = ({
@@ -107,13 +114,60 @@ const Filters: React.FC<FiltersProps> = ({
   onSearchChange,
   status,
   onStatusChange,
+  selectedCategories,
+  onCategoriesChange,
+  selectedProvinces,
+  onProvincesChange,
+  selectedOrientations,
+  onOrientationsChange,
+  selectedDisplays,
+  onDisplaysChange,
 }) => {
   const [showDetailedFilters, setShowDetailedFilters] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  
+  const handleCategoryToggle = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      onCategoriesChange(selectedCategories.filter(c => c !== category));
+    } else {
+      onCategoriesChange([...selectedCategories, category]);
+    }
+  };
+  
+  const handleProvinceToggle = (province: string) => {
+    if (selectedProvinces.includes(province)) {
+      onProvincesChange(selectedProvinces.filter(p => p !== province));
+    } else {
+      onProvincesChange([...selectedProvinces, province]);
+    }
+  };
+  
+  const handleOrientationToggle = (orientation: string) => {
+    if (selectedOrientations.includes(orientation)) {
+      onOrientationsChange(selectedOrientations.filter(o => o !== orientation));
+    } else {
+      onOrientationsChange([...selectedOrientations, orientation]);
+    }
+  };
+  
+  const handleDisplayToggle = (display: string) => {
+    if (selectedDisplays.includes(display)) {
+      onDisplaysChange(selectedDisplays.filter(d => d !== display));
+    } else {
+      onDisplaysChange([...selectedDisplays, display]);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') onSearchChange(localSearch);
   };
+  
+  // Calculate active filter count
+  const activeFilterCount = 
+    selectedCategories.length + 
+    selectedProvinces.length + 
+    selectedOrientations.length + 
+    selectedDisplays.length;
 
   return (
     <div className="space-y-4">
@@ -142,13 +196,45 @@ const Filters: React.FC<FiltersProps> = ({
         </div>
 
         {/* FILTER BUTTON */}
-        <button
-          onClick={() => setShowDetailedFilters(!showDetailedFilters)}
-          className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          <FilterIcon className="h-4 w-4" />
-          Filter Lainnya
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDetailedFilters(!showDetailedFilters)}
+            className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 flex-1 relative"
+          >
+            <FilterIcon className="h-4 w-4" />
+            Filter Lainnya
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          
+          {/* Reset Filters Button - show only if filters are active */}
+          {(selectedCategories.length > 0 || 
+            selectedProvinces.length > 0 || 
+            selectedOrientations.length > 0 || 
+            selectedDisplays.length > 0 || 
+            status !== 'Semua' ||
+            searchQuery !== '') && (
+            <button
+              onClick={() => {
+                onCategoriesChange([]);
+                onProvincesChange([]);
+                onOrientationsChange([]);
+                onDisplaysChange([]);
+                onStatusChange('Semua');
+                onSearchChange('');
+                setLocalSearch('');
+              }}
+              className="flex h-[42px] items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 text-sm font-medium text-red-600 hover:bg-red-100"
+              title="Reset semua filter"
+            >
+              <X className="h-4 w-4" />
+              Reset
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ================== ADVANCED FILTERS ================== */}
@@ -156,27 +242,28 @@ const Filters: React.FC<FiltersProps> = ({
         <div className="grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           <FilterPopover title="Kategori" icon={<SearchIcon className="h-4 w-4" />}>
             {CATEGORIES.map((cat) => (
-              <label key={cat} className="flex items-center gap-3 p-2 text-sm">
-                <input type="checkbox" className="h-4 w-4" />
+              <label key={cat} className="flex items-center gap-3 p-2 text-sm cursor-pointer hover:bg-gray-50">
+                <input 
+                  type="checkbox" 
+                  className="h-4 w-4 cursor-pointer" 
+                  checked={selectedCategories.includes(cat)}
+                  onChange={() => handleCategoryToggle(cat)}
+                />
                 {cat}
               </label>
             ))}
           </FilterPopover>
 
-          <FilterPopover title="Lokasi" icon={<MapPin className="h-4 w-4" />}>
+          <FilterPopover title="Lokasi (Provinsi)" icon={<MapPin className="h-4 w-4" />}>
             {LOCATIONS.map((loc) => (
-              <label key={loc} className="flex items-center gap-3 p-2 text-sm">
-                <input type="checkbox" className="h-4 w-4" />
+              <label key={loc} className="flex items-center gap-3 p-2 text-sm cursor-pointer hover:bg-gray-50">
+                <input 
+                  type="checkbox" 
+                  className="h-4 w-4 cursor-pointer" 
+                  checked={selectedProvinces.includes(loc)}
+                  onChange={() => handleProvinceToggle(loc)}
+                />
                 {loc}
-              </label>
-            ))}
-          </FilterPopover>
-
-          <FilterPopover title="Ukuran" icon={<GridIcon className="h-4 w-4" />}>
-            {SIZES.map((size) => (
-              <label key={size} className="flex items-center gap-3 p-2 text-sm">
-                <input type="checkbox" className="h-4 w-4" />
-                {size}
               </label>
             ))}
           </FilterPopover>
@@ -186,8 +273,13 @@ const Filters: React.FC<FiltersProps> = ({
             icon={<Move3DIcon className="h-4 w-4" />}
           >
             {ORIENTATIONS.map((ori) => (
-              <label key={ori} className="flex items-center gap-3 p-2 text-sm">
-                <input type="checkbox" className="h-4 w-4" />
+              <label key={ori} className="flex items-center gap-3 p-2 text-sm cursor-pointer hover:bg-gray-50">
+                <input 
+                  type="checkbox" 
+                  className="h-4 w-4 cursor-pointer" 
+                  checked={selectedOrientations.includes(ori)}
+                  onChange={() => handleOrientationToggle(ori)}
+                />
                 {ori}
               </label>
             ))}
@@ -195,8 +287,13 @@ const Filters: React.FC<FiltersProps> = ({
 
           <FilterPopover title="Tampilan" icon={<ViewIcon className="h-4 w-4" />}>
             {DISPLAYS.map((disp) => (
-              <label key={disp} className="flex items-center gap-3 p-2 text-sm">
-                <input type="checkbox" className="h-4 w-4" />
+              <label key={disp} className="flex items-center gap-3 p-2 text-sm cursor-pointer hover:bg-gray-50">
+                <input 
+                  type="checkbox" 
+                  className="h-4 w-4 cursor-pointer" 
+                  checked={selectedDisplays.includes(disp)}
+                  onChange={() => handleDisplayToggle(disp)}
+                />
                 {disp}
               </label>
             ))}

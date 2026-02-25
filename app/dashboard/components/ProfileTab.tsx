@@ -21,7 +21,7 @@ export default function ProfileTab() {
     });
   }, []);
 
-  const handleSaveProfile = async (updatedData: Partial<User>) => {
+  const handleSaveProfile = async (updatedData: Partial<User> & { _avatarFile?: File }) => {
     if (!user) return;
     const updatedUser = await userService.updateUser(updatedData);
     setUser(updatedUser);
@@ -30,13 +30,34 @@ export default function ProfileTab() {
 
   const handleSavePassword = async (passwordData: PasswordData) => {
     console.log('Updating password:', passwordData);
-    await userService.updatePassword();
-    alert('Password updated successfully!');
-    setView('profile');
+    
+    if (!passwordData.oldPassword || !passwordData.newPassword) {
+      alert('Please provide both old and new passwords');
+      return;
+    }
+    
+    const result = await userService.updatePassword(
+      passwordData.oldPassword,
+      passwordData.newPassword
+    );
+    
+    if (result.success) {
+      alert(result.message || 'Password updated successfully!');
+      setView('profile');
+    } else {
+      alert(result.message || 'Failed to update password');
+    }
   };
 
   if (isLoading || !user) {
-    return <div className="p-8 text-center">Loading profile...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mb-4"></div>
+          <p className="text-gray-600">Memuat profil...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

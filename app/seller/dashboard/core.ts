@@ -598,7 +598,9 @@ export class SellerDashboard {
 
         // Listeners
         this.root.querySelector('.logout-btn-sidebar')?.addEventListener('click', () => {
-            authService.logout().then(() => window.location.href = '/login');
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                authService.logout().then(() => window.location.href = '/login');
+            }
         });
 
         // const modalOverlay = this.root.querySelector('.modal-overlay');

@@ -87,8 +87,10 @@ export default function BillboardDetailPage({ params }: { params: Promise<{ id: 
     }, [id]);
 
     const handleLogout = async () => {
-        await authService.logout();
-        window.location.href = '/login';
+        if (confirm('Apakah Anda yakin ingin keluar?')) {
+            await authService.logout();
+            window.location.href = '/login';
+        }
     };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);

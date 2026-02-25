@@ -24,7 +24,7 @@ const Profile: React.FC = () => {
     });
   }, []);
 
-  const handleSaveProfile = async (updatedData: Partial<User>) => {
+  const handleSaveProfile = async (updatedData: Partial<User> & { _avatarFile?: File }) => {
     if (!user) return;
     const updatedUser = await userService.updateUser(updatedData);
     setUser(updatedUser);
@@ -32,11 +32,24 @@ const Profile: React.FC = () => {
   };
 
   const handleSavePassword = async (passwordData: PasswordData) => {
-    // In a real app, you would validate the old password and update the new one.
     console.log('Updating password:', passwordData);
-    await userService.updatePassword();
-    alert('Password updated successfully!');
-    setView('profile');
+    
+    if (!passwordData.oldPassword || !passwordData.newPassword) {
+      alert('Please provide both old and new passwords');
+      return;
+    }
+    
+    const result = await userService.updatePassword(
+      passwordData.oldPassword,
+      passwordData.newPassword
+    );
+    
+    if (result.success) {
+      alert(result.message || 'Password updated successfully!');
+      setView('profile');
+    } else {
+      alert(result.message || 'Failed to update password');
+    }
   };
 
   const renderView = () => {

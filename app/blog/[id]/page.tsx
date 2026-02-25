@@ -2,6 +2,7 @@ import NavBar from "@/components/NavBar"
 import FootBar from "@/components/footer/FootBar"
 import BlogContent from "@/components/blog/BlogContent"
 import BlogSidebar from "@/components/blog/BlogSidebar"
+import type { Metadata } from "next"
 
 type Blog = {
   id: string
@@ -70,6 +71,30 @@ const blogs: Blog[] = [
 
 interface BlogDetailPageProps {
   params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: BlogDetailPageProps): Promise<Metadata> {
+  const { id } = await params
+  const blog = blogs.find((b) => b.id === id)
+  
+  if (!blog) {
+    return {
+      title: 'Artikel Tidak Ditemukan',
+      description: 'Artikel yang Anda cari tidak ditemukan',
+    }
+  }
+
+  return {
+    title: blog.title,
+    description: blog.content.substring(0, 160),
+    openGraph: {
+      title: blog.title,
+      description: blog.content.substring(0, 160),
+      type: 'article',
+      publishedTime: blog.date,
+      authors: [blog.author],
+    },
+  }
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {

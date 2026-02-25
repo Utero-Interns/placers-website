@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-
 // Components
 import { toast } from 'sonner';
 import { authService } from '@/app/lib/auth';
@@ -31,7 +29,33 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const googleRegister = () => {
-    signIn('google', { callbackUrl: '/dashboard' });
+    toast.info('Daftar dengan Google belum tersedia. Gunakan email dan password.');
+  };
+
+  // Format phone number to international format (+62...)
+  const formatPhoneNumber = (phoneInput: string): string => {
+    const trimmed = phoneInput.trim();
+
+    // Already in +62... format — return as-is
+    if (trimmed.startsWith('+62')) {
+      return trimmed;
+    }
+
+    // Remove all non-digit characters
+    const cleaned = trimmed.replace(/\D/g, '');
+
+    // If starts with 0, replace leading 0 with +62
+    if (cleaned.startsWith('0')) {
+      return `+62${cleaned.slice(1)}`;
+    }
+
+    // If starts with 62 (e.g. user typed 628xxx), add + prefix
+    if (cleaned.startsWith('62')) {
+      return `+${cleaned}`;
+    }
+
+    // Bare local number (e.g. 81234567890) — prepend +62
+    return `+62${cleaned}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,13 +65,17 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
       setError('Password dan Konfirmasi Password tidak sama');
+      setLoading(false);
       return;
     }
+
+    // Format phone number to international format
+    const formattedPhone = formatPhoneNumber(phone);
 
     try {
       const res = await authService.register({
         email,
-        phone,
+        phone: formattedPhone,
         username,
         password,
         confirmPassword

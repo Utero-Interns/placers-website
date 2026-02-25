@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 interface EditProfileViewProps {
   user: User;
-  onSave: (updatedUser: Partial<User>) => void;
+  onSave: (updatedUser: Partial<User> & { _avatarFile?: File }) => void;
   onCancel: () => void;
 }
 
@@ -16,7 +16,7 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onSave, onCance
     phone: user.phone,
   });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatarUrl);
-  // const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onSave, onCance
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // setAvatarFile(file);
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
@@ -41,8 +41,7 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onSave, onCance
     e.stopPropagation();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      // You may want to add file type/size validation here
-      // setAvatarFile(file);
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
@@ -59,10 +58,9 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onSave, onCance
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const updatePayload: Partial<User> = { ...formData };
-    // In a real app, you would upload the file and get a new URL
-    if (avatarPreview && avatarPreview !== user.avatarUrl) {
-      updatePayload.avatarUrl = avatarPreview;
+    const updatePayload: Partial<User> & { _avatarFile?: File } = { ...formData };
+    if (avatarFile) {
+      updatePayload._avatarFile = avatarFile;
     }
     onSave(updatePayload);
   };

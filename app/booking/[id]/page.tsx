@@ -9,10 +9,12 @@ import { IncludeStep } from '@/components/booking/steps/IncludeStep';
 import { ReviewSubmitStep } from '@/components/booking/steps/ReviewSubmitStep';
 import FootBar from '@/components/footer/FootBar';
 import { submitBooking } from '@/services/bookingService';
-import type { BookingFormData, Step } from '@/types';
+import { fetchBillboardById } from '@/services/billboardService';
+import type { AddOnApiResponse, AddOnItem, BillboardDetail, BookingFormData, Step } from '@/types';
 import { PackageCheckIcon, PuzzleIcon, SendIcon, UserIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 const steps: Step[] = [
   { name: 'Data Pemesanan', icon: UserIcon },
@@ -22,22 +24,8 @@ const steps: Step[] = [
 ];
 
 const initialFormData: BookingFormData = {
-  nama: '',
-  noTelepon: '',
-  alamat: '',
   periodeAwal: '',
   periodeAkhir: '',
-  penerangan: 'Pilih jenis penerangan',
-  lahan: 'Pilih lahan',
-  pajakPPN: 'Pilih status PPN',
-  pajakPPH: 'Pilih status PPH',
-  pengawasanMedia: true,
-  asuransi: true,
-  nomorAsuransi: '',
-  maintenanceMedia: false,
-  rmm: false,
-  augmentedReality: 0,
-  trafficDataReporting: 0,
   catatan: '',
 };
 
@@ -47,6 +35,25 @@ function Booking() {
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [billboard, setBillboard] = useState<BillboardDetail | null>(null);
+  const [addOns, setAddOns] = useState<AddOnItem[]>([]);
+
+  useEffect(() => {
+    const billboardId = params?.id as string;
+    if (!billboardId) return;
+    fetchBillboardById(billboardId).then(res => {
+      if (res?.data) setBillboard(res.data);
+    });
+  }, [params?.id]);
+
+  useEffect(() => {
+    fetch('/api/add-on')
+      .then(r => r.json())
+      .then((result: AddOnApiResponse) => {
+        if (result.status && Array.isArray(result.data)) setAddOns(result.data);
+      })
+      .catch(e => console.error('Failed to fetch add-ons:', e));
+  }, []);
 
   const updateData = useCallback((fields: Partial<BookingFormData>) => {
     setFormData(prev => ({ ...prev, ...fields }));
@@ -62,8 +69,40 @@ function Booking() {
         const billboardId = params?.id as string;
         const result = await submitBooking(formData, billboardId);
         setSubmissionResult(result);
-      } catch {
-        setSubmissionResult({ success: false, message: 'An error occurred during submission.' });
+        
+        if (result.success) {
+          toast.success('Booking berhasil dibuat!');
+        } else {
+          // Handle failed submission with specific error message
+          toast.error(result.message || 'Terjadi kesalahan, silakan coba lagi');
+        }
+      } catch (error: unknown) {
+        console.error('Booking submission error:', error);
+        
+        // Parse backend error message if available
+        let errorMessage = 'Terjadi kesalahan, silakan coba lagi';
+        
+        const err = error as { response?: { data?: { message?: string } }; message?: string };
+        
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.message) {
+          // Provide user-friendly messages for common errors
+          if (err.message.includes('401') || err.message.includes('unauthorized')) {
+            errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+          } else if (err.message.includes('400') || err.message.includes('validation')) {
+            errorMessage = 'Data yang Anda masukkan tidak valid. Periksa kembali formulir.';
+          } else if (err.message.includes('404')) {
+            errorMessage = 'Billboard tidak ditemukan. Mungkin sudah tidak tersedia.';
+          } else if (err.message.includes('409') || err.message.includes('conflict')) {
+            errorMessage = 'Periode yang Anda pilih sudah dibooking. Pilih tanggal lain.';
+          } else if (err.message.includes('network') || err.message.includes('fetch')) {
+            errorMessage = 'Koneksi bermasalah. Periksa internet Anda dan coba lagi.';
+          }
+        }
+        
+        toast.error(errorMessage);
+        setSubmissionResult({ success: false, message: errorMessage });
       } finally {
         setIsSubmitting(false);
       }
@@ -88,11 +127,11 @@ function Booking() {
       case 0:
         return <DataPemesananStep data={formData} updateData={updateData} />;
       case 1:
-        return <AddOnStep data={formData} updateData={updateData} />;
+        return <AddOnStep data={formData} updateData={updateData} addOns={addOns} />;
       case 2:
         return <IncludeStep />;
       case 3:
-        return <ReviewSubmitStep data={formData} />;
+        return <ReviewSubmitStep data={formData} billboard={billboard} addOns={addOns} />;
       default:
         return null;
     }

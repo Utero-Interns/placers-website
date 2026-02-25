@@ -17,8 +17,9 @@ export async function GET() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Forward the token
+        Authorization: `Bearer ${token}`,
       },
+      cache: "no-store",
     });
 
     if (!res.ok) {

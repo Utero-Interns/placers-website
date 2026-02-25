@@ -49,8 +49,10 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleLogout = async () => {
-    await authService.logout();
-    router.push('/login');
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+      await authService.logout();
+      router.push('/login');
+    }
   };
 
   if (loading) {

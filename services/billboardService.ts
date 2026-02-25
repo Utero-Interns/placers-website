@@ -1,9 +1,10 @@
 import type { Billboard } from "@/types";
 
-export const fetchBillboards = async (): Promise<Billboard[]> => {
+export const fetchBillboards = async (queryParams?: string): Promise<Billboard[]> => {
   try {
     console.log("Fetching billboards from API...");
-    const res = await fetch("/api/billboard/all", {
+    const url = queryParams ? `/api/billboard/all?${queryParams}` : "/api/billboard/all";
+    const res = await fetch(url, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",

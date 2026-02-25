@@ -4,6 +4,8 @@ import type { User } from '@/types';
 import { UserIcon, Mail, Phone  } from 'lucide-react';
 import Modal from './Modal';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { authService } from '@/app/lib/auth';
 
 interface ProfileViewProps {
   user: User;
@@ -23,7 +25,14 @@ const InfoCard: React.FC<{ icon: React.ReactNode; value: string }> = ({ icon, va
 
 const ProfileView: React.FC<ProfileViewProps> = ({ user, onEditProfile, onEditPassword }) => {
     const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
-    
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await authService.logout();
+        setLogoutModalOpen(false);
+        router.push('/login');
+    };
+
     return (
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md space-y-8">
             <div className="flex flex-col sm:flex-row items-center sm:space-x-6 space-y-4 sm:space-y-0">
@@ -62,7 +71,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onEditProfile, onEditPa
                 <p className="text-gray-600">Apakah Anda yakin ingin keluar dari akun?</p>
                 <div className="mt-6 flex justify-end space-x-3">
                     <button onClick={() => setLogoutModalOpen(false)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer">Batal</button>
-                    <button onClick={() => { /* Handle logout logic here */ setLogoutModalOpen(false); }} className="px-6 py-2 text-sm font-medium text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/80 rounded-lg cursor-pointer">Logout</button>
+                    <button onClick={handleLogout} className="px-6 py-2 text-sm font-medium text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/80 rounded-lg cursor-pointer">Logout</button>
                 </div>
             </Modal>
         </div>

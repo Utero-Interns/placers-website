@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
+  title: "Placers.id: Marketplace Iklan OOH & Billboard Digital Indonesia",
   description:
     "Platform marketplace iklan luar ruang pertama di Indonesia dengan integrasi IoT. Sewa billboard strategis secara transparan, mudah, dan berbasis data.",
 
@@ -64,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body
         suppressHydrationWarning={true}
         className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}

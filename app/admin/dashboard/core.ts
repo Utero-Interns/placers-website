@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { store } from '../../lib/store';
 import { getImageUrl } from '../../lib/utils';
@@ -490,9 +490,11 @@ export class AdminDashboard {
         // Logout listener
         const logoutBtn = this.root.querySelector('.logout-btn-sidebar');
         logoutBtn?.addEventListener('click', async () => {
-            // Handle logout
-            await fetch('/api/proxy/auth/logout', { method: 'POST' }); // Ensure proper logout call if needed or just redirect
-            window.location.href = '/login';
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                // Handle logout
+                await fetch('/api/proxy/auth/logout', { method: 'POST' }); // Ensure proper logout call if needed or just redirect
+                window.location.href = '/login';
+            }
         });
 
         this.attachFloatingNotificationListener();

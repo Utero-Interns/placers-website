@@ -33,11 +33,13 @@ export default function NavBar() {
     }, []);
 
     const handleLogout = async () => {
-        await authService.logout();
-        setUser(null);
-        toast.success(t('nav.logout_success'));
-        router.push('/login');
-        router.refresh();
+        if (confirm('Apakah Anda yakin ingin keluar?')) {
+            await authService.logout();
+            setUser(null);
+            toast.success(t('nav.logout_success'));
+            router.push('/login');
+            router.refresh();
+        }
     };
 
     // Helper to check active active link
@@ -110,7 +112,7 @@ export default function NavBar() {
                         </ul>
                     </li>
                     <li>
-                        <Link href="/seller" className={`${baseNoColor} ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
+                        <Link href="/seller/register" className={`${baseNoColor} ${isActive('/seller/register') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
                     </li>
                 </ul>
             </div>
@@ -126,7 +128,7 @@ export default function NavBar() {
                              {/* User Icon */}
                              <div className="w-8 h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border border-gray-300">
                                 {user.profilePicture ? (
-                                    <Image src={`${process.env.NEXT_PUBLIC_API_URL}/${user.profilePicture}`} alt="Profile" width={48} height={48} className="w-full h-full object-cover" />
+                                    <Image src={`/api/uploads/${user.profilePicture.replace(/^uploads\//, '')}`} alt="Profile" width={48} height={48} className="w-full h-full object-cover" />
                                 ) : (
                                     <UserIcon className="w-5 h-5 xl:w-6 xl:h-6 text-gray-600" />
                                 )}
@@ -151,19 +153,19 @@ export default function NavBar() {
                              ) : (
                                 <>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/order-history" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <History className="w-4 h-4" />
                                             {t('nav.history')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/bookmark" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <Bookmark className="w-4 h-4" />
                                             {t('nav.bookmark')}
                                         </Link>
                                     </li>
                                     <li className="rounded-xl hover:bg-red-50 cursor-pointer">
-                                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
+                                        <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-gray-700 font-medium">
                                             <UserIcon className="w-4 h-4" />
                                             {t('nav.profile')}
                                         </Link>
@@ -228,7 +230,7 @@ export default function NavBar() {
                             )}
                         </li>
                         <li className="w-full">
-                            <Link href="/seller" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
+                            <Link href="/seller/register" className={`block text-center p-2 font-medium text-lg hover:text-[var(--color-primary)] ${isActive('/seller/register') ? activeClass : 'text-gray-700'}`}>{t('nav.upgradeSeller')}</Link>
                         </li>
 
                         <li className="w-full border-t pt-4 mt-2 flex flex-col items-center space-y-4">
@@ -240,7 +242,7 @@ export default function NavBar() {
                                     <div className="flex items-center justify-center gap-3 p-2 bg-gray-50 rounded-xl mb-2">
                                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                                             {user.profilePicture ? (
-                                                <Image src={`${process.env.NEXT_PUBLIC_API_URL}/${user.profilePicture}`} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
+                                                <Image src={`/api/uploads/${user.profilePicture.replace(/^uploads\//, '')}`} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
                                             ) : (
                                                 <UserIcon className="w-6 h-6 text-gray-600" />
                                             )}
