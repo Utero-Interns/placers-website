@@ -1,114 +1,153 @@
+﻿import { authService } from '@/app/lib/auth';
+import type { PasswordData, User } from '@/types';
 
-import type { User } from '../types';
+// Helper to convert base64 to Blob
+const checkBase64 = (str: string) => {
+  return /^data:image\/[a-z]+;base64,/.test(str);
+};
 
-const API_BASE_URL = '/api/proxy';
+const base64ToBlob = async (base64: string): Promise<Blob> => {
+  const res = await fetch(base64);
+  return await res.blob();
+};
 
 export const userService = {
   getUser: async (): Promise<User> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/user/me`, {
-        credentials: 'include',
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      const authUser = await authService.getProfile();
+      
+      const userId = authUser.user?.id || authUser.data?.id;
 
-      if (!res.ok) {
-        throw new Error(`Failed to fetch user profile: ${res.status}`);
+      if (!userId) {
+        throw new Error('User not found in session');
       }
 
-      const data = await res.json();
-      // Handle both response structures: { user: {...} } or { data: {...} }
-      const user = data.user || data.data || data;
-      
-      // Map backend profilePicture to frontend avatarUrl if needed
-      if (user.profilePicture && !user.avatarUrl) {
-        user.avatarUrl = user.profilePicture;
+      const response = await fetch(`/api/profile/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
       }
-      
-      return user;
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      throw error;
-    }
-  },
 
-  updateUser: async (updatedData: Partial<User> & { _avatarFile?: File }): Promise<User> => {
-    try {
-      const { _avatarFile, ...fields } = updatedData;
-      let body: BodyInit;
-      const headers: Record<string, string> = {};
+      const result = await response.json();
+      const userData = result.data || result;
 
-      if (_avatarFile) {
-        const form = new FormData();
-        Object.entries(fields).forEach(([k, v]) => {
-          if (v !== undefined && v !== null) form.append(k, String(v));
-        });
-        form.append('file', _avatarFile);
-        body = form;
-        // Don't set Content-Type — browser sets it with boundary automatically
+      // Transform profilePicture to avatarUrl
+      if (userData.profilePicture) {
+        userData.avatarUrl = `/api/uploads/${userData.profilePicture.replace(/^uploads\//, "")}`;
       } else {
-        body = JSON.stringify(fields);
-        headers['Content-Type'] = 'application/json';
+        userData.avatarUrl = '/seller-placeholder.png';
       }
 
-      const res = await fetch(`${API_BASE_URL}/user/me`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers,
-        body,
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to update user profile: ${res.status}`);
-      }
-
-      const data = await res.json();
-      const user = data.user || data.data || data;
-      
-      // Map backend profilePicture to frontend avatarUrl if needed
-      if (user.profilePicture && !user.avatarUrl) {
-        user.avatarUrl = user.profilePicture;
-      }
-      
-      return user;
+      return userData;
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error('Error getting user:', error);
       throw error;
     }
   },
 
-  updatePassword: async (oldPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
+  updateUser: async (updatedData: Partial<User>): Promise<User> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/user/password`, {
+      // Validation
+      if (updatedData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updatedData.email)) {
+        throw new Error('Invalid email format');
+      }
+      if (updatedData.phone && !/^\d{10,15}$/.test(updatedData.phone)) {
+        throw new Error('Phone number must be 10-15 digits');
+      }
+
+      // Get ID
+      const authUser = await authService.getProfile();
+      const userId = authUser.user?.id || authUser.data?.id;
+
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
+      const formData = new FormData();
+      if (updatedData.username) formData.append('username', updatedData.username);
+      if (updatedData.email) formData.append('email', updatedData.email);
+      if (updatedData.phone) formData.append('phone', updatedData.phone);
+      
+      // Handle Avatar
+      if (updatedData.avatarUrl && checkBase64(updatedData.avatarUrl)) {
+        const blob = await base64ToBlob(updatedData.avatarUrl);
+        formData.append('file', blob, 'profile-picture.jpg');
+      }
+
+      const response = await fetch(`/api/profile/${userId}`, {
         method: 'PUT',
-        credentials: 'include',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to update user');
+      }
+
+      return result.data || result;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  },
+
+  updatePassword: async (
+    passwordData: PasswordData
+  ): Promise<{ success: boolean; message?: string }> => {
+    try {
+      if (!passwordData) {
+        throw new Error('Password data is required');
+      }
+
+      if (!passwordData.newPassword) {
+        throw new Error('New password is required');
+      }
+
+        if (!passwordData.confirmPassword) {
+        throw new Error('Confirm password is required');
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      const authUser = await authService.getProfile();
+      const userId = authUser.user?.id || authUser.data?.id;
+
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
+      const response = await fetch(`/api/profile/${userId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          oldPassword,
-          newPassword
-        })
+          password: passwordData.newPassword,
+          confirmPassword: passwordData.confirmPassword,
+        }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || `Failed to change password: ${res.status}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        let errorMessage = result?.message || 'Failed to update password';
+
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.join(', ');
+        } else if (typeof errorMessage !== 'string') {
+          errorMessage = JSON.stringify(errorMessage);
+        }
+
+        throw new Error(errorMessage);
       }
 
-      const result = await res.json();
-      return { 
-        success: true, 
-        message: result.message || 'Password changed successfully' 
-      };
-    } catch (error) {
-      console.error('Error changing password:', error);
-      return { 
-        success: false, 
-        message: error instanceof Error ? error.message : 'Failed to change password' 
-      };
+      return { success: true, message: result?.message };
+
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      throw new Error(error?.message || 'Failed to update password');
     }
   }
 };

@@ -9,6 +9,7 @@ export interface User {
 export interface PasswordData {
   oldPassword?: string;
   newPassword?: string;
+  confirmPassword?: string;
 }
 
 export interface OwnerUser {

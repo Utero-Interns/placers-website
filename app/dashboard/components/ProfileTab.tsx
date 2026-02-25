@@ -23,9 +23,14 @@ export default function ProfileTab() {
 
   const handleSaveProfile = async (updatedData: Partial<User> & { _avatarFile?: File }) => {
     if (!user) return;
-    const updatedUser = await userService.updateUser(updatedData);
-    setUser(updatedUser);
-    setView('profile');
+    try {
+      const updatedUser = await userService.updateUser(updatedData);
+      setUser(updatedUser);
+      alert('Edit profil berhasil');
+      window.location.href = '/dashboard';
+    } catch (error) {
+      alert('Gagal mengedit profil. Silakan coba lagi.');
+    }
   };
 
   const handleSavePassword = async (passwordData: PasswordData) => {
@@ -36,10 +41,7 @@ export default function ProfileTab() {
       return;
     }
     
-    const result = await userService.updatePassword(
-      passwordData.oldPassword,
-      passwordData.newPassword
-    );
+    const result = await userService.updatePassword(passwordData);
     
     if (result.success) {
       alert(result.message || 'Password updated successfully!');

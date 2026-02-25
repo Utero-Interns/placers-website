@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
 import type { PasswordData } from '@/types';
+import React, { useState } from 'react';
 import PasswordInput from './PasswordInput';
 
 interface EditPasswordViewProps {
@@ -26,7 +26,11 @@ const EditPasswordView: React.FC<EditPasswordViewProps> = ({ onSave, onCancel })
       alert("Password baru tidak cocok!");
       return;
     }
-    onSave({ oldPassword: passwords.oldPassword, newPassword: passwords.newPassword });
+    onSave({ 
+      oldPassword: passwords.oldPassword, 
+      newPassword: passwords.newPassword,
+      confirmPassword: passwords.confirmPassword 
+    });
   };
 
   return (
