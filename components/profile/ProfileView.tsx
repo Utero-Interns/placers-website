@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import { authService } from '@/app/lib/auth';
 import type { User } from '@/types';
-import { UserIcon, Mail, Phone  } from 'lucide-react';
-import Modal from './Modal';
+import { Mail, Phone, UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/app/lib/auth';
+import React, { useState } from 'react';
+import Modal from './Modal';
 
 interface ProfileViewProps {
   user: User;
@@ -37,7 +37,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onEditProfile, onEditPa
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md space-y-8">
             <div className="flex flex-col sm:flex-row items-center sm:space-x-6 space-y-4 sm:space-y-0">
                 <Image
-                    src={user.avatarUrl}
+                    src={user.avatarUrl || '/seller-placeholder.png'}
                     alt="User Avatar"
                     width={500}
                     height={500}
